@@ -1,3 +1,4 @@
+
 export interface RetirementInputs {
   dateOfBirth: Date;
   sex: "male" | "female";
@@ -8,6 +9,16 @@ export interface RetirementInputs {
   pensionFunder: string;
   nationalPensionFunds: number;
 }
+
+export const pensionFunders = [
+  "DSK Rodina",
+  "Allianz Bulgaria",
+  "NN Pension Insurance",
+  "Doverie",
+  "Saglasie",
+  "CCB-Sila",
+  "Budeshte"
+];
 
 export const calculateRetirement = (inputs: RetirementInputs) => {
   // Calculate standard monthly pension (without additional funds)
