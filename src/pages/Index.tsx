@@ -4,14 +4,14 @@ import Navigation from '@/components/Navigation';
 const Index = () => {
   return (
     <div className="min-h-screen dsk-gradient flex flex-col">
-      <header className="green-header pt-6 pb-4 px-4 rounded-b-lg shadow-md">
+      <header className="green-header pt-4 pb-3 px-4 rounded-b-lg shadow-md">
         <h1 className="text-3xl font-semibold text-center tracking-tight mb-1">Калкулатор за пенсиониране</h1>
         <p className="text-center text-white/90 max-w-2xl mx-auto text-sm">
           Планирайте финансовото си бъдеще с нашия калкулатор. Изчислете и сравнете вариантите за пенсионен доход.
         </p>
       </header>
       
-      <main className="flex-1 px-4 pb-16 pt-20">
+      <main className="flex-1 px-4 pb-16 pt-4">
         <Navigation />
       </main>
       

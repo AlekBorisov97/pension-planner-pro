@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
 import RetirementCalculator from './RetirementCalculator';
@@ -8,6 +8,35 @@ import ContactsTab from './ContactsTab';
 
 export default function Navigation() {
   const [activeTab, setActiveTab] = useState("calculator");
+  const [scrollDirection, setScrollDirection] = useState("up");
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (header) {
+      setHeaderHeight(header.getBoundingClientRect().height);
+    }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+        setScrollDirection("down");
+      } else if (currentScrollY < lastScrollY) {
+        setScrollDirection("up");
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, headerHeight]);
+
+  const navPosition = scrollDirection === "down" ? "fixed top-0 left-0 right-0 z-10" : 
+                    lastScrollY > 0 ? "sticky top-0 z-10" : 
+                    "relative";
 
   return (
     <Tabs 
@@ -15,7 +44,7 @@ export default function Navigation() {
       className="w-full max-w-4xl mx-auto"
       onValueChange={setActiveTab}
     >
-      <div className="fixed top-0 left-0 right-0 z-10 flex justify-center pt-2 pb-2 bg-secondary/80 backdrop-blur-sm border-b border-primary/10">
+      <div className={`${navPosition} flex justify-center pt-2 pb-2 bg-secondary/80 backdrop-blur-sm border-b border-primary/10 transition-all duration-300`}>
         <TabsList className="grid grid-cols-3 w-[400px]">
           <TabsTrigger 
             value="calculator"
