@@ -1,7 +1,7 @@
 
 export interface RetirementInputs {
   dateOfBirth: Date;
-  sex: "male" | "female";
+  gender: "male" | "female";
   workExperienceYears: number;
   workExperienceMonths: number;
   retirementDate: Date;
@@ -11,13 +11,13 @@ export interface RetirementInputs {
 }
 
 export const pensionFunders = [
-  "DSK Rodina",
-  "Allianz Bulgaria",
-  "NN Pension Insurance",
-  "Doverie",
-  "Saglasie",
-  "CCB-Sila",
-  "Budeshte"
+  "ДСК Родина",
+  "Алианц България",
+  "NN Пенсионно осигуряване",
+  "Доверие",
+  "Съгласие",
+  "ЦКБ-Сила",
+  "Бъдеще"
 ];
 
 export const calculateRetirement = (inputs: RetirementInputs) => {
@@ -49,7 +49,7 @@ export const formatCurrency = (amount: number): string => {
 };
 
 export const formatPercentage = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('bg-BG', {
     style: 'percent',
     minimumFractionDigits: 1,
     maximumFractionDigits: 1

@@ -15,13 +15,13 @@ export default function Navigation() {
       className="w-full max-w-4xl mx-auto"
       onValueChange={setActiveTab}
     >
-      <div className="flex justify-center mb-8">
+      <div className="fixed top-0 left-0 right-0 z-10 flex justify-center pt-2 pb-2 bg-secondary/80 backdrop-blur-sm border-b border-primary/10">
         <TabsList className="grid grid-cols-3 w-[400px]">
           <TabsTrigger 
             value="calculator"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
-            Calculator
+            Калкулатор
             {activeTab === "calculator" && (
               <motion.div
                 className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-primary"
@@ -36,7 +36,7 @@ export default function Navigation() {
             value="info"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
-            More Info
+            Информация
             {activeTab === "info" && (
               <motion.div
                 className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-primary"
@@ -51,7 +51,7 @@ export default function Navigation() {
             value="contacts"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
-            Contacts
+            Контакти
             {activeTab === "contacts" && (
               <motion.div
                 className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-primary"
@@ -67,7 +67,7 @@ export default function Navigation() {
 
       <TabsContent 
         value="calculator" 
-        className="mt-0 focus-visible:outline-none focus-visible:ring-0"
+        className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -81,7 +81,7 @@ export default function Navigation() {
       
       <TabsContent 
         value="info" 
-        className="mt-0 focus-visible:outline-none focus-visible:ring-0"
+        className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -95,7 +95,7 @@ export default function Navigation() {
       
       <TabsContent 
         value="contacts" 
-        className="mt-0 focus-visible:outline-none focus-visible:ring-0"
+        className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}

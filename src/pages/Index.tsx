@@ -4,20 +4,20 @@ import Navigation from '@/components/Navigation';
 const Index = () => {
   return (
     <div className="min-h-screen dsk-gradient flex flex-col">
-      <header className="green-header pt-12 pb-6 px-4 rounded-b-lg shadow-md">
-        <h1 className="text-4xl font-semibold text-center tracking-tight mb-2">Retirement Calculator</h1>
-        <p className="text-center text-white/90 max-w-2xl mx-auto">
-          Plan your financial future with our comprehensive retirement calculator. Estimate and compare your retirement income options.
+      <header className="green-header pt-6 pb-4 px-4 rounded-b-lg shadow-md">
+        <h1 className="text-3xl font-semibold text-center tracking-tight mb-1">Калкулатор за пенсиониране</h1>
+        <p className="text-center text-white/90 max-w-2xl mx-auto text-sm">
+          Планирайте финансовото си бъдеще с нашия калкулатор. Изчислете и сравнете вариантите за пенсионен доход.
         </p>
       </header>
       
-      <main className="flex-1 px-4 pb-16">
+      <main className="flex-1 px-4 pb-16 pt-20">
         <Navigation />
       </main>
       
-      <footer className="py-6 border-t border-primary/20 bg-secondary/50 text-center text-sm text-muted-foreground">
+      <footer className="py-4 border-t border-primary/20 bg-secondary/50 text-center text-sm text-muted-foreground">
         <div className="container">
-          <p className="text-primary/80">© {new Date().getFullYear()} Retirement Calculator. All rights reserved.</p>
+          <p className="text-primary/80">© {new Date().getFullYear()} Калкулатор за пенсиониране. Всички права запазени.</p>
         </div>
       </footer>
     </div>

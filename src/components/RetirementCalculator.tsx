@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { bg } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
@@ -23,29 +24,29 @@ import CalculationResult from './CalculationResult';
 
 const formSchema = z.object({
   dateOfBirth: z.date({
-    required_error: 'Please select your date of birth.',
+    required_error: 'Моля, изберете дата на раждане.',
   }),
-  sex: z.enum(['male', 'female'], {
-    required_error: 'Please select your gender.',
+  gender: z.enum(['male', 'female'], {
+    required_error: 'Моля, изберете пол.',
   }),
   workExperienceYears: z.number()
     .int()
-    .min(0, 'Years must be 0 or greater')
-    .max(80, 'Years must be 80 or less'),
+    .min(0, 'Годините трябва да са 0 или повече')
+    .max(80, 'Годините трябва да са 80 или по-малко'),
   workExperienceMonths: z.number()
     .int()
-    .min(0, 'Months must be 0 or greater')
-    .max(11, 'Months must be 11 or less'),
+    .min(0, 'Месеците трябва да са 0 или повече')
+    .max(11, 'Месеците трябва да са 11 или по-малко'),
   retirementDate: z.date({
-    required_error: 'Please select your retirement date.',
+    required_error: 'Моля, изберете дата на пенсиониране.',
   }),
   additionalPensionFunds: z.number()
-    .min(0, 'Amount must be 0 or greater'),
+    .min(0, 'Сумата трябва да е 0 или повече'),
   pensionFunder: z.string({
-    required_error: 'Please select a pension funder.',
+    required_error: 'Моля, изберете пенсионен фонд.',
   }),
   nationalPensionFunds: z.number()
-    .min(0, 'Amount must be 0 or greater'),
+    .min(0, 'Сумата трябва да е 0 или повече'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,7 +68,7 @@ export default function RetirementCalculator() {
     // Ensure all required properties are present by casting the data to RetirementInputs
     const inputData: RetirementInputs = {
       dateOfBirth: data.dateOfBirth,
-      sex: data.sex,
+      gender: data.gender,
       workExperienceYears: data.workExperienceYears,
       workExperienceMonths: data.workExperienceMonths,
       retirementDate: data.retirementDate,
@@ -97,15 +98,15 @@ export default function RetirementCalculator() {
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Date of Birth */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <div className="flex items-center gap-2 h-6">
+                    <Label htmlFor="dateOfBirth">Дата на раждане</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          Your date of birth is used to calculate your current age and retirement eligibility.
+                          Вашата дата на раждане се използва за изчисляване на текущата възраст и допустимост за пенсиониране.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -125,9 +126,9 @@ export default function RetirementCalculator() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value, "dd.MM.yyyy", { locale: bg })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Изберете дата</span>
                             )}
                           </Button>
                         </PopoverTrigger>
@@ -141,6 +142,7 @@ export default function RetirementCalculator() {
                             }
                             initialFocus
                             className="rounded-md border p-3 pointer-events-auto"
+                            locale={bg}
                           />
                         </PopoverContent>
                       </Popover>
@@ -153,24 +155,24 @@ export default function RetirementCalculator() {
                   )}
                 </div>
 
-                {/* Sex */}
+                {/* Gender */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label>Sex</Label>
+                  <div className="flex items-center gap-2 h-6">
+                    <Label>Пол</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          Sex is relevant as retirement ages can differ for males and females.
+                          Полът е от значение, тъй като пенсионната възраст може да се различава при мъжете и жените.
                         </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
                   <Controller
                     control={form.control}
-                    name="sex"
+                    name="gender"
                     render={({ field }) => (
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -179,18 +181,18 @@ export default function RetirementCalculator() {
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="male" id="male" />
-                          <Label htmlFor="male" className="font-normal cursor-pointer">Male</Label>
+                          <Label htmlFor="male" className="font-normal cursor-pointer">Мъж</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="female" id="female" />
-                          <Label htmlFor="female" className="font-normal cursor-pointer">Female</Label>
+                          <Label htmlFor="female" className="font-normal cursor-pointer">Жена</Label>
                         </div>
                       </RadioGroup>
                     )}
                   />
-                  {form.formState.errors.sex && (
+                  {form.formState.errors.gender && (
                     <p className="text-sm text-destructive">
-                      {form.formState.errors.sex.message}
+                      {form.formState.errors.gender.message}
                     </p>
                   )}
                 </div>
@@ -198,81 +200,91 @@ export default function RetirementCalculator() {
 
               <Separator />
 
-              {/* Work Experience */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Label>Work Experience</Label>
+              {/* Work Experience and Retirement Date */}
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* Work Experience Years */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 h-6">
+                    <Label htmlFor="workExperienceYears">Стаж (години)</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          Your total work experience in years and months affects your pension eligibility and amount.
+                          Общият ви трудов стаж в години влияе на допустимостта и размера на пенсията.
                         </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="workExperienceYears">Years</Label>
-                      <Controller
-                        control={form.control}
-                        name="workExperienceYears"
-                        render={({ field }) => (
-                          <Input
-                            id="workExperienceYears"
-                            type="number"
-                            min={0}
-                            max={80}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            value={field.value}
-                          />
-                        )}
+                  <Controller
+                    control={form.control}
+                    name="workExperienceYears"
+                    render={({ field }) => (
+                      <Input
+                        id="workExperienceYears"
+                        type="number"
+                        min={0}
+                        max={80}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        value={field.value}
                       />
-                      {form.formState.errors.workExperienceYears && (
-                        <p className="text-sm text-destructive">
-                          {form.formState.errors.workExperienceYears.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="workExperienceMonths">Months</Label>
-                      <Controller
-                        control={form.control}
-                        name="workExperienceMonths"
-                        render={({ field }) => (
-                          <Input
-                            id="workExperienceMonths"
-                            type="number"
-                            min={0}
-                            max={11}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            value={field.value}
-                          />
-                        )}
-                      />
-                      {form.formState.errors.workExperienceMonths && (
-                        <p className="text-sm text-destructive">
-                          {form.formState.errors.workExperienceMonths.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                    )}
+                  />
+                  {form.formState.errors.workExperienceYears && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.workExperienceYears.message}
+                    </p>
+                  )}
                 </div>
 
-                {/* Retirement Date */}
+                {/* Work Experience Months */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="retirementDate">Retirement Date</Label>
+                  <div className="flex items-center gap-2 h-6">
+                    <Label htmlFor="workExperienceMonths">Стаж (месеци)</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          The date when you plan to retire or your official retirement age anniversary.
+                          Допълнителни месеци трудов стаж.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Controller
+                    control={form.control}
+                    name="workExperienceMonths"
+                    render={({ field }) => (
+                      <Input
+                        id="workExperienceMonths"
+                        type="number"
+                        min={0}
+                        max={11}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        value={field.value}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.workExperienceMonths && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.workExperienceMonths.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Retirement Date */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 h-6">
+                    <Label htmlFor="retirementDate">Дата на пенсиониране</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="w-[200px] text-sm">
+                          Датата, на която планирате да се пенсионирате.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -292,9 +304,9 @@ export default function RetirementCalculator() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(field.value, "dd.MM.yyyy", { locale: bg })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Изберете дата</span>
                             )}
                           </Button>
                         </PopoverTrigger>
@@ -308,6 +320,7 @@ export default function RetirementCalculator() {
                             }
                             initialFocus
                             className="rounded-md border p-3 pointer-events-auto"
+                            locale={bg}
                           />
                         </PopoverContent>
                       </Popover>
@@ -328,14 +341,14 @@ export default function RetirementCalculator() {
                 {/* Additional Pension Funds */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="additionalPensionFunds">Additional Pension Funds (BGN)</Label>
+                    <Label htmlFor="additionalPensionFunds">Допълнителни пенсионни фондове (лв.)</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          The total amount accumulated in your additional pension funds in BGN.
+                          Общата сума, натрупана в допълнителните ви пенсионни фондове в лева.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -363,14 +376,14 @@ export default function RetirementCalculator() {
                 {/* Pension Funder */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="pensionFunder">Pension Funder</Label>
+                    <Label htmlFor="pensionFunder">Пенсионен фонд</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-[200px] text-sm">
-                          The company managing your additional pension funds.
+                          Компанията, управляваща допълнителните ви пенсионни фондове.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -384,7 +397,7 @@ export default function RetirementCalculator() {
                         defaultValue={field.value}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a pension funder" />
+                          <SelectValue placeholder="Изберете пенсионен фонд" />
                         </SelectTrigger>
                         <SelectContent>
                           {pensionFunders.map((funder) => (
@@ -407,14 +420,14 @@ export default function RetirementCalculator() {
               {/* National Pension Funds */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="nationalPensionFunds">National Pension Funds (BGN)</Label>
+                  <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="w-[200px] text-sm">
-                        The amount you've accumulated in the national pension system in BGN.
+                        Сумата, която сте натрупали в националната пенсионна система в лева.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -446,7 +459,7 @@ export default function RetirementCalculator() {
                   size="lg"
                   className="rounded-full px-8 bg-primary hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg"
                 >
-                  Calculate Retirement Funds
+                  Изчисли пенсионните фондове
                 </Button>
               </div>
             </form>
