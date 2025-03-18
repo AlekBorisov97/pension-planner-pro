@@ -18,7 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { calculateRetirement, pensionFunders } from '@/utils/calculatorUtils';
+import { calculateRetirement, pensionFunders, RetirementInputs } from '@/utils/calculatorUtils';
 import CalculationResult from './CalculationResult';
 
 const formSchema = z.object({
@@ -64,7 +64,19 @@ export default function RetirementCalculator() {
   });
 
   const onSubmit = (data: FormValues) => {
-    const result = calculateRetirement(data);
+    // Ensure all required properties are present by casting the data to RetirementInputs
+    const inputData: RetirementInputs = {
+      dateOfBirth: data.dateOfBirth,
+      sex: data.sex,
+      workExperienceYears: data.workExperienceYears,
+      workExperienceMonths: data.workExperienceMonths,
+      retirementDate: data.retirementDate,
+      additionalPensionFunds: data.additionalPensionFunds,
+      pensionFunder: data.pensionFunder,
+      nationalPensionFunds: data.nationalPensionFunds
+    };
+    
+    const result = calculateRetirement(inputData);
     setCalculationResult(result);
     
     // Scroll to result with smooth animation
