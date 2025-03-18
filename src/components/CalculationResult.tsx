@@ -24,9 +24,9 @@ export default function CalculationResult({
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="result-appear"
     >
-      <Card className="shadow-md border-0 bg-gradient-to-b from-white to-secondary/30 overflow-hidden">
+      <Card className="shadow-md border-0 green-card overflow-hidden">
         <CardHeader className="pb-4">
-          <CardTitle className="text-2xl font-medium text-center">Your Retirement Projection</CardTitle>
+          <CardTitle className="text-2xl font-medium text-center text-primary">Your Retirement Projection</CardTitle>
           <CardDescription className="text-center">
             Compare your retirement options below
           </CardDescription>
@@ -36,7 +36,7 @@ export default function CalculationResult({
             {/* Standard Pension */}
             <div className="flex flex-col">
               <div className="text-center pb-3">
-                <span className="text-sm uppercase tracking-wider font-medium text-muted-foreground">
+                <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
                   Standard Pension
                 </span>
               </div>
@@ -55,7 +55,7 @@ export default function CalculationResult({
             {/* Enhanced Pension */}
             <div className="flex flex-col">
               <div className="text-center pb-3">
-                <span className="text-sm uppercase tracking-wider font-medium text-muted-foreground">
+                <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
                   Enhanced Pension
                 </span>
               </div>
@@ -75,7 +75,7 @@ export default function CalculationResult({
             </div>
           </div>
 
-          <div className="bg-muted/50 rounded-lg p-4 mt-2">
+          <div className="bg-secondary/50 rounded-lg p-4 mt-2 border border-primary/10">
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium">Difference</span>
               <span className="font-semibold text-primary flex items-center">
