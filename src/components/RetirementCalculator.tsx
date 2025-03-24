@@ -227,7 +227,8 @@ export default function RetirementCalculator() {
                         min={0}
                         max={80}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        value={field.value}
+                        value={field.value === 0 ? "" : field.value}
+                        placeholder="Въведете години"
                       />
                     )}
                   />
@@ -263,7 +264,8 @@ export default function RetirementCalculator() {
                         min={0}
                         max={11}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        value={field.value}
+                        value={field.value === 0 ? "" : field.value}
+                        placeholder="Въведете месеци"
                       />
                     )}
                   />
@@ -362,7 +364,8 @@ export default function RetirementCalculator() {
                         type="number"
                         min={0}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        value={field.value}
+                        value={field.value === 0 ? "" : field.value}
+                        placeholder="Въведете сума"
                       />
                     )}
                   />
@@ -441,7 +444,8 @@ export default function RetirementCalculator() {
                       type="number"
                       min={0}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      value={field.value}
+                      value={field.value === 0 ? "" : field.value}
+                      placeholder="Въведете сума"
                     />
                   )}
                 />
