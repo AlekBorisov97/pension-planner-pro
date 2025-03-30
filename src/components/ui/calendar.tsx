@@ -13,9 +13,10 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  defaultMonth = new Date(1960, 0, 1), // Set default month to January 1960
   ...props
 }: CalendarProps) {
-  function CustomCaption(props: CaptionProps) {
+  function CustomCaption({ displayMonth, onMonthChange }: CaptionProps) {
     const months = [
       'Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 
       'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'
@@ -28,11 +29,11 @@ function Calendar({
     return (
       <div className="flex items-center justify-center gap-1">
         <Select
-          value={props.displayMonth.getMonth().toString()}
+          value={displayMonth.getMonth().toString()}
           onValueChange={(value) => {
-            const newDate = new Date(props.displayMonth);
+            const newDate = new Date(displayMonth);
             newDate.setMonth(parseInt(value));
-            props.goToMonth(newDate);
+            onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[90px] text-xs font-normal">
@@ -48,11 +49,11 @@ function Calendar({
         </Select>
 
         <Select
-          value={props.displayMonth.getFullYear().toString()}
+          value={displayMonth.getFullYear().toString()}
           onValueChange={(value) => {
-            const newDate = new Date(props.displayMonth);
+            const newDate = new Date(displayMonth);
             newDate.setFullYear(parseInt(value));
-            props.goToMonth(newDate);
+            onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[70px] text-xs font-normal">
@@ -74,6 +75,7 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
+      defaultMonth={defaultMonth}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -57,7 +56,6 @@ type FormValues = z.infer<typeof formSchema>;
 export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<ReturnType<typeof calculateRetirement> | null>(null);
 
-  // Load form data from localStorage
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === 'undefined') return {};
     
@@ -67,7 +65,6 @@ export default function RetirementCalculator() {
     try {
       const parsedData = JSON.parse(savedData);
       
-      // Convert date strings back to Date objects
       if (parsedData.dateOfBirth) parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
       if (parsedData.retirementDate) parsedData.retirementDate = new Date(parsedData.retirementDate);
       
@@ -94,10 +91,8 @@ export default function RetirementCalculator() {
     },
   });
 
-  // Save form data to localStorage whenever it changes
   useEffect(() => {
     const subscription = form.watch((formValues) => {
-      // Only save if we have values
       if (Object.keys(formValues).length === 0) return;
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
@@ -106,12 +101,10 @@ export default function RetirementCalculator() {
     return () => subscription.unsubscribe();
   }, [form.watch]);
 
-  // Get current date for retirement date validation
   const currentDate = new Date();
   const minRetirementDate = new Date('2016-01-01');
 
   const onSubmit = (data: FormValues) => {
-    // Ensure all required properties are present by casting the data to RetirementInputs
     const inputData: RetirementInputs = {
       dateOfBirth: data.dateOfBirth,
       gender: data.gender,
@@ -126,7 +119,6 @@ export default function RetirementCalculator() {
     const result = calculateRetirement(inputData);
     setCalculationResult(result);
     
-    // Scroll to result with smooth animation
     setTimeout(() => {
       const resultElement = document.getElementById('calculation-result');
       if (resultElement) {
@@ -142,7 +134,6 @@ export default function RetirementCalculator() {
           <CardContent className="pt-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Date of Birth */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 h-6">
                     <Label htmlFor="dateOfBirth">Дата на раждане</Label>
@@ -202,7 +193,6 @@ export default function RetirementCalculator() {
                   )}
                 </div>
 
-                {/* Gender */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 h-6">
                     <Label>Пол</Label>
@@ -247,9 +237,7 @@ export default function RetirementCalculator() {
 
               <Separator />
 
-              {/* Work Experience and Retirement Date */}
               <div className="grid gap-6 md:grid-cols-3">
-                {/* Work Experience Years */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 h-6">
                     <Label htmlFor="workExperienceYears">Стаж (години)</Label>
@@ -286,7 +274,6 @@ export default function RetirementCalculator() {
                   )}
                 </div>
 
-                {/* Work Experience Months */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 h-6">
                     <Label htmlFor="workExperienceMonths">Стаж (месеци)</Label>
@@ -323,7 +310,6 @@ export default function RetirementCalculator() {
                   )}
                 </div>
 
-                {/* Retirement Date */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 h-6">
                     <Label htmlFor="retirementDate">Дата на пенсиониране</Label>
@@ -386,9 +372,7 @@ export default function RetirementCalculator() {
 
               <Separator />
 
-              {/* Pension Funds */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Additional Pension Funds */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="additionalPensionFunds">Допълнителни пенсионни фондове (лв.)</Label>
@@ -424,7 +408,6 @@ export default function RetirementCalculator() {
                   )}
                 </div>
 
-                {/* Pension Funder */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="pensionFunder">Пенсионен фонд</Label>
@@ -468,7 +451,6 @@ export default function RetirementCalculator() {
                 </div>
               </div>
 
-              {/* National Pension Funds */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
@@ -504,7 +486,6 @@ export default function RetirementCalculator() {
                 )}
               </div>
 
-              {/* Submit Button */}
               <div className="flex justify-center pt-2">
                 <Button 
                   type="submit" 
@@ -519,7 +500,6 @@ export default function RetirementCalculator() {
         </Card>
       </motion.div>
 
-      {/* Results Section */}
       <div id="calculation-result">
         <AnimatePresence>
           {calculationResult && (
