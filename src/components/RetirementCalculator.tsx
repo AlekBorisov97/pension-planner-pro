@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { bg } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,6 +21,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import { calculateRetirement, pensionFunders, RetirementInputs } from '@/utils/calculatorUtils';
 import CalculationResult from './CalculationResult';
+
+const STORAGE_KEY = 'retirement-calculator-form-data';
+const DEFAULT_BIRTH_DATE = new Date('1960-01-01');
 
 const formSchema = z.object({
   dateOfBirth: z.date({
@@ -54,15 +57,58 @@ type FormValues = z.infer<typeof formSchema>;
 export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<ReturnType<typeof calculateRetirement> | null>(null);
 
+  // Load form data from localStorage
+  const loadSavedFormData = (): Partial<FormValues> => {
+    if (typeof window === 'undefined') return {};
+    
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (!savedData) return {};
+    
+    try {
+      const parsedData = JSON.parse(savedData);
+      
+      // Convert date strings back to Date objects
+      if (parsedData.dateOfBirth) parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
+      if (parsedData.retirementDate) parsedData.retirementDate = new Date(parsedData.retirementDate);
+      
+      return parsedData;
+    } catch (e) {
+      console.error('Failed to parse saved form data:', e);
+      return {};
+    }
+  };
+
+  const savedData = loadSavedFormData();
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      workExperienceYears: 0,
-      workExperienceMonths: 0,
-      additionalPensionFunds: 0,
-      nationalPensionFunds: 0,
+      dateOfBirth: savedData.dateOfBirth || DEFAULT_BIRTH_DATE,
+      gender: savedData.gender || undefined,
+      workExperienceYears: savedData.workExperienceYears || 0,
+      workExperienceMonths: savedData.workExperienceMonths || 0,
+      retirementDate: savedData.retirementDate || undefined,
+      additionalPensionFunds: savedData.additionalPensionFunds || 0,
+      nationalPensionFunds: savedData.nationalPensionFunds || 0,
+      pensionFunder: savedData.pensionFunder || undefined,
     },
   });
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    const subscription = form.watch((formValues) => {
+      // Only save if we have values
+      if (Object.keys(formValues).length === 0) return;
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  // Get current date for retirement date validation
+  const currentDate = new Date();
+  const minRetirementDate = new Date('2016-01-01');
 
   const onSubmit = (data: FormValues) => {
     // Ensure all required properties are present by casting the data to RetirementInputs
@@ -137,6 +183,7 @@ export default function RetirementCalculator() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
+                            defaultMonth={DEFAULT_BIRTH_DATE}
                             disabled={(date) =>
                               date > new Date() || date < new Date("1930-01-01")
                             }
@@ -176,7 +223,7 @@ export default function RetirementCalculator() {
                     render={({ field }) => (
                       <RadioGroup
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         className="flex space-x-4"
                       >
                         <div className="flex items-center space-x-2">
@@ -317,8 +364,9 @@ export default function RetirementCalculator() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
+                            defaultMonth={minRetirementDate}
                             disabled={(date) =>
-                              date < new Date()
+                              date < minRetirementDate || date > currentDate
                             }
                             initialFocus
                             className="rounded-md border p-3 pointer-events-auto"
@@ -397,7 +445,7 @@ export default function RetirementCalculator() {
                     render={({ field }) => (
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Изберете пенсионен фонд" />
