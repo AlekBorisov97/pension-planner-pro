@@ -1,11 +1,10 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, CaptionProps } from "react-day-picker";
+import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -16,71 +15,17 @@ function Calendar({
   defaultMonth = new Date(1960, 0, 1), // Set default month to January 1960
   ...props
 }: CalendarProps) {
-  function CustomCaption({ displayMonth, onMonthChange }: CaptionProps) {
-    const months = [
-      'Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 
-      'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'
-    ];
-    
-    // Generate an array of years from 1930 to current year + 20
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear + 20 - 1930 + 1 }, (_, i) => 1930 + i);
-    
-    return (
-      <div className="flex items-center justify-center gap-1">
-        <Select
-          value={displayMonth.getMonth().toString()}
-          onValueChange={(value) => {
-            const newDate = new Date(displayMonth);
-            newDate.setMonth(parseInt(value));
-            onMonthChange(newDate);
-          }}
-        >
-          <SelectTrigger className="h-7 w-[90px] text-xs font-normal">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper" className="bg-background">
-            {months.map((month, i) => (
-              <SelectItem key={i} value={i.toString()} className="text-xs">
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={displayMonth.getFullYear().toString()}
-          onValueChange={(value) => {
-            const newDate = new Date(displayMonth);
-            newDate.setFullYear(parseInt(value));
-            onMonthChange(newDate);
-          }}
-        >
-          <SelectTrigger className="h-7 w-[70px] text-xs font-normal">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper" className="bg-background h-40 overflow-y-auto">
-            {years.map((year) => (
-              <SelectItem key={year} value={year.toString()} className="text-xs">
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    );
-  }
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       defaultMonth={defaultMonth}
+      captionLayout="dropdown"
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center h-9",
-        caption_label: "hidden", // Hide the default caption label
+        caption_label: "text-sm font-medium",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -108,12 +53,14 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        dropdown: "bg-background border border-input rounded-md p-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring",
+        dropdown_month: "text-sm py-1 px-2 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground",
+        dropdown_year: "text-sm py-1 px-2 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground",
         ...classNames,
       }}
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
-        Caption: CustomCaption
       }}
       {...props}
     />
