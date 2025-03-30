@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, CaptionProps } from "react-day-picker";
@@ -32,7 +31,7 @@ function Calendar({
           onValueChange={(value) => {
             const newDate = new Date(props.displayMonth);
             newDate.setMonth(parseInt(value));
-            props.goToMonth(newDate);
+            props.onMonthChange && props.onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[90px] text-xs font-normal">
@@ -52,7 +51,7 @@ function Calendar({
           onValueChange={(value) => {
             const newDate = new Date(props.displayMonth);
             newDate.setFullYear(parseInt(value));
-            props.goToMonth(newDate);
+            props.onMonthChange && props.onMonthChange(newDate);
           }}
         >
           <SelectTrigger className="h-7 w-[70px] text-xs font-normal">
