@@ -2,6 +2,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,6 +14,8 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   defaultMonth = new Date(1960, 0, 1), // Set default month to January 1960
+  fromDate = new Date(1950, 0, 1), // Min date: January 1, 1950
+  toDate = new Date(2040, 11, 31), // Max date: December 31, 2040
   ...props
 }: CalendarProps) {
   return (
@@ -21,6 +24,8 @@ function Calendar({
       className={cn("p-3 pointer-events-auto", className)}
       defaultMonth={defaultMonth}
       captionLayout="dropdown"
+      fromDate={fromDate}
+      toDate={toDate}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -53,7 +58,7 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        dropdown: "bg-background border border-input rounded-md p-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring",
+        dropdown: "bg-background border border-input rounded-md p-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring shadow-md",
         dropdown_month: "text-sm py-1 px-2 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground",
         dropdown_year: "text-sm py-1 px-2 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground",
         ...classNames,

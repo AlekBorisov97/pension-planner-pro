@@ -103,6 +103,8 @@ export default function RetirementCalculator() {
 
   const currentDate = new Date();
   const minRetirementDate = new Date('2016-01-01');
+  const birthDateFromYear = new Date('1930-01-01');
+  const birthDateToYear = new Date();
 
   const onSubmit = (data: FormValues) => {
     const inputData: RetirementInputs = {
@@ -175,9 +177,8 @@ export default function RetirementCalculator() {
                             selected={field.value}
                             onSelect={field.onChange}
                             defaultMonth={DEFAULT_BIRTH_DATE}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1930-01-01")
-                            }
+                            fromDate={birthDateFromYear}
+                            toDate={birthDateToYear}
                             initialFocus
                             className="rounded-md border p-3 pointer-events-auto"
                             locale={bg}
@@ -351,9 +352,8 @@ export default function RetirementCalculator() {
                             selected={field.value}
                             onSelect={field.onChange}
                             defaultMonth={minRetirementDate}
-                            disabled={(date) =>
-                              date < minRetirementDate || date > currentDate
-                            }
+                            fromDate={minRetirementDate}
+                            toDate={currentDate}
                             initialFocus
                             className="rounded-md border p-3 pointer-events-auto"
                             locale={bg}
