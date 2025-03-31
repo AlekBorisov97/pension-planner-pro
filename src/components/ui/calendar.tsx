@@ -47,7 +47,7 @@ function Calendar({
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground transition-colors"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-primary hover:text-primary-foreground transition-colors"
         ),
         day_range_end: "day-range-end",
         day_selected:
@@ -59,7 +59,7 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        dropdown: "bg-background border border-input rounded-md p-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring shadow-md z-10",
+        dropdown: "bg-background border border-input rounded-md p-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring shadow-md z-10 text-foreground",
         dropdown_month: "text-sm py-1.5 px-3 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground cursor-pointer",
         dropdown_year: "text-sm py-1.5 px-3 rounded-md hover:bg-accent hover:text-accent-foreground focus-within:bg-accent focus-within:text-accent-foreground cursor-pointer",
         vhidden: "hidden",
