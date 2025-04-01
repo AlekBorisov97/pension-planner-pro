@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { calculateRetirement, pensionFunders, RetirementInputs } from '@/utils/calculatorUtils';
 import CalculationResult from './CalculationResult';
+import { useToast } from '@/hooks/use-toast';
 
 const STORAGE_KEY = 'retirement-calculator-form-data';
 const DEFAULT_BIRTH_DATE = new Date('1960-01-01');
@@ -68,6 +69,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function RetirementCalculator() {
+  const { toast } = useToast();
   const [calculationResult, setCalculationResult] = useState<ReturnType<typeof calculateRetirement> | null>(null);
   const [basicInfoComplete, setBasicInfoComplete] = useState(false);
   const [step, setStep] = useState(1);
@@ -161,15 +163,20 @@ export default function RetirementCalculator() {
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     const pensionFunder = form.watch('pensionFunder');
     
+    console.log("Check pension fund - funds:", additionalFunds, "funder:", pensionFunder);
+    
     if (additionalFunds > 0 && pensionFunder) {
       // Check if the additional funds exceed 10,000
       const showOptions = additionalFunds > 10000;
       console.log("Additional funds:", additionalFunds, "Show options:", showOptions);
+      
       setShowOptionDropdown(showOptions);
       
-      if (showOptions && step === 2) {
+      if (showOptions) {
+        console.log("Setting step to 3 for options");
         setStep(3); // Show options step for amounts > 10000
-      } else if (!showOptions && step === 2) {
+      } else if (step === 2) {
+        console.log("Setting step to 4 to skip options");
         setStep(4); // Skip options step for amounts <= 10000
       }
     }
@@ -232,6 +239,20 @@ export default function RetirementCalculator() {
     
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
+  // Force re-check when additionalPensionFunds changes
+  useEffect(() => {
+    const additionalFunds = form.watch('additionalPensionFunds') || 0;
+    const pensionFunder = form.watch('pensionFunder');
+    
+    if (additionalFunds > 10000 && pensionFunder) {
+      console.log("Additional funds changed and > 10000:", additionalFunds);
+      setShowOptionDropdown(true);
+      if (step === 2) {
+        setStep(3);
+      }
+    }
+  }, [form.watch('additionalPensionFunds'), form.watch('pensionFunder')]);
 
   const onSubmit = (data: FormValues) => {
     const inputData: RetirementInputs = {
@@ -563,7 +584,12 @@ export default function RetirementCalculator() {
                               id="additionalPensionFunds"
                               type="number"
                               min={0}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                field.onChange(value);
+                                // Debug
+                                console.log("Input changed to:", value);
+                              }}
                               value={field.value === 0 ? "" : field.value}
                               placeholder="Въведете сума"
                             />
@@ -595,7 +621,11 @@ export default function RetirementCalculator() {
                           name="pensionFunder"
                           render={({ field }) => (
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Force check after selection
+                                setTimeout(() => checkPensionFundComplete(), 0);
+                              }}
                               value={field.value}
                             >
                               <SelectTrigger className="w-full">
@@ -644,6 +674,7 @@ export default function RetirementCalculator() {
                             <Select
                               onValueChange={field.onChange}
                               value={field.value}
+                              defaultValue="option1"
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Изберете опция" />
