@@ -167,7 +167,7 @@ export default function RetirementCalculator() {
     console.log("Check pension fund - funds:", additionalFunds, "funder:", pensionFunder);
     
     if (additionalFunds > 0 && pensionFunder) {
-      // Check if the additional funds exceed 10,000
+      // Only show options for amounts > 10000
       const showOptions = additionalFunds > 10000;
       console.log("Additional funds:", additionalFunds, "Show options:", showOptions);
       
@@ -176,10 +176,14 @@ export default function RetirementCalculator() {
       if (showOptions) {
         console.log("Setting step to 3 for options");
         setStep(3); // Show options step for amounts > 10000
-      } else if (step === 2) {
-        console.log("Setting step to 4 to skip options");
-        setShowNationalPensionStep(true); // Skip options, but we still need to show national pension
-        setStep(4); 
+        
+        // Reset the national pension step visibility
+        // It will be shown again only if appropriate option conditions are met
+        setShowNationalPensionStep(false);
+      } else {
+        console.log("Setting step to 2, no options needed");
+        if (step > 2) setStep(2); // Reset to step 2 if we were further ahead
+        setShowNationalPensionStep(false); // Hide national pension step
       }
     }
   };
@@ -188,18 +192,14 @@ export default function RetirementCalculator() {
   const checkOptionFieldsComplete = () => {
     if (step !== 3) return; // Only check when we're actually on the options step
     
+    const additionalFunds = form.watch('additionalPensionFunds') || 0;
     const selectedOption = form.watch('selectedOption');
     console.log("Checking option fields, selected option:", selectedOption);
     
-    if (!selectedOption) {
+    // If funds are ≤ 10000 OR Option 1 is selected, don't show additional fields
+    if (additionalFunds <= 10000 || selectedOption === 'option1') {
+      console.log("Funds ≤ 10000 or Option 1 selected, hiding national pension step");
       setShowNationalPensionStep(false);
-      return;
-    }
-    
-    if (selectedOption === 'option1') {
-      console.log("Option 1 selected, showing national pension step");
-      setShowNationalPensionStep(true);
-      setStep(4);
       return;
     }
     
@@ -274,17 +274,28 @@ export default function RetirementCalculator() {
         setStep(3);
       }
     } else if (additionalFunds <= 10000 && additionalFunds > 0 && pensionFunder) {
-      // If funds <= 10000, skip options step and show national pension
-      console.log("Additional funds <= 10000, skipping options:", additionalFunds);
-      setShowNationalPensionStep(true);
-      if (step === 2) {
-        setStep(4);
+      // If funds <= 10000, hide options and national pension steps
+      console.log("Additional funds <= 10000, hiding options:", additionalFunds);
+      setShowOptionDropdown(false);
+      setShowNationalPensionStep(false);
+      if (step > 2) {
+        setStep(2);
       }
     }
   }, [form.watch('additionalPensionFunds'), form.watch('pensionFunder')]);
 
   // Watch for changes to selectedOption and its dependent fields
   useEffect(() => {
+    const selectedOption = form.watch('selectedOption');
+    const additionalFunds = form.watch('additionalPensionFunds') || 0;
+    
+    // If Option 1 selected OR funds ≤ 10000, hide national pension step
+    if (selectedOption === 'option1' || additionalFunds <= 10000) {
+      console.log("Option 1 selected or funds ≤ 10000, hiding national pension step");
+      setShowNationalPensionStep(false);
+      return;
+    }
+    
     checkOptionFieldsComplete();
   }, [
     form.watch('selectedOption'), 
@@ -717,7 +728,6 @@ export default function RetirementCalculator() {
                                 setTimeout(() => checkOptionFieldsComplete(), 0);
                               }}
                               value={field.value}
-                              defaultValue="option1"
                             >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Изберете опция" />
@@ -843,9 +853,9 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* Step 4: National Pension Funds - only shown if option step criteria met */}
+              {/* Step 4: National Pension Funds - only shown for Option 2/3 with filled fields */}
               <AnimatePresence>
-                {step >= 4 && showNationalPensionStep && (
+                {showNationalPensionStep && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
