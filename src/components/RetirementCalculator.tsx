@@ -158,16 +158,19 @@ export default function RetirementCalculator() {
 
   // Check pension fund amounts
   const checkPensionFundComplete = () => {
-    const additionalFunds = form.watch('additionalPensionFunds');
+    const additionalFunds = form.watch('additionalPensionFunds') || 0;
     const pensionFunder = form.watch('pensionFunder');
     
-    if (additionalFunds && additionalFunds > 0 && pensionFunder) {
-      setShowOptionDropdown(additionalFunds > 10000);
+    if (additionalFunds > 0 && pensionFunder) {
+      // Check if the additional funds exceed 10,000
+      const showOptions = additionalFunds > 10000;
+      console.log("Additional funds:", additionalFunds, "Show options:", showOptions);
+      setShowOptionDropdown(showOptions);
       
-      if (additionalFunds <= 10000 && step === 2) {
-        setStep(4); // Skip options step for amounts <= 10000
-      } else if (additionalFunds > 10000 && step === 2) {
+      if (showOptions && step === 2) {
         setStep(3); // Show options step for amounts > 10000
+      } else if (!showOptions && step === 2) {
+        setStep(4); // Skip options step for amounts <= 10000
       }
     }
   };
@@ -201,7 +204,7 @@ export default function RetirementCalculator() {
   };
 
   useEffect(() => {
-    const subscription = form.watch((_, { name, type }) => {
+    const subscription = form.watch((value, { name, type }) => {
       // Save to localStorage
       const formValues = form.getValues();
       if (Object.keys(formValues).length > 0) {
