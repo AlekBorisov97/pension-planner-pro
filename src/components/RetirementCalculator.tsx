@@ -76,7 +76,8 @@ export default function RetirementCalculator() {
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   const [isRetirementEligible, setIsRetirementEligible] = useState<boolean | null>(null);
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
-
+  const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
+  
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === 'undefined') return {};
     
@@ -177,35 +178,56 @@ export default function RetirementCalculator() {
         setStep(3); // Show options step for amounts > 10000
       } else if (step === 2) {
         console.log("Setting step to 4 to skip options");
-        setStep(4); // Skip options step for amounts <= 10000
+        setShowNationalPensionStep(true); // Skip options, but we still need to show national pension
+        setStep(4); 
       }
     }
   };
 
   // Check if option-specific fields are completed
   const checkOptionFieldsComplete = () => {
-    const selectedOption = form.watch('selectedOption');
+    if (step !== 3) return; // Only check when we're actually on the options step
     
-    if (!selectedOption || selectedOption === 'option1') {
-      if (step === 3) setStep(4);
+    const selectedOption = form.watch('selectedOption');
+    console.log("Checking option fields, selected option:", selectedOption);
+    
+    if (!selectedOption) {
+      setShowNationalPensionStep(false);
+      return;
+    }
+    
+    if (selectedOption === 'option1') {
+      console.log("Option 1 selected, showing national pension step");
+      setShowNationalPensionStep(true);
+      setStep(4);
       return;
     }
     
     if (selectedOption === 'option2') {
       const periodYears = form.watch('periodYears');
-      if (periodYears && periodYears > 0 && step === 3) {
+      console.log("Option 2 selected, period years:", periodYears);
+      
+      if (periodYears && periodYears > 0) {
+        console.log("Period years valid, showing national pension step");
+        setShowNationalPensionStep(true);
         setStep(4);
+      } else {
+        setShowNationalPensionStep(false);
       }
     }
     
     if (selectedOption === 'option3') {
       const installmentPeriod = form.watch('installmentPeriod');
       const installmentAmount = form.watch('installmentAmount');
+      console.log("Option 3 selected, period:", installmentPeriod, "amount:", installmentAmount);
       
       if (installmentPeriod && installmentPeriod > 0 && 
-          installmentAmount && installmentAmount > 0 && 
-          step === 3) {
+          installmentAmount && installmentAmount > 0) {
+        console.log("Installment fields valid, showing national pension step");
+        setShowNationalPensionStep(true);
         setStep(4);
+      } else {
+        setShowNationalPensionStep(false);
       }
     }
   };
@@ -251,8 +273,25 @@ export default function RetirementCalculator() {
       if (step === 2) {
         setStep(3);
       }
+    } else if (additionalFunds <= 10000 && additionalFunds > 0 && pensionFunder) {
+      // If funds <= 10000, skip options step and show national pension
+      console.log("Additional funds <= 10000, skipping options:", additionalFunds);
+      setShowNationalPensionStep(true);
+      if (step === 2) {
+        setStep(4);
+      }
     }
   }, [form.watch('additionalPensionFunds'), form.watch('pensionFunder')]);
+
+  // Watch for changes to selectedOption and its dependent fields
+  useEffect(() => {
+    checkOptionFieldsComplete();
+  }, [
+    form.watch('selectedOption'), 
+    form.watch('periodYears'), 
+    form.watch('installmentPeriod'), 
+    form.watch('installmentAmount')
+  ]);
 
   const onSubmit = (data: FormValues) => {
     const inputData: RetirementInputs = {
@@ -672,7 +711,11 @@ export default function RetirementCalculator() {
                           name="selectedOption"
                           render={({ field }) => (
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Force check after option selection
+                                setTimeout(() => checkOptionFieldsComplete(), 0);
+                              }}
                               value={field.value}
                               defaultValue="option1"
                             >
@@ -708,7 +751,12 @@ export default function RetirementCalculator() {
                                   id="periodYears"
                                   type="number"
                                   min={1}
-                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    field.onChange(value);
+                                    // Force check after value change
+                                    setTimeout(() => checkOptionFieldsComplete(), 0);
+                                  }}
                                   value={field.value === 0 || !field.value ? "" : field.value}
                                   placeholder="Въведете период в години"
                                 />
@@ -743,7 +791,12 @@ export default function RetirementCalculator() {
                                     id="installmentPeriod"
                                     type="number"
                                     min={1}
-                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                    onChange={(e) => {
+                                      const value = parseInt(e.target.value) || 0;
+                                      field.onChange(value);
+                                      // Force check after value change
+                                      setTimeout(() => checkOptionFieldsComplete(), 0);
+                                    }}
                                     value={field.value === 0 || !field.value ? "" : field.value}
                                     placeholder="Въведете период"
                                   />
@@ -765,7 +818,12 @@ export default function RetirementCalculator() {
                                     id="installmentAmount"
                                     type="number"
                                     min={1}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    onChange={(e) => {
+                                      const value = parseFloat(e.target.value) || 0;
+                                      field.onChange(value);
+                                      // Force check after value change
+                                      setTimeout(() => checkOptionFieldsComplete(), 0);
+                                    }}
                                     value={field.value === 0 || !field.value ? "" : field.value}
                                     placeholder="Въведете сума"
                                   />
@@ -785,9 +843,9 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* Step 4: National Pension Funds */}
+              {/* Step 4: National Pension Funds - only shown if option step criteria met */}
               <AnimatePresence>
-                {step >= 4 && (
+                {step >= 4 && showNationalPensionStep && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -864,3 +922,4 @@ export default function RetirementCalculator() {
     </div>
   );
 }
+
