@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -5,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
-import { CalendarIcon, HelpCircle } from 'lucide-react';
+import { CalendarIcon, HelpCircle, CheckCircle, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { calculateRetirement, pensionFunders, RetirementInputs } from '@/utils/calculatorUtils';
 import CalculationResult from './CalculationResult';
@@ -47,6 +49,18 @@ const formSchema = z.object({
   pensionFunder: z.string({
     required_error: 'Моля, изберете пенсионен фонд.',
   }),
+  selectedOption: z.enum(['option1', 'option2', 'option3']).optional(),
+  periodYears: z.number()
+    .int()
+    .min(1, 'Периодът трябва да е поне 1 година')
+    .optional(),
+  installmentPeriod: z.number()
+    .int()
+    .min(1, 'Периодът трябва да е поне 1')
+    .optional(),
+  installmentAmount: z.number()
+    .min(1, 'Сумата трябва да е поне 1')
+    .optional(),
   nationalPensionFunds: z.number()
     .min(0, 'Сумата трябва да е 0 или повече'),
 });
@@ -55,6 +69,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<ReturnType<typeof calculateRetirement> | null>(null);
+  const [basicInfoComplete, setBasicInfoComplete] = useState(false);
+  const [step, setStep] = useState(1);
+  const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
+  const [isRetirementEligible, setIsRetirementEligible] = useState<boolean | null>(null);
+  const [showOptionDropdown, setShowOptionDropdown] = useState(false);
 
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === 'undefined') return {};
@@ -88,23 +107,128 @@ export default function RetirementCalculator() {
       additionalPensionFunds: savedData.additionalPensionFunds || 0,
       nationalPensionFunds: savedData.nationalPensionFunds || 0,
       pensionFunder: savedData.pensionFunder || undefined,
+      selectedOption: savedData.selectedOption || undefined,
+      periodYears: savedData.periodYears || undefined,
+      installmentPeriod: savedData.installmentPeriod || undefined,
+      installmentAmount: savedData.installmentAmount || undefined,
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((formValues) => {
-      if (Object.keys(formValues).length === 0) return;
+  const checkBasicInfoComplete = () => {
+    const dateOfBirth = form.watch('dateOfBirth');
+    const gender = form.watch('gender');
+    const workExperienceYears = form.watch('workExperienceYears');
+    const retirementDate = form.watch('retirementDate');
+    
+    const isComplete = Boolean(
+      dateOfBirth && 
+      gender && 
+      (workExperienceYears !== undefined) && 
+      retirementDate
+    );
+    
+    setBasicInfoComplete(isComplete);
+    
+    if (isComplete) {
+      // Calculate age at retirement
+      const birthDate = new Date(dateOfBirth);
+      const retirement = new Date(retirementDate);
       
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+      const ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
+      setCalculatedAge(ageAtRetirement);
+      
+      // Simple eligibility check (example logic - customize as needed)
+      const minRetirementAge = gender === 'male' ? 64 : 61;
+      const minWorkExperience = 15;
+      
+      setIsRetirementEligible(
+        ageAtRetirement >= minRetirementAge && 
+        workExperienceYears >= minWorkExperience
+      );
+      
+      if (step === 1) {
+        setStep(2);
+      }
+    } else {
+      setCalculatedAge(null);
+      setIsRetirementEligible(null);
+      setStep(1);
+    }
+  };
+
+  // Check pension fund amounts
+  const checkPensionFundComplete = () => {
+    const additionalFunds = form.watch('additionalPensionFunds');
+    const pensionFunder = form.watch('pensionFunder');
+    
+    if (additionalFunds && additionalFunds > 0 && pensionFunder) {
+      setShowOptionDropdown(additionalFunds > 10000);
+      
+      if (additionalFunds <= 10000 && step === 2) {
+        setStep(4); // Skip options step for amounts <= 10000
+      } else if (additionalFunds > 10000 && step === 2) {
+        setStep(3); // Show options step for amounts > 10000
+      }
+    }
+  };
+
+  // Check if option-specific fields are completed
+  const checkOptionFieldsComplete = () => {
+    const selectedOption = form.watch('selectedOption');
+    
+    if (!selectedOption || selectedOption === 'option1') {
+      if (step === 3) setStep(4);
+      return;
+    }
+    
+    if (selectedOption === 'option2') {
+      const periodYears = form.watch('periodYears');
+      if (periodYears && periodYears > 0 && step === 3) {
+        setStep(4);
+      }
+    }
+    
+    if (selectedOption === 'option3') {
+      const installmentPeriod = form.watch('installmentPeriod');
+      const installmentAmount = form.watch('installmentAmount');
+      
+      if (installmentPeriod && installmentPeriod > 0 && 
+          installmentAmount && installmentAmount > 0 && 
+          step === 3) {
+        setStep(4);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const subscription = form.watch((_, { name, type }) => {
+      // Save to localStorage
+      const formValues = form.getValues();
+      if (Object.keys(formValues).length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+      }
+      
+      // Check step completion
+      if (['dateOfBirth', 'gender', 'workExperienceYears', 'workExperienceMonths', 'retirementDate'].includes(name || '')) {
+        checkBasicInfoComplete();
+      }
+      
+      if (['additionalPensionFunds', 'pensionFunder'].includes(name || '')) {
+        checkPensionFundComplete();
+      }
+      
+      if (['selectedOption', 'periodYears', 'installmentPeriod', 'installmentAmount'].includes(name || '')) {
+        checkOptionFieldsComplete();
+      }
     });
+    
+    // Initial check
+    checkBasicInfoComplete();
+    checkPensionFundComplete();
+    checkOptionFieldsComplete();
     
     return () => subscription.unsubscribe();
   }, [form.watch]);
-
-  const currentDate = new Date();
-  const minRetirementDate = new Date('2016-01-01');
-  const birthDateFromYear = new Date('1930-01-01');
-  const birthDateToYear = new Date();
 
   const onSubmit = (data: FormValues) => {
     const inputData: RetirementInputs = {
@@ -135,366 +259,557 @@ export default function RetirementCalculator() {
         <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 h-6">
-                    <Label htmlFor="dateOfBirth">Дата на раждане</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Вашата дата на раждане се използва за изчисляване на текущата възраст и допустимост за пенсиониране.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="dateOfBirth"
-                    render={({ field }) => (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? (
-                              format(field.value, "dd.MM.yyyy", { locale: bg })
-                            ) : (
-                              <span>Изберете дата</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            defaultMonth={DEFAULT_BIRTH_DATE}
-                            fromDate={birthDateFromYear}
-                            toDate={birthDateToYear}
-                            initialFocus
-                            className="rounded-md border p-3 pointer-events-auto"
-                            locale={bg}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  />
-                  {form.formState.errors.dateOfBirth && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.dateOfBirth.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 h-6">
-                    <Label>Пол</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Полът е от значение, тъй като пенсионната възраст може да се различава при мъжете и жените.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="gender"
-                    render={({ field }) => (
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="male" id="male" />
-                          <Label htmlFor="male" className="font-normal cursor-pointer">Мъж</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="female" id="female" />
-                          <Label htmlFor="female" className="font-normal cursor-pointer">Жена</Label>
-                        </div>
-                      </RadioGroup>
-                    )}
-                  />
-                  {form.formState.errors.gender && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.gender.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 h-6">
-                    <Label htmlFor="workExperienceYears">Стаж (години)</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Общият ви трудов стаж в години влияе на допустимостта и размера на пенсията.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="workExperienceYears"
-                    render={({ field }) => (
-                      <Input
-                        id="workExperienceYears"
-                        type="number"
-                        min={0}
-                        max={80}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        value={field.value === 0 ? "" : field.value}
-                        placeholder="Въведете години"
-                      />
-                    )}
-                  />
-                  {form.formState.errors.workExperienceYears && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.workExperienceYears.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 h-6">
-                    <Label htmlFor="workExperienceMonths">Стаж (месеци)</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Допълнителни месеци трудов стаж.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="workExperienceMonths"
-                    render={({ field }) => (
-                      <Input
-                        id="workExperienceMonths"
-                        type="number"
-                        min={0}
-                        max={11}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        value={field.value === 0 ? "" : field.value}
-                        placeholder="Въведете месеци"
-                      />
-                    )}
-                  />
-                  {form.formState.errors.workExperienceMonths && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.workExperienceMonths.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 h-6">
-                    <Label htmlFor="retirementDate">Дата на пенсиониране</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Датата, на която планирате да се пенсионирате.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="retirementDate"
-                    render={({ field }) => (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? (
-                              format(field.value, "dd.MM.yyyy", { locale: bg })
-                            ) : (
-                              <span>Изберете дата</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            defaultMonth={minRetirementDate}
-                            fromDate={minRetirementDate}
-                            toDate={currentDate}
-                            initialFocus
-                            className="rounded-md border p-3 pointer-events-auto"
-                            locale={bg}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  />
-                  {form.formState.errors.retirementDate && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.retirementDate.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="additionalPensionFunds">Допълнителни пенсионни фондове (лв.)</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Общата сума, натрупана в допълнителните ви пенсионни фондове в лева.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="additionalPensionFunds"
-                    render={({ field }) => (
-                      <Input
-                        id="additionalPensionFunds"
-                        type="number"
-                        min={0}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        value={field.value === 0 ? "" : field.value}
-                        placeholder="Въведете сума"
-                      />
-                    )}
-                  />
-                  {form.formState.errors.additionalPensionFunds && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.additionalPensionFunds.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="pensionFunder">Пенсионен фонд</Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-[200px] text-sm">
-                          Компанията, управляваща допълнителните ви пенсионни фондове.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Controller
-                    control={form.control}
-                    name="pensionFunder"
-                    render={({ field }) => (
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Изберете пенсионен фонд" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {pensionFunders.map((funder) => (
-                            <SelectItem key={funder} value={funder}>
-                              {funder}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {form.formState.errors.pensionFunder && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.pensionFunder.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="w-[200px] text-sm">
-                        Сумата, която сте натрупали в националната пенсионна система в лева.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <Controller
-                  control={form.control}
-                  name="nationalPensionFunds"
-                  render={({ field }) => (
-                    <Input
-                      id="nationalPensionFunds"
-                      type="number"
-                      min={0}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      value={field.value === 0 ? "" : field.value}
-                      placeholder="Въведете сума"
+              {/* Step 1: Basic Information */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium">Основна информация</h3>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 h-6">
+                      <Label htmlFor="dateOfBirth">Дата на раждане</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-sm">
+                            Вашата дата на раждане се използва за изчисляване на текущата възраст и допустимост за пенсиониране.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Controller
+                      control={form.control}
+                      name="dateOfBirth"
+                      render={({ field }) => (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, "dd.MM.yyyy", { locale: bg })
+                              ) : (
+                                <span>Изберете дата</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              defaultMonth={DEFAULT_BIRTH_DATE}
+                              fromDate={new Date('1930-01-01')}
+                              toDate={new Date()}
+                              initialFocus
+                              className="rounded-md border p-3 pointer-events-auto"
+                              locale={bg}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     />
+                    {form.formState.errors.dateOfBirth && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.dateOfBirth.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 h-6">
+                      <Label>Пол</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-sm">
+                            Полът е от значение, тъй като пенсионната възраст може да се различава при мъжете и жените.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Controller
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="male" id="male" />
+                            <Label htmlFor="male" className="font-normal cursor-pointer">Мъж</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="female" id="female" />
+                            <Label htmlFor="female" className="font-normal cursor-pointer">Жена</Label>
+                          </div>
+                        </RadioGroup>
+                      )}
+                    />
+                    {form.formState.errors.gender && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.gender.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 h-6">
+                      <Label htmlFor="workExperienceYears">Стаж (години)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-sm">
+                            Общият ви трудов стаж в години влияе на допустимостта и размера на пенсията.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Controller
+                      control={form.control}
+                      name="workExperienceYears"
+                      render={({ field }) => (
+                        <Input
+                          id="workExperienceYears"
+                          type="number"
+                          min={0}
+                          max={80}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value === 0 ? "" : field.value}
+                          placeholder="Въведете години"
+                        />
+                      )}
+                    />
+                    {form.formState.errors.workExperienceYears && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.workExperienceYears.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 h-6">
+                      <Label htmlFor="workExperienceMonths">Стаж (месеци)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-sm">
+                            Допълнителни месеци трудов стаж.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Controller
+                      control={form.control}
+                      name="workExperienceMonths"
+                      render={({ field }) => (
+                        <Input
+                          id="workExperienceMonths"
+                          type="number"
+                          min={0}
+                          max={11}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value === 0 ? "" : field.value}
+                          placeholder="Въведете месеци"
+                        />
+                      )}
+                    />
+                    {form.formState.errors.workExperienceMonths && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.workExperienceMonths.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 h-6">
+                      <Label htmlFor="retirementDate">Дата на пенсиониране</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-sm">
+                            Датата, на която планирате да се пенсионирате.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Controller
+                      control={form.control}
+                      name="retirementDate"
+                      render={({ field }) => (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, "dd.MM.yyyy", { locale: bg })
+                              ) : (
+                                <span>Изберете дата</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              defaultMonth={new Date('2016-01-01')}
+                              fromDate={new Date('2016-01-01')}
+                              toDate={new Date()}
+                              initialFocus
+                              className="rounded-md border p-3 pointer-events-auto"
+                              locale={bg}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    />
+                    {form.formState.errors.retirementDate && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.retirementDate.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Eligibility Message */}
+                <AnimatePresence>
+                  {(calculatedAge !== null && isRetirementEligible !== null) && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Alert variant={isRetirementEligible ? "default" : "destructive"} className={cn(
+                        "mt-4 flex items-center",
+                        isRetirementEligible ? "bg-green-50 text-green-800 border-green-200" : "bg-red-50 text-red-800 border-red-200" 
+                      )}>
+                        {isRetirementEligible ? (
+                          <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
+                        )}
+                        <AlertDescription className="text-sm">
+                          {isRetirementEligible
+                            ? `Отговаряте на условията за пенсиониране. Възрастта ви при пенсиониране ще бъде ${calculatedAge} години.`
+                            : `Не отговаряте на условията за пенсиониране. Възрастта ви при пенсиониране ще бъде ${calculatedAge} години.`
+                          }
+                        </AlertDescription>
+                      </Alert>
+                    </motion.div>
                   )}
-                />
-                {form.formState.errors.nationalPensionFunds && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.nationalPensionFunds.message}
-                  </p>
-                )}
+                </AnimatePresence>
               </div>
 
-              <div className="flex justify-center pt-2">
-                <Button 
-                  type="submit" 
-                  size="lg"
-                  className="rounded-full px-8 bg-primary hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg"
-                >
-                  Изчисли пенсионните фондове
-                </Button>
-              </div>
+              {/* Step 2: Pension Funds */}
+              <AnimatePresence>
+                {step >= 2 && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
+                    <h3 className="text-lg font-medium">Допълнителни пенсионни данни</h3>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="additionalPensionFunds">Допълнителни пенсионни фондове (лв.)</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="w-[200px] text-sm">
+                                Общата сума, натрупана в допълнителните ви пенсионни фондове в лева.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Controller
+                          control={form.control}
+                          name="additionalPensionFunds"
+                          render={({ field }) => (
+                            <Input
+                              id="additionalPensionFunds"
+                              type="number"
+                              min={0}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value === 0 ? "" : field.value}
+                              placeholder="Въведете сума"
+                            />
+                          )}
+                        />
+                        {form.formState.errors.additionalPensionFunds && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.additionalPensionFunds.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="pensionFunder">Пенсионен фонд</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="w-[200px] text-sm">
+                                Компанията, управляваща допълнителните ви пенсионни фондове.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Controller
+                          control={form.control}
+                          name="pensionFunder"
+                          render={({ field }) => (
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Изберете пенсионен фонд" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {pensionFunders.map((funder) => (
+                                  <SelectItem key={funder} value={funder}>
+                                    {funder}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        {form.formState.errors.pensionFunder && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.pensionFunder.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Step 3: Options (shown only if additionalPensionFunds > 10000) */}
+              <AnimatePresence>
+                {step >= 3 && showOptionDropdown && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
+                    <h3 className="text-lg font-medium">Опции за изплащане</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="selectedOption">Изберете опция</Label>
+                        <Controller
+                          control={form.control}
+                          name="selectedOption"
+                          render={({ field }) => (
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Изберете опция" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="option1">Опция 1</SelectItem>
+                                <SelectItem value="option2">Опция 2</SelectItem>
+                                <SelectItem value="option3">Опция 3</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+
+                      {/* Option 2 fields */}
+                      <AnimatePresence>
+                        {form.watch('selectedOption') === 'option2' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-2"
+                          >
+                            <Label htmlFor="periodYears">Период (години)</Label>
+                            <Controller
+                              control={form.control}
+                              name="periodYears"
+                              render={({ field }) => (
+                                <Input
+                                  id="periodYears"
+                                  type="number"
+                                  min={1}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  value={field.value === 0 || !field.value ? "" : field.value}
+                                  placeholder="Въведете период в години"
+                                />
+                              )}
+                            />
+                            {form.formState.errors.periodYears && (
+                              <p className="text-sm text-destructive">
+                                {form.formState.errors.periodYears.message}
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Option 3 fields */}
+                      <AnimatePresence>
+                        {form.watch('selectedOption') === 'option3' && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-4"
+                          >
+                            <div className="space-y-2">
+                              <Label htmlFor="installmentPeriod">Период на разсрочване</Label>
+                              <Controller
+                                control={form.control}
+                                name="installmentPeriod"
+                                render={({ field }) => (
+                                  <Input
+                                    id="installmentPeriod"
+                                    type="number"
+                                    min={1}
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                    value={field.value === 0 || !field.value ? "" : field.value}
+                                    placeholder="Въведете период"
+                                  />
+                                )}
+                              />
+                              {form.formState.errors.installmentPeriod && (
+                                <p className="text-sm text-destructive">
+                                  {form.formState.errors.installmentPeriod.message}
+                                </p>
+                              )}
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="installmentAmount">Сума</Label>
+                              <Controller
+                                control={form.control}
+                                name="installmentAmount"
+                                render={({ field }) => (
+                                  <Input
+                                    id="installmentAmount"
+                                    type="number"
+                                    min={1}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    value={field.value === 0 || !field.value ? "" : field.value}
+                                    placeholder="Въведете сума"
+                                  />
+                                )}
+                              />
+                              {form.formState.errors.installmentAmount && (
+                                <p className="text-sm text-destructive">
+                                  {form.formState.errors.installmentAmount.message}
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Step 4: National Pension Funds */}
+              <AnimatePresence>
+                {step >= 4 && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
+                    <h3 className="text-lg font-medium">Национални пенсионни данни</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="w-[200px] text-sm">
+                              Сумата, която сте натрупали в националната пенсионна система в лева.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Controller
+                        control={form.control}
+                        name="nationalPensionFunds"
+                        render={({ field }) => (
+                          <Input
+                            id="nationalPensionFunds"
+                            type="number"
+                            min={0}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            value={field.value === 0 ? "" : field.value}
+                            placeholder="Въведете сума"
+                          />
+                        )}
+                      />
+                      {form.formState.errors.nationalPensionFunds && (
+                        <p className="text-sm text-destructive">
+                          {form.formState.errors.nationalPensionFunds.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-center pt-2">
+                      <Button 
+                        type="submit" 
+                        size="lg"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg"
+                      >
+                        Изчисли пенсионните фондове
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </form>
           </CardContent>
         </Card>
