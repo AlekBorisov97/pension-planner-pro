@@ -27,26 +27,35 @@ export const paymentOptions = [
 ];
 
 export const calculateRetirement = (inputs: RetirementInputs) => {
-  // Calculate standard monthly pension (without additional funds)
-  const standardMonthlyPension = inputs.nationalPensionFunds / 240; // Simplified calculation
-
-  // Apply payment option modifiers for small funds
-  let enhancedMonthlyPension = standardMonthlyPension;
-  
+  // For small funds (≤10000), we'll calculate based only on the payment option
   if (inputs.additionalPensionFunds <= 10000) {
-    // For small funds (≤10000), apply payment option modifier
+    let result = 0;
+    
     if (inputs.paymentOption === "Payment 1") {
-      enhancedMonthlyPension += (inputs.additionalPensionFunds / 2) / 240;
+      result = inputs.additionalPensionFunds / 2;
     } else if (inputs.paymentOption === "Payment 2") {
-      enhancedMonthlyPension += (inputs.additionalPensionFunds / 3) / 240;
+      result = inputs.additionalPensionFunds / 3;
     } else {
       // Default calculation if no option selected
-      enhancedMonthlyPension += (inputs.additionalPensionFunds) / 240;
+      result = inputs.additionalPensionFunds;
     }
-  } else {
-    // For larger funds (>10000), use standard calculation
-    enhancedMonthlyPension += (inputs.additionalPensionFunds / 240);
+    
+    return {
+      standardMonthlyPension: 0, // Not using national pension for small funds
+      enhancedMonthlyPension: result / 240,
+      difference: result / 240,
+      percentageIncrease: 100 // 100% increase as we're not using standard pension
+    };
   }
+  
+  // Calculate standard monthly pension (for larger funds)
+  const standardMonthlyPension = inputs.nationalPensionFunds / 240; // Simplified calculation
+
+  // Apply payment option modifiers for large funds
+  let enhancedMonthlyPension = standardMonthlyPension;
+  
+  // For larger funds (>10000), use standard calculation
+  enhancedMonthlyPension += (inputs.additionalPensionFunds / 240);
 
   // Calculate difference and percentage increase
   const difference = enhancedMonthlyPension - standardMonthlyPension;

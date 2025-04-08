@@ -174,7 +174,8 @@ export default function RetirementCalculator() {
     
     if (additionalFunds > 0 && pensionFunder) {
       // Check if funds are <= 10000 for small fund options
-      setShowSmallFundOptions(additionalFunds <= 10000);
+      const isSmallFund = additionalFunds <= 10000;
+      setShowSmallFundOptions(isSmallFund);
       
       // Only show options for large funds (> 10000)
       const showOptions = additionalFunds > 10000;
@@ -192,7 +193,7 @@ export default function RetirementCalculator() {
       } else {
         console.log("Setting step to 2, small fund options");
         if (step > 2) setStep(2); // Reset to step 2 if we were further ahead
-        setShowNationalPensionStep(true); // Show national pension step for small funds
+        setShowNationalPensionStep(false); // Don't show national pension step for small funds
       }
     }
   };
@@ -205,18 +206,17 @@ export default function RetirementCalculator() {
     const selectedOption = form.watch('selectedOption');
     console.log("Checking option fields, selected option:", selectedOption);
     
-    // For small funds (≤10000), we always show national pension step
+    // For small funds (≤10000), we don't show national pension step
     if (additionalFunds <= 10000) {
-      console.log("Funds ≤ 10000, showing national pension step directly");
-      setShowNationalPensionStep(true);
+      console.log("Funds ≤ 10000, not showing national pension step");
+      setShowNationalPensionStep(false);
       return;
     }
     
-    // If Option 1 is selected with large funds, show national pension step
+    // If Option 1 is selected with large funds, don't show national pension step
     if (selectedOption === 'option1') {
-      console.log("Option 1 selected, showing national pension step");
-      setShowNationalPensionStep(true);
-      setStep(4);
+      console.log("Option 1 selected, not showing national pension step");
+      setShowNationalPensionStep(false);
       return;
     }
     
@@ -271,9 +271,29 @@ export default function RetirementCalculator() {
       }
 
       if (['paymentOption'].includes(name || '')) {
-        // Ensure national pension step is shown when payment option is selected
+        // When payment option changes for small funds, calculate and show result
         if (form.watch('additionalPensionFunds') <= 10000 && form.watch('paymentOption')) {
-          setShowNationalPensionStep(true);
+          const inputData: RetirementInputs = {
+            dateOfBirth: form.getValues('dateOfBirth'),
+            gender: form.getValues('gender'),
+            workExperienceYears: form.getValues('workExperienceYears'),
+            workExperienceMonths: form.getValues('workExperienceMonths'),
+            retirementDate: form.getValues('retirementDate'),
+            additionalPensionFunds: form.getValues('additionalPensionFunds'),
+            pensionFunder: form.getValues('pensionFunder'),
+            nationalPensionFunds: 0, // Not used for small funds
+            paymentOption: form.getValues('paymentOption')
+          };
+          
+          const result = calculateRetirement(inputData);
+          setCalculationResult(result);
+          
+          setTimeout(() => {
+            const resultElement = document.getElementById('calculation-result');
+            if (resultElement) {
+              resultElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
         }
       }
     });
@@ -306,7 +326,7 @@ export default function RetirementCalculator() {
       console.log("Additional funds <= 10000, showing small fund options:", additionalFunds);
       setShowOptionDropdown(false);
       setShowSmallFundOptions(true);
-      setShowNationalPensionStep(true);
+      setShowNationalPensionStep(false); // Don't show national pension for small funds
       if (step > 2) {
         setStep(2);
       }
@@ -318,11 +338,10 @@ export default function RetirementCalculator() {
     const selectedOption = form.watch('selectedOption');
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     
-    // Special case for large funds with Option 1
-    if (additionalFunds > 10000 && selectedOption === 'option1') {
-      console.log("Large funds with Option 1 selected, showing national pension step");
-      setShowNationalPensionStep(true);
-      setStep(4);
+    // Don't show national pension step for Option 1 or small funds
+    if (additionalFunds <= 10000 || selectedOption === 'option1') {
+      console.log("Small funds or Option 1 selected, not showing national pension step");
+      setShowNationalPensionStep(false);
       return;
     }
     
@@ -761,7 +780,23 @@ export default function RetirementCalculator() {
                                 <Select
                                   onValueChange={(value) => {
                                     field.onChange(value);
-                                    setShowNationalPensionStep(true);
+                                    // Auto-calculate immediately when payment option changes for small funds
+                                    if (form.watch('additionalPensionFunds') <= 10000) {
+                                      const inputData: RetirementInputs = {
+                                        dateOfBirth: form.getValues('dateOfBirth'),
+                                        gender: form.getValues('gender'),
+                                        workExperienceYears: form.getValues('workExperienceYears'),
+                                        workExperienceMonths: form.getValues('workExperienceMonths'),
+                                        retirementDate: form.getValues('retirementDate'),
+                                        additionalPensionFunds: form.getValues('additionalPensionFunds'),
+                                        pensionFunder: form.getValues('pensionFunder'),
+                                        nationalPensionFunds: 0, // Not used for small funds
+                                        paymentOption: value
+                                      };
+                                      
+                                      const result = calculateRetirement(inputData);
+                                      setCalculationResult(result);
+                                    }
                                   }}
                                   value={field.value}
                                 >
@@ -937,7 +972,7 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* National Pension Funds - Now shown for both small funds and Option 1 */}
+              {/* National Pension Funds - Only shown for Options 2 & 3 with completed fields */}
               <AnimatePresence>
                 {showNationalPensionStep && (
                   <motion.div 
