@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, addYears } from 'date-fns';
 import { bg } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,12 +20,15 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { calculateRetirement, pensionFunders, RetirementInputs } from '@/utils/calculatorUtils';
+import { calculateRetirement, pensionFunders, paymentOptions, RetirementInputs } from '@/utils/calculatorUtils';
 import CalculationResult from './CalculationResult';
 import { useToast } from '@/hooks/use-toast';
 
 const STORAGE_KEY = 'retirement-calculator-form-data';
 const DEFAULT_BIRTH_DATE = new Date('1960-01-01');
+const MIN_BIRTH_DATE = new Date('1960-01-01'); // No dates before 1960-01-01
+const TODAY = new Date();
+const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
 
 const formSchema = z.object({
   dateOfBirth: z.date({
@@ -64,6 +67,7 @@ const formSchema = z.object({
     .optional(),
   nationalPensionFunds: z.number()
     .min(0, 'Сумата трябва да е 0 или повече'),
+  paymentOption: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -77,6 +81,7 @@ export default function RetirementCalculator() {
   const [isRetirementEligible, setIsRetirementEligible] = useState<boolean | null>(null);
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
   const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
+  const [showSmallFundOptions, setShowSmallFundOptions] = useState(false);
   
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === 'undefined') return {};
@@ -106,7 +111,7 @@ export default function RetirementCalculator() {
       gender: savedData.gender || undefined,
       workExperienceYears: savedData.workExperienceYears || 0,
       workExperienceMonths: savedData.workExperienceMonths || 0,
-      retirementDate: savedData.retirementDate || undefined,
+      retirementDate: savedData.retirementDate || TODAY,
       additionalPensionFunds: savedData.additionalPensionFunds || 0,
       nationalPensionFunds: savedData.nationalPensionFunds || 0,
       pensionFunder: savedData.pensionFunder || undefined,
@@ -114,6 +119,7 @@ export default function RetirementCalculator() {
       periodYears: savedData.periodYears || undefined,
       installmentPeriod: savedData.installmentPeriod || undefined,
       installmentAmount: savedData.installmentAmount || undefined,
+      paymentOption: savedData.paymentOption || undefined,
     },
   });
 
@@ -167,7 +173,10 @@ export default function RetirementCalculator() {
     console.log("Check pension fund - funds:", additionalFunds, "funder:", pensionFunder);
     
     if (additionalFunds > 0 && pensionFunder) {
-      // Only show options for amounts > 10000
+      // Check if funds are <= 10000 for small fund options
+      setShowSmallFundOptions(additionalFunds <= 10000);
+      
+      // Only show options for large funds (> 10000)
       const showOptions = additionalFunds > 10000;
       console.log("Additional funds:", additionalFunds, "Show options:", showOptions);
       
@@ -181,9 +190,9 @@ export default function RetirementCalculator() {
         // It will be shown again only if appropriate option conditions are met
         setShowNationalPensionStep(false);
       } else {
-        console.log("Setting step to 2, no options needed");
+        console.log("Setting step to 2, small fund options");
         if (step > 2) setStep(2); // Reset to step 2 if we were further ahead
-        setShowNationalPensionStep(false); // Hide national pension step
+        setShowNationalPensionStep(true); // Show national pension step for small funds
       }
     }
   };
@@ -196,10 +205,18 @@ export default function RetirementCalculator() {
     const selectedOption = form.watch('selectedOption');
     console.log("Checking option fields, selected option:", selectedOption);
     
-    // If funds are ≤ 10000 OR Option 1 is selected, don't show additional fields
-    if (additionalFunds <= 10000 || selectedOption === 'option1') {
-      console.log("Funds ≤ 10000 or Option 1 selected, hiding national pension step");
-      setShowNationalPensionStep(false);
+    // For small funds (≤10000), we always show national pension step
+    if (additionalFunds <= 10000) {
+      console.log("Funds ≤ 10000, showing national pension step directly");
+      setShowNationalPensionStep(true);
+      return;
+    }
+    
+    // If Option 1 is selected with large funds, show national pension step
+    if (selectedOption === 'option1') {
+      console.log("Option 1 selected, showing national pension step");
+      setShowNationalPensionStep(true);
+      setStep(4);
       return;
     }
     
@@ -252,6 +269,13 @@ export default function RetirementCalculator() {
       if (['selectedOption', 'periodYears', 'installmentPeriod', 'installmentAmount'].includes(name || '')) {
         checkOptionFieldsComplete();
       }
+
+      if (['paymentOption'].includes(name || '')) {
+        // Ensure national pension step is shown when payment option is selected
+        if (form.watch('additionalPensionFunds') <= 10000 && form.watch('paymentOption')) {
+          setShowNationalPensionStep(true);
+        }
+      }
     });
     
     // Initial check
@@ -267,17 +291,22 @@ export default function RetirementCalculator() {
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     const pensionFunder = form.watch('pensionFunder');
     
+    // Update small fund options visibility
+    setShowSmallFundOptions(additionalFunds <= 10000 && additionalFunds > 0);
+    
     if (additionalFunds > 10000 && pensionFunder) {
       console.log("Additional funds changed and > 10000:", additionalFunds);
       setShowOptionDropdown(true);
+      setShowSmallFundOptions(false);
       if (step === 2) {
         setStep(3);
       }
     } else if (additionalFunds <= 10000 && additionalFunds > 0 && pensionFunder) {
-      // If funds <= 10000, hide options and national pension steps
-      console.log("Additional funds <= 10000, hiding options:", additionalFunds);
+      // If funds <= 10000, hide large fund options and show small fund options
+      console.log("Additional funds <= 10000, showing small fund options:", additionalFunds);
       setShowOptionDropdown(false);
-      setShowNationalPensionStep(false);
+      setShowSmallFundOptions(true);
+      setShowNationalPensionStep(true);
       if (step > 2) {
         setStep(2);
       }
@@ -289,10 +318,11 @@ export default function RetirementCalculator() {
     const selectedOption = form.watch('selectedOption');
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     
-    // If Option 1 selected OR funds ≤ 10000, hide national pension step
-    if (selectedOption === 'option1' || additionalFunds <= 10000) {
-      console.log("Option 1 selected or funds ≤ 10000, hiding national pension step");
-      setShowNationalPensionStep(false);
+    // Special case for large funds with Option 1
+    if (additionalFunds > 10000 && selectedOption === 'option1') {
+      console.log("Large funds with Option 1 selected, showing national pension step");
+      setShowNationalPensionStep(true);
+      setStep(4);
       return;
     }
     
@@ -313,7 +343,8 @@ export default function RetirementCalculator() {
       retirementDate: data.retirementDate,
       additionalPensionFunds: data.additionalPensionFunds,
       pensionFunder: data.pensionFunder,
-      nationalPensionFunds: data.nationalPensionFunds
+      nationalPensionFunds: data.nationalPensionFunds,
+      paymentOption: data.paymentOption
     };
     
     const result = calculateRetirement(inputData);
@@ -378,8 +409,8 @@ export default function RetirementCalculator() {
                               selected={field.value}
                               onSelect={field.onChange}
                               defaultMonth={DEFAULT_BIRTH_DATE}
-                              fromDate={new Date('1930-01-01')}
-                              toDate={new Date()}
+                              fromDate={MIN_BIRTH_DATE} // No dates before 1960-01-01
+                              toDate={TODAY}
                               initialFocus
                               className="rounded-md border p-3 pointer-events-auto"
                               locale={bg}
@@ -550,9 +581,9 @@ export default function RetirementCalculator() {
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              defaultMonth={new Date('2016-01-01')}
-                              fromDate={new Date('2016-01-01')}
-                              toDate={new Date()}
+                              defaultMonth={TODAY}
+                              fromDate={TODAY}
+                              toDate={MAX_RETIREMENT_DATE} // Up to 40 years in future
                               initialFocus
                               className="rounded-md border p-3 pointer-events-auto"
                               locale={bg}
@@ -698,6 +729,59 @@ export default function RetirementCalculator() {
                         )}
                       </div>
                     </div>
+
+                    {/* Small Fund Options - Only visible when funds <= 10000 */}
+                    <AnimatePresence>
+                      {showSmallFundOptions && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-4"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor="paymentOption">Опции за плащане</Label>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="w-[200px] text-sm">
+                                    Изберете опция за плащане за малки суми (под 10,000 лв).
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <Controller
+                              control={form.control}
+                              name="paymentOption"
+                              render={({ field }) => (
+                                <Select
+                                  onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setShowNationalPensionStep(true);
+                                  }}
+                                  value={field.value}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Изберете опция за плащане" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {paymentOptions.map((option) => (
+                                      <SelectItem key={option} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -853,7 +937,7 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* Step 4: National Pension Funds - only shown for Option 2/3 with filled fields */}
+              {/* National Pension Funds - Now shown for both small funds and Option 1 */}
               <AnimatePresence>
                 {showNationalPensionStep && (
                   <motion.div 
@@ -932,4 +1016,3 @@ export default function RetirementCalculator() {
     </div>
   );
 }
-

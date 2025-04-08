@@ -13,9 +13,9 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  defaultMonth = new Date(1960, 0, 1), // Set default month to January 1960
-  fromDate = new Date(1950, 0, 1), // Min date: January 1, 1950
-  toDate = new Date(2040, 11, 31), // Max date: December 31, 2040
+  defaultMonth,
+  fromDate,
+  toDate,
   ...props
 }: CalendarProps) {
   return (

@@ -8,6 +8,7 @@ export interface RetirementInputs {
   additionalPensionFunds: number;
   pensionFunder: string;
   nationalPensionFunds: number;
+  paymentOption?: string;
 }
 
 export const pensionFunders = [
@@ -20,12 +21,32 @@ export const pensionFunders = [
   "Бъдеще"
 ];
 
+export const paymentOptions = [
+  "Payment 1",
+  "Payment 2"
+];
+
 export const calculateRetirement = (inputs: RetirementInputs) => {
   // Calculate standard monthly pension (without additional funds)
   const standardMonthlyPension = inputs.nationalPensionFunds / 240; // Simplified calculation
 
-  // Calculate enhanced monthly pension (with additional funds)
-  const enhancedMonthlyPension = standardMonthlyPension + (inputs.additionalPensionFunds / 240); // Simplified calculation
+  // Apply payment option modifiers for small funds
+  let enhancedMonthlyPension = standardMonthlyPension;
+  
+  if (inputs.additionalPensionFunds <= 10000) {
+    // For small funds (≤10000), apply payment option modifier
+    if (inputs.paymentOption === "Payment 1") {
+      enhancedMonthlyPension += (inputs.additionalPensionFunds / 2) / 240;
+    } else if (inputs.paymentOption === "Payment 2") {
+      enhancedMonthlyPension += (inputs.additionalPensionFunds / 3) / 240;
+    } else {
+      // Default calculation if no option selected
+      enhancedMonthlyPension += (inputs.additionalPensionFunds) / 240;
+    }
+  } else {
+    // For larger funds (>10000), use standard calculation
+    enhancedMonthlyPension += (inputs.additionalPensionFunds / 240);
+  }
 
   // Calculate difference and percentage increase
   const difference = enhancedMonthlyPension - standardMonthlyPension;
