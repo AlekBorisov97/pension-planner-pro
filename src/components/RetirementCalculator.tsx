@@ -82,6 +82,7 @@ export default function RetirementCalculator() {
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
   const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
   const [showSmallFundOptions, setShowSmallFundOptions] = useState(false);
+  const [previousFundsThreshold, setPreviousFundsThreshold] = useState<'small' | 'large' | null>(null);
   
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === 'undefined') return {};
@@ -122,6 +123,38 @@ export default function RetirementCalculator() {
       paymentOption: savedData.paymentOption || undefined,
     },
   });
+
+  // Reset form state when threshold is crossed
+  const resetFormStateForThreshold = (isSmallFund: boolean) => {
+    console.log(`Resetting form state for ${isSmallFund ? 'small' : 'large'} fund`);
+    
+    // Reset calculation results
+    setCalculationResult(null);
+    
+    // Reset form fields that are specific to the path
+    if (isSmallFund) {
+      // For small funds (≤10000), reset large fund specific fields
+      form.setValue('selectedOption', undefined);
+      form.setValue('periodYears', undefined);
+      form.setValue('installmentPeriod', undefined);
+      form.setValue('installmentAmount', undefined);
+      form.setValue('nationalPensionFunds', 0);
+      
+      // Reset UI states for large funds
+      setShowOptionDropdown(false);
+      setShowNationalPensionStep(false);
+      setShowSmallFundOptions(true);
+      setStep(2);
+    } else {
+      // For large funds (>10000), reset small fund specific fields
+      form.setValue('paymentOption', undefined);
+      
+      // Reset UI states for small funds
+      setShowSmallFundOptions(false);
+      setShowOptionDropdown(true);
+      setStep(3);
+    }
+  };
 
   const checkBasicInfoComplete = () => {
     const dateOfBirth = form.watch('dateOfBirth');
@@ -175,24 +208,33 @@ export default function RetirementCalculator() {
     if (additionalFunds > 0 && pensionFunder) {
       // Check if funds are <= 10000 for small fund options
       const isSmallFund = additionalFunds <= 10000;
+      
+      // Check if we crossed the threshold
+      const currentThreshold = isSmallFund ? 'small' : 'large';
+      if (previousFundsThreshold !== null && previousFundsThreshold !== currentThreshold) {
+        console.log(`Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`);
+        resetFormStateForThreshold(isSmallFund);
+      }
+      
+      // Update threshold state for future comparison
+      setPreviousFundsThreshold(currentThreshold);
+      
+      // Update UI states based on fund amount
       setShowSmallFundOptions(isSmallFund);
+      setShowOptionDropdown(!isSmallFund);
       
-      // Only show options for large funds (> 10000)
-      const showOptions = additionalFunds > 10000;
-      console.log("Additional funds:", additionalFunds, "Show options:", showOptions);
-      
-      setShowOptionDropdown(showOptions);
-      
-      if (showOptions) {
-        console.log("Setting step to 3 for options");
-        setStep(3); // Show options step for amounts > 10000
+      if (!isSmallFund) {
+        // For large funds (>10000)
+        console.log("Setting step to 3 for large fund options");
+        if (step < 3) setStep(3);
         
-        // Reset the national pension step visibility
+        // Reset the national pension step visibility for large funds
         // It will be shown again only if appropriate option conditions are met
         setShowNationalPensionStep(false);
       } else {
-        console.log("Setting step to 2, small fund options");
-        if (step > 2) setStep(2); // Reset to step 2 if we were further ahead
+        // For small funds (≤10000)
+        console.log("Setting step to 2 for small fund options");
+        if (step > 2) setStep(2);
         setShowNationalPensionStep(false); // Don't show national pension step for small funds
       }
     }
@@ -311,27 +353,52 @@ export default function RetirementCalculator() {
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     const pensionFunder = form.watch('pensionFunder');
     
-    // Update small fund options visibility
-    setShowSmallFundOptions(additionalFunds <= 10000 && additionalFunds > 0);
-    
-    if (additionalFunds > 10000 && pensionFunder) {
-      console.log("Additional funds changed and > 10000:", additionalFunds);
-      setShowOptionDropdown(true);
-      setShowSmallFundOptions(false);
-      if (step === 2) {
-        setStep(3);
+    if (additionalFunds > 0 && pensionFunder) {
+      // Determine if this is a small or large fund
+      const isSmallFund = additionalFunds <= 10000;
+      const currentThreshold = isSmallFund ? 'small' : 'large';
+      
+      // Check if we crossed the threshold
+      if (previousFundsThreshold !== null && previousFundsThreshold !== currentThreshold) {
+        console.log(`Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`);
+        resetFormStateForThreshold(isSmallFund);
+        
+        // Show toast notification about the reset
+        toast({
+          title: isSmallFund 
+            ? "Намалена сума на фонда" 
+            : "Увеличена сума на фонда",
+          description: isSmallFund
+            ? "Формулярът е нулиран за малки фондове под 10,000 лв."
+            : "Формулярът е нулиран за големи фондове над 10,000 лв.",
+          duration: 5000,
+        });
       }
-    } else if (additionalFunds <= 10000 && additionalFunds > 0 && pensionFunder) {
-      // If funds <= 10000, hide large fund options and show small fund options
-      console.log("Additional funds <= 10000, showing small fund options:", additionalFunds);
-      setShowOptionDropdown(false);
-      setShowSmallFundOptions(true);
-      setShowNationalPensionStep(false); // Don't show national pension for small funds
-      if (step > 2) {
-        setStep(2);
+      
+      // Update threshold state
+      setPreviousFundsThreshold(currentThreshold);
+      
+      // Update UI based on fund size
+      if (isSmallFund) {
+        // Set up UI for small funds
+        console.log("Additional funds <= 10000, showing small fund options:", additionalFunds);
+        setShowOptionDropdown(false);
+        setShowSmallFundOptions(true);
+        setShowNationalPensionStep(false);
+        if (step > 2) {
+          setStep(2);
+        }
+      } else {
+        // Set up UI for large funds
+        console.log("Additional funds > 10000, showing large fund options:", additionalFunds);
+        setShowOptionDropdown(true);
+        setShowSmallFundOptions(false);
+        if (step < 3) {
+          setStep(3);
+        }
       }
     }
-  }, [form.watch('additionalPensionFunds'), form.watch('pensionFunder')]);
+  }, [form.watch('additionalPensionFunds')]);
 
   // Watch for changes to selectedOption and its dependent fields
   useEffect(() => {
