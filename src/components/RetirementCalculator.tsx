@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, addYears } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -255,10 +254,11 @@ export default function RetirementCalculator() {
       return;
     }
     
-    // If Option 1 is selected with large funds, don't show national pension step
+    // For Option 1 with large funds, show national pension step immediately
     if (selectedOption === 'option1') {
-      console.log("Option 1 selected, not showing national pension step");
-      setShowNationalPensionStep(false);
+      console.log("Option 1 selected, showing national pension step");
+      setShowNationalPensionStep(true);
+      setStep(4);
       return;
     }
     
@@ -405,16 +405,46 @@ export default function RetirementCalculator() {
     const selectedOption = form.watch('selectedOption');
     const additionalFunds = form.watch('additionalPensionFunds') || 0;
     
-    // Don't show national pension step for Option 1 or small funds
-    if (additionalFunds <= 10000 || selectedOption === 'option1') {
-      console.log("Small funds or Option 1 selected, not showing national pension step");
+    // Reset calculation result when option changes
+    setCalculationResult(null);
+    
+    // Don't show national pension step for small funds
+    if (additionalFunds <= 10000) {
+      console.log("Small funds, not showing national pension step");
       setShowNationalPensionStep(false);
       return;
     }
     
+    // For Option 1 with large funds, show national pension step immediately
+    if (selectedOption === 'option1') {
+      console.log("Option 1 selected, showing national pension step immediately");
+      setShowNationalPensionStep(true);
+      setStep(4);
+      return;
+    }
+    
+    // For other options, check conditions
     checkOptionFieldsComplete();
   }, [
-    form.watch('selectedOption'), 
+    form.watch('selectedOption')
+  ]);
+  
+  // Separate effect for option-specific fields
+  useEffect(() => {
+    const selectedOption = form.watch('selectedOption');
+    const additionalFunds = form.watch('additionalPensionFunds') || 0;
+    
+    // Skip if not on option 2 or 3, or if it's a small fund
+    if (additionalFunds <= 10000 || 
+        (selectedOption !== 'option2' && selectedOption !== 'option3')) {
+      return;
+    }
+    
+    // Reset calculation result when option-specific fields change
+    setCalculationResult(null);
+    
+    checkOptionFieldsComplete();
+  }, [
     form.watch('periodYears'), 
     form.watch('installmentPeriod'), 
     form.watch('installmentAmount')
@@ -511,7 +541,6 @@ export default function RetirementCalculator() {
                       </p>
                     )}
                   </div>
-
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 h-6">
                       <Label>Пол</Label>
@@ -807,314 +836,3 @@ export default function RetirementCalculator() {
                               </SelectContent>
                             </Select>
                           )}
-                        />
-                        {form.formState.errors.pensionFunder && (
-                          <p className="text-sm text-destructive">
-                            {form.formState.errors.pensionFunder.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Small Fund Options - Only visible when funds <= 10000 */}
-                    <AnimatePresence>
-                      {showSmallFundOptions && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="space-y-4"
-                        >
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="paymentOption">Опции за плащане</Label>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="w-[200px] text-sm">
-                                    Изберете опция за плащане за малки суми (под 10,000 лв).
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Controller
-                              control={form.control}
-                              name="paymentOption"
-                              render={({ field }) => (
-                                <Select
-                                  onValueChange={(value) => {
-                                    field.onChange(value);
-                                    // Auto-calculate immediately when payment option changes for small funds
-                                    if (form.watch('additionalPensionFunds') <= 10000) {
-                                      const inputData: RetirementInputs = {
-                                        dateOfBirth: form.getValues('dateOfBirth'),
-                                        gender: form.getValues('gender'),
-                                        workExperienceYears: form.getValues('workExperienceYears'),
-                                        workExperienceMonths: form.getValues('workExperienceMonths'),
-                                        retirementDate: form.getValues('retirementDate'),
-                                        additionalPensionFunds: form.getValues('additionalPensionFunds'),
-                                        pensionFunder: form.getValues('pensionFunder'),
-                                        nationalPensionFunds: 0, // Not used for small funds
-                                        paymentOption: value
-                                      };
-                                      
-                                      const result = calculateRetirement(inputData);
-                                      setCalculationResult(result);
-                                    }
-                                  }}
-                                  value={field.value}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Изберете опция за плащане" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {paymentOptions.map((option) => (
-                                      <SelectItem key={option} value={option}>
-                                        {option}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            />
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Step 3: Options (shown only if additionalPensionFunds > 10000) */}
-              <AnimatePresence>
-                {step >= 3 && showOptionDropdown && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    <Separator />
-                    <h3 className="text-lg font-medium">Опции за изплащане</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="selectedOption">Изберете опция</Label>
-                        <Controller
-                          control={form.control}
-                          name="selectedOption"
-                          render={({ field }) => (
-                            <Select
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                // Force check after option selection
-                                setTimeout(() => checkOptionFieldsComplete(), 0);
-                              }}
-                              value={field.value}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Изберете опция" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="option1">Опция 1</SelectItem>
-                                <SelectItem value="option2">Опция 2</SelectItem>
-                                <SelectItem value="option3">Опция 3</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                      </div>
-
-                      {/* Option 2 fields */}
-                      <AnimatePresence>
-                        {form.watch('selectedOption') === 'option2' && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="space-y-2"
-                          >
-                            <Label htmlFor="periodYears">Период (години)</Label>
-                            <Controller
-                              control={form.control}
-                              name="periodYears"
-                              render={({ field }) => (
-                                <Input
-                                  id="periodYears"
-                                  type="number"
-                                  min={1}
-                                  onChange={(e) => {
-                                    const value = parseInt(e.target.value) || 0;
-                                    field.onChange(value);
-                                    // Force check after value change
-                                    setTimeout(() => checkOptionFieldsComplete(), 0);
-                                  }}
-                                  value={field.value === 0 || !field.value ? "" : field.value}
-                                  placeholder="Въведете период в години"
-                                />
-                              )}
-                            />
-                            {form.formState.errors.periodYears && (
-                              <p className="text-sm text-destructive">
-                                {form.formState.errors.periodYears.message}
-                              </p>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {/* Option 3 fields */}
-                      <AnimatePresence>
-                        {form.watch('selectedOption') === 'option3' && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="space-y-4"
-                          >
-                            <div className="space-y-2">
-                              <Label htmlFor="installmentPeriod">Период на разсрочване</Label>
-                              <Controller
-                                control={form.control}
-                                name="installmentPeriod"
-                                render={({ field }) => (
-                                  <Input
-                                    id="installmentPeriod"
-                                    type="number"
-                                    min={1}
-                                    onChange={(e) => {
-                                      const value = parseInt(e.target.value) || 0;
-                                      field.onChange(value);
-                                      // Force check after value change
-                                      setTimeout(() => checkOptionFieldsComplete(), 0);
-                                    }}
-                                    value={field.value === 0 || !field.value ? "" : field.value}
-                                    placeholder="Въведете период"
-                                  />
-                                )}
-                              />
-                              {form.formState.errors.installmentPeriod && (
-                                <p className="text-sm text-destructive">
-                                  {form.formState.errors.installmentPeriod.message}
-                                </p>
-                              )}
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="installmentAmount">Сума</Label>
-                              <Controller
-                                control={form.control}
-                                name="installmentAmount"
-                                render={({ field }) => (
-                                  <Input
-                                    id="installmentAmount"
-                                    type="number"
-                                    min={1}
-                                    onChange={(e) => {
-                                      const value = parseFloat(e.target.value) || 0;
-                                      field.onChange(value);
-                                      // Force check after value change
-                                      setTimeout(() => checkOptionFieldsComplete(), 0);
-                                    }}
-                                    value={field.value === 0 || !field.value ? "" : field.value}
-                                    placeholder="Въведете сума"
-                                  />
-                                )}
-                              />
-                              {form.formState.errors.installmentAmount && (
-                                <p className="text-sm text-destructive">
-                                  {form.formState.errors.installmentAmount.message}
-                                </p>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* National Pension Funds - Only shown for Options 2 & 3 with completed fields */}
-              <AnimatePresence>
-                {showNationalPensionStep && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    <Separator />
-                    <h3 className="text-lg font-medium">Национални пенсионни данни</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="w-[200px] text-sm">
-                              Сумата, която сте натрупали в националната пенсионна система в лева.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      <Controller
-                        control={form.control}
-                        name="nationalPensionFunds"
-                        render={({ field }) => (
-                          <Input
-                            id="nationalPensionFunds"
-                            type="number"
-                            min={0}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            value={field.value === 0 ? "" : field.value}
-                            placeholder="Въведете сума"
-                          />
-                        )}
-                      />
-                      {form.formState.errors.nationalPensionFunds && (
-                        <p className="text-sm text-destructive">
-                          {form.formState.errors.nationalPensionFunds.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex justify-center pt-2">
-                      <Button 
-                        type="submit" 
-                        size="lg"
-                        className="rounded-full px-8 bg-primary hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg"
-                      >
-                        Изчисли пенсионните фондове
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </form>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      <div id="calculation-result">
-        <AnimatePresence>
-          {calculationResult && (
-            <CalculationResult
-              standardMonthlyPension={calculationResult.standardMonthlyPension}
-              enhancedMonthlyPension={calculationResult.enhancedMonthlyPension}
-              difference={calculationResult.difference}
-              percentageIncrease={calculationResult.percentageIncrease}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
