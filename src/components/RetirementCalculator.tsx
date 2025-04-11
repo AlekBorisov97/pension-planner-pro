@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, addYears } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -836,3 +837,332 @@ export default function RetirementCalculator() {
                               </SelectContent>
                             </Select>
                           )}
+                        />
+                        {form.formState.errors.pensionFunder && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.pensionFunder.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Small Fund Options */}
+                    <AnimatePresence>
+                      {showSmallFundOptions && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-4"
+                        >
+                          <div className="space-y-2">
+                            <Label htmlFor="paymentOption">Опция за плащане</Label>
+                            <Controller
+                              control={form.control}
+                              name="paymentOption"
+                              render={({ field }) => (
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Изберете опция за плащане" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {paymentOptions.map((option) => (
+                                      <SelectItem key={option} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Step 3: Options for large funds */}
+              <AnimatePresence>
+                {step >= 3 && showOptionDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
+                    <h3 className="text-lg font-medium">Опции за изплащане</h3>
+
+                    <div className="space-y-4">
+                      <Controller
+                        control={form.control}
+                        name="selectedOption"
+                        render={({ field }) => (
+                          <RadioGroup
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Reset calculation result when option changes
+                              setCalculationResult(null);
+                            }}
+                            value={field.value}
+                            className="space-y-3"
+                          >
+                            <div className="flex items-start space-x-2">
+                              <RadioGroupItem value="option1" id="option1" className="mt-1" />
+                              <div>
+                                <Label htmlFor="option1" className="font-medium cursor-pointer">Опция 1: Еднократно плащане</Label>
+                                <p className="text-sm text-muted-foreground">
+                                  Получаване на цялата сума наведнъж.
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start space-x-2">
+                              <RadioGroupItem value="option2" id="option2" className="mt-1" />
+                              <div className="flex-1">
+                                <Label htmlFor="option2" className="font-medium cursor-pointer">Опция 2: Разсрочено плащане (фиксиран период)</Label>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Получаване на средствата на равни месечни вноски за фиксиран период.
+                                </p>
+
+                                <AnimatePresence>
+                                  {field.value === "option2" && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <div className="space-y-2 ml-0 mt-2">
+                                        <div className="flex items-center gap-2">
+                                          <Label htmlFor="periodYears">Период (години)</Label>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p className="w-[200px] text-sm">
+                                                Периодът, през който желаете да получавате месечни плащания.
+                                              </p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </div>
+                                        <Controller
+                                          control={form.control}
+                                          name="periodYears"
+                                          render={({ field }) => (
+                                            <Input
+                                              id="periodYears"
+                                              type="number"
+                                              min={1}
+                                              max={30}
+                                              onChange={(e) => field.onChange(parseInt(e.target.value) || "")}
+                                              value={field.value || ""}
+                                              placeholder="Въведете период в години"
+                                              className="max-w-[200px]"
+                                            />
+                                          )}
+                                        />
+                                        {form.formState.errors.periodYears && (
+                                          <p className="text-sm text-destructive">
+                                            {form.formState.errors.periodYears.message}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start space-x-2">
+                              <RadioGroupItem value="option3" id="option3" className="mt-1" />
+                              <div className="flex-1">
+                                <Label htmlFor="option3" className="font-medium cursor-pointer">Опция 3: Програмирано теглене</Label>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Гъвкава схема на изплащане с променливи суми.
+                                </p>
+
+                                <AnimatePresence>
+                                  {field.value === "option3" && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="space-y-4 mt-2"
+                                    >
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <Label htmlFor="installmentPeriod">Период на разсрочване</Label>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p className="w-[200px] text-sm">
+                                                Периодът за получаване на разсрочените плащания.
+                                              </p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </div>
+                                        <Controller
+                                          control={form.control}
+                                          name="installmentPeriod"
+                                          render={({ field }) => (
+                                            <Input
+                                              id="installmentPeriod"
+                                              type="number"
+                                              min={1}
+                                              onChange={(e) => field.onChange(parseInt(e.target.value) || "")}
+                                              value={field.value || ""}
+                                              placeholder="Въведете период"
+                                              className="max-w-[200px]"
+                                            />
+                                          )}
+                                        />
+                                        {form.formState.errors.installmentPeriod && (
+                                          <p className="text-sm text-destructive">
+                                            {form.formState.errors.installmentPeriod.message}
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <Label htmlFor="installmentAmount">Сума</Label>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p className="w-[200px] text-sm">
+                                                Сумата, която желаете да получавате.
+                                              </p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </div>
+                                        <Controller
+                                          control={form.control}
+                                          name="installmentAmount"
+                                          render={({ field }) => (
+                                            <Input
+                                              id="installmentAmount"
+                                              type="number"
+                                              min={1}
+                                              onChange={(e) => field.onChange(parseFloat(e.target.value) || "")}
+                                              value={field.value || ""}
+                                              placeholder="Въведете сума"
+                                              className="max-w-[200px]"
+                                            />
+                                          )}
+                                        />
+                                        {form.formState.errors.installmentAmount && (
+                                          <p className="text-sm text-destructive">
+                                            {form.formState.errors.installmentAmount.message}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Step 4: National Pension Funds */}
+              <AnimatePresence>
+                {step >= 4 && showNationalPensionStep && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
+                    <h3 className="text-lg font-medium">Национални пенсионни данни</h3>
+                    <div className="space-y-2 max-w-md">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="nationalPensionFunds">Национални пенсионни фондове (лв.)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="w-[200px] text-sm">
+                              Натрупаната сума в националните ви пенсионни фондове.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Controller
+                        control={form.control}
+                        name="nationalPensionFunds"
+                        render={({ field }) => (
+                          <Input
+                            id="nationalPensionFunds"
+                            type="number"
+                            min={0}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            value={field.value === 0 ? "" : field.value}
+                            placeholder="Въведете сума в лева"
+                          />
+                        )}
+                      />
+                      {form.formState.errors.nationalPensionFunds && (
+                        <p className="text-sm text-destructive">
+                          {form.formState.errors.nationalPensionFunds.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Button 
+                        type="submit" 
+                        disabled={form.formState.isSubmitting}
+                        className="mt-2"
+                      >
+                        Изчисли
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Calculation Result */}
+              <AnimatePresence>
+                {calculationResult && (
+                  <motion.div
+                    id="calculation-result"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Separator className="my-6" />
+                    <h3 className="text-lg font-medium mb-4">Резултат от изчислението</h3>
+                    <CalculationResult result={calculationResult} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
