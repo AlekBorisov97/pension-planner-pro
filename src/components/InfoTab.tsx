@@ -1,20 +1,34 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Calculator, TrendingUp, Users, Info, ArrowRight } from "lucide-react";
 
-export default function InfoTab({ onGoToCalculator }: { onGoToCalculator: () => void }) {
+export default function InfoTab({
+  onGoToCalculator,
+}: {
+  onGoToCalculator: () => void;
+}) {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col items-center text-center space-y-6 py-8 mb-8">
-        <h1 className="text-4xl font-bold tracking-tight text-primary">Планирайте вашето финансово бъдеще</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-primary">
+          Направете избор за Вашето пенсиониране
+        </h1>
         <p className="text-xl max-w-2xl text-muted-foreground">
-          Нашият пенсионен калкулатор ви помага да вземете информирани решения за вашето финансово бъдеще с лесни за използване инструменти и персонализирани изчисления.
+          С помощта на нашия пенсионен калкулатор, сравнете дали във Вашия
+          случай е по-благоприятно да изберете две пенсии – държавна пенсия в
+          намален размер плюс втора пенсия от частен пенсионен фонд или само
+          една пенсия – държавна пенсия в пълен размер от НОИ.
         </p>
-        <Button 
-          onClick={onGoToCalculator} 
-          size="lg" 
+        <Button
+          onClick={onGoToCalculator}
+          size="lg"
           className="rounded-full px-8 bg-primary hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg mt-4 gap-2"
         >
           Към калкулатора <ArrowRight className="h-4 w-4 ml-1" />
@@ -25,11 +39,14 @@ export default function InfoTab({ onGoToCalculator }: { onGoToCalculator: () => 
         <Card className="border-primary/10 shadow-sm bg-secondary/30">
           <CardHeader className="pb-2">
             <Calculator className="h-8 w-8 text-primary mb-2" />
-            <CardTitle className="text-xl font-medium text-primary">Лесни изчисления</CardTitle>
+            <CardTitle className="text-xl font-medium text-primary">
+              Държавна пенсия
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Изчислете вашия очакван пенсионен доход с няколко прости стъпки, използвайки актуални данни и формули.
+              Можете да проверите какъв е размерът на Вашата държавна пенсия на
+              сайта на НОИ тук (изисква се ПИК на НОИ).
             </p>
           </CardContent>
         </Card>
@@ -37,11 +54,30 @@ export default function InfoTab({ onGoToCalculator }: { onGoToCalculator: () => 
         <Card className="border-primary/10 shadow-sm bg-secondary/30">
           <CardHeader className="pb-2">
             <TrendingUp className="h-8 w-8 text-primary mb-2" />
-            <CardTitle className="text-xl font-medium text-primary">Сравнете опциите</CardTitle>
+            <CardTitle className="text-xl font-medium text-primary">
+              Втора пенсия
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Разберете как допълнителните пенсионни фондове могат да увеличат значително вашия пенсионен доход с времето.
+              Можете да проверите какъв е размерът на Вашата втора пенсия с
+              помощта на нашия{" "}
+              <span
+                onClick={onGoToCalculator}
+                className="underline cursor-pointer text-primary hover:opacity-80"
+              >
+                калкулатор
+              </span>{" "}
+              или на сайта на Вашия УПФ{" "}
+              <a
+                href="https://example.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80"
+              >
+                тук
+              </a>
+              .
             </p>
           </CardContent>
         </Card>
@@ -49,11 +85,23 @@ export default function InfoTab({ onGoToCalculator }: { onGoToCalculator: () => 
         <Card className="border-primary/10 shadow-sm bg-secondary/30">
           <CardHeader className="pb-2">
             <Users className="h-8 w-8 text-primary mb-2" />
-            <CardTitle className="text-xl font-medium text-primary">Персонализиран подход</CardTitle>
+            <CardTitle className="text-xl font-medium text-primary">
+              Две пенсии повече от една ли са?
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Получете персонализирани резултати въз основа на вашата възраст, пол, трудов стаж и натрупани средства.
+              Можете да направите сравнение дали във Вашия случай е
+              по-благоприятно да получавате две пенсии – пенсия от НОИ в намален
+              размер плюс втора пенсия от УПФ или само една пенсия от НОИ в
+              пълен размер{" "}<a
+                href="https://www.nssi.bg/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80"
+              >
+                тук
+              </a>.
             </p>
           </CardContent>
         </Card>
@@ -63,51 +111,150 @@ export default function InfoTab({ onGoToCalculator }: { onGoToCalculator: () => 
         <CardHeader className="bg-primary/10 border-b border-primary/10 flex flex-row items-center gap-4">
           <Info className="h-6 w-6 text-primary" />
           <div>
-            <CardTitle className="text-2xl font-medium text-primary">За пенсионното планиране</CardTitle>
-            <CardDescription>Научете повече за планирането на вашето пенсиониране</CardDescription>
+            <CardTitle className="text-2xl font-medium text-primary">
+              Как да се пенсионираме?
+            </CardTitle>
+            <CardDescription>
+              Планирайте навреме и внимателно Вашето пенсиониране.
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Разбиране на пенсионните фондове</h3>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">Кога?</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Пенсионните фондове са създадени, за да осигурят финансова сигурност по време на пенсиониране. В България пенсионната система се състои от три стълба: държавна пенсия, задължително допълнително пенсионно осигуряване и доброволно допълнително пенсионно осигуряване.
+              За да добие човек в България право на пенсия от НОИ обичайно са
+              необходими две неща:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed mt-2">
+                <li className="ml-2 pl-6">
+                  Да е навършил възраст за пенсиониране. Тук можете да проверите
+                  дали сте навършили възрастта за пенсиониране;
+                </li>
+                <li className="ml-2 pl-6">
+                  Да има определения от закона осигурителен стаж. Тук можете да
+                  проверите дали имате изискуемия от закона осигурителен стаж;
+                </li>
+              </ul>
+              За да добие човек право на пенсия от УПФ е достатъчно само да
+              навършил възрастта за пенсиониране.
             </p>
           </div>
-          
+
           <Separator className="bg-primary/10" />
-          
+
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Как работи нашият калкулатор</h3>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">Къде?</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Нашият пенсионен калкулатор изчислява вашата бъдеща пенсия въз основа на текущата ви възраст, трудов стаж и пенсионни вноски. Калкулаторът показва два сценария: със и без допълнителни пенсионни фондове, подчертавайки потенциалните ползи от допълнителните спестявания.
+              Задължителното осигуряване за пенсия, за което на всеки, работещ
+              по договор при трета категория труд се удържат осигуровки от НАП,
+              е два вида:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed">
+                <li className="ml-2 pl-6">
+                  Държавно обществено осигуряване (ДОО), което се извършва от
+                  Националния осигурителен институт (НОИ);
+                </li>
+                <li className="ml-2 pl-6">
+                  Допълнително задължително пенсионно осигуряване (ДЗПО), което
+                  се извършва чрез частни универсални пенсионни фондове (УПФ).
+                  Ако не сте сигурни в кой УПФ се осигурявате, можете да
+                  направите проверка на сайта на НАП{" "}<a
+                href="https://nra.bg/wps/portal/nra/nachalo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80"
+              >
+                тук
+              </a>{" "}(изисква се ПИК на
+                  НАП), или да потърсите последното извлечение от Вашата
+                  пенсионна партида, което УПФ е длъжен да Ви праща ежегодно по
+                  пощата (или мейл);
+                </li>
+              </ul>
+              Законът предвижда и изключения от горните два случая на пенсионно
+              осигуряване – напр. за хора, работещи при първа или втора
+              категория труд, за определени професии като военнослужещи,
+              държавни служители, морски лица, работещи в културни организации,
+              учители, съдии и т.н., които трябва да консултират конкретно в
+              техния случай какви са изискванията при пенсиониране;
             </p>
           </div>
-          
+
           <Separator className="bg-primary/10" />
-          
+
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Пенсионна възраст в България</h3>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">Какво?</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Пенсионната възраст в България постепенно се увеличава. Към 2023 г. стандартната пенсионна възраст за мъжете е 64 години и 6 месеца, докато за жените е 62 години. До 2037 г. пенсионната възраст и за двата пола ще бъде 65 години.
+              Как се определя каква пенсия ще получите, когато дойде време за
+              пенсиониране:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed">
+                <li className="ml-2 pl-6">
+                  Ако се осигурявате и за държавна пенсия в НОИ и за втора
+                  пенсия в УПФ, след пенсиониране ще получавате държавна пенсия
+                  „в намален размер“ от НОИ плюс втора пенсия, изчислена от УПФ;
+                </li>
+                <li className="ml-2 pl-6">
+                  Законът, обаче, Ви дава право, ако пожелаете, да се откажете
+                  от осигуряването за втора пенсия в УПФ и да прехвърлите изцяло
+                  осигуряването си за пенсия в НОИ. (Ако след време размислите,
+                  имате право да върнете осигуровките си от НОИ обратно в някой
+                  УПФ);
+                </li>
+                <li className="ml-2 pl-6">
+                  Ако сте прехвърлили осигуряването си за пенсия изцяло към НОИ,
+                  ще получавате само една пенсия – от НОИ – „в пълен размер“;
+                </li>
+              </ul>
             </p>
           </div>
-          
+
           <Separator className="bg-primary/10" />
-          
+
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Допълнителни пенсионни фондове</h3>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">Колко?</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Инвестирането в допълнителни пенсионни фондове може значително да увеличи вашия пенсионен доход. Тези фондове се управляват от частни пенсионни компании и предлагат различни инвестиционни опции в зависимост от вашата толерантност към риска и финансовите ви цели.
+              Колко голям ще бъде размерът на Вашата пенсия зависи от няколко
+              неща:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed">
+                <li className="ml-2 pl-6">
+                  Държавната пенсия зависи от натрупания от Вас осигурителен
+                  стаж, средния осигурителен доход, изчислен от НОИ, процентът
+                  за всяка година стаж за определяне на пенсията и др.;
+                </li>
+                <li className="ml-2 pl-6">
+                  Втората пенсия зависи от възрастта Ви към момента на
+                  пенсиониране, брутния размер на осигурителните вноски,
+                  преведени за Вас в УПФ, доходността, която е постигнал фондът
+                  при инвестиране на Вашите спестявания и техническия лихвен
+                  процент.
+                </li>
+              </ul>
+              Важно е да се знае, че първоначално определения размер на
+              пенсията, както държавната, така и втората, може да се променя
+              ежегодно след това.
             </p>
           </div>
-          
+
           <Separator className="bg-primary/10" />
-          
+
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Планиране за бъдещето</h3>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">
+              Избирайте!
+            </h3>
             <p className="text-muted-foreground leading-relaxed">
-              Никога не е твърде рано да започнете да планирате пенсионирането си. Редовните вноски в пенсионни фондове, дори малки суми, могат да нараснат значително с течение на времето поради сложната лихва. Нашият калкулатор може да ви помогне да разберете дългосрочното въздействие на вашата текуща стратегия за спестяване.
+              Така се стига до въпроса дали „Две пенсии са повече от една?“ и
+              отговорът е, зависи:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed">
+                <li className="ml-2 pl-6">
+                  Ако частното ПОД Ви предлага втора пенсия, която е по-голяма
+                  от намалението на държавната пенсия от НОИ, тогава двете
+                  пенсии са повече от една;
+                </li>
+                <li className="ml-2 pl-6">
+                  Ако частното ПОД Ви предлага втора пенсия, която е по-малка от
+                  намалението на държавната пенсия от НОИ, тогава двете пенсии
+                  са по-малко от една;
+                </li>
+              </ul>
             </p>
           </div>
         </CardContent>

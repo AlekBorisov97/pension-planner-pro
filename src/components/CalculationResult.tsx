@@ -1,21 +1,28 @@
-
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUp, TrendingUp } from 'lucide-react';
-import { formatCurrency, formatPercentage } from '@/utils/calculatorUtils';
+import { motion } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowUp, TrendingUp } from "lucide-react";
+import { formatCurrency, formatPercentage } from "@/utils/calculatorUtils";
 
 interface CalculationResultProps {
-  standardMonthlyPension: number;
-  enhancedMonthlyPension: number;
-  difference: number;
-  percentageIncrease: number;
+  result?: any;
+  standardMonthlyPension?: number;
+  enhancedMonthlyPension?: number;
+  difference?: number;
+  percentageIncrease?: number;
 }
 
 export default function CalculationResult({
+  result,
   standardMonthlyPension,
   enhancedMonthlyPension,
   difference,
-  percentageIncrease
+  percentageIncrease,
 }: CalculationResultProps) {
   return (
     <motion.div
@@ -26,7 +33,9 @@ export default function CalculationResult({
     >
       <Card className="shadow-md border-0 green-card overflow-hidden">
         <CardHeader className="pb-4">
-          <CardTitle className="text-2xl font-medium text-center text-primary">Your Retirement Projection</CardTitle>
+          <CardTitle className="text-2xl font-medium text-center text-primary">
+            Your Retirement Projection
+          </CardTitle>
           <CardDescription className="text-center">
             Compare your retirement options below
           </CardDescription>
@@ -94,8 +103,9 @@ export default function CalculationResult({
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>
-              The enhanced pension is {formatPercentage(percentageIncrease)} higher than the standard option,
-              providing you with an additional {formatCurrency(difference)} monthly.
+              The enhanced pension is {formatPercentage(percentageIncrease)}{" "}
+              higher than the standard option, providing you with an additional{" "}
+              {formatCurrency(difference)} monthly.
             </p>
           </div>
         </CardContent>

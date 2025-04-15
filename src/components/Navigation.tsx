@@ -1,59 +1,70 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { motion } from 'framer-motion';
-import RetirementCalculator from './RetirementCalculator';
-import InfoTab from './InfoTab';
-import ContactsTab from './ContactsTab';
+import { motion } from "framer-motion";
+import RetirementCalculator from "./RetirementCalculator";
+import InfoTab from "./InfoTab";
+import ContactsTab from "./ContactsTab";
 
 export default function Navigation() {
   const [activeTab, setActiveTab] = useState("info");
   const [scrollDirection, setScrollDirection] = useState("up");
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
-    const header = document.querySelector('header');
+    const header = document.querySelector("header");
     if (header) {
       setHeaderHeight(header.getBoundingClientRect().height);
     }
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
-        setScrollDirection("down");
-      } else if (currentScrollY < lastScrollY) {
-        setScrollDirection("up");
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+
+      if (isAtBottom) return;
+
+      if (
+        currentScrollY > lastScrollY.current &&
+        currentScrollY > headerHeight
+      ) {
+        if (scrollDirection !== "down") setScrollDirection("down");
+      } else if (currentScrollY < lastScrollY.current) {
+        if (scrollDirection !== "up") setScrollDirection("up");
       }
-      
-      setLastScrollY(currentScrollY);
+
+      lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, headerHeight]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, headerHeight, scrollDirection]);
 
-  const navPosition = scrollDirection === "down" ? "fixed top-0 left-0 right-0 z-10" : 
-                    lastScrollY > 0 ? "sticky top-0 z-10" : 
-                    "relative";
+  const navPosition =
+    scrollDirection === "down"
+      ? "fixed top-0 left-0 right-0 z-10"
+      : lastScrollY.current > 0
+        ? "sticky top-0 z-10"
+        : "relative";
 
   const goToCalculator = () => {
     setActiveTab("calculator");
     // Smooth scroll to top when navigating to calculator
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <Tabs 
+    <Tabs
       defaultValue="info"
       value={activeTab}
       className="w-full max-w-4xl mx-auto"
       onValueChange={setActiveTab}
     >
-      <div className={`${navPosition} flex justify-center pt-2 pb-2 bg-secondary/80 backdrop-blur-sm border-b border-primary/10 transition-all duration-300`}>
+      <div
+        className={`${navPosition} flex justify-center pt-2 pb-2 bg-secondary/80 backdrop-blur-sm border-b border-primary/10 transition-all duration-300`}
+      >
         <TabsList className="grid grid-cols-3 w-[400px]">
-          <TabsTrigger 
+          <TabsTrigger
             value="info"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
@@ -68,7 +79,7 @@ export default function Navigation() {
               />
             )}
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="calculator"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
@@ -83,7 +94,7 @@ export default function Navigation() {
               />
             )}
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="contacts"
             className="relative data-[state=active]:text-primary data-[state=active]:font-medium"
           >
@@ -101,8 +112,8 @@ export default function Navigation() {
         </TabsList>
       </div>
 
-      <TabsContent 
-        value="info" 
+      <TabsContent
+        value="info"
         className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
@@ -114,9 +125,9 @@ export default function Navigation() {
           <InfoTab onGoToCalculator={goToCalculator} />
         </motion.div>
       </TabsContent>
-      
-      <TabsContent 
-        value="calculator" 
+
+      <TabsContent
+        value="calculator"
         className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
@@ -128,9 +139,9 @@ export default function Navigation() {
           <RetirementCalculator />
         </motion.div>
       </TabsContent>
-      
-      <TabsContent 
-        value="contacts" 
+
+      <TabsContent
+        value="contacts"
         className="mt-6 focus-visible:outline-none focus-visible:ring-0"
       >
         <motion.div
