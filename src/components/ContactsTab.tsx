@@ -2,11 +2,10 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
   Mail,
@@ -77,7 +76,12 @@ export default function ContactsTab() {
               <div className="grid gap-5 md:grid-cols-2">
                 {governmentInstitutions.map((institution, i) => (
                   <Card key={i} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20">
-                    <Link to="/" className="block p-5">
+                    <a 
+                      href="/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block p-5"
+                    >
                       <div className="flex items-start space-x-4">
                         <institution.icon className="h-6 w-6 text-primary mt-1 shrink-0" />
                         <div>
@@ -89,7 +93,7 @@ export default function ContactsTab() {
                           )}
                         </div>
                       </div>
-                    </Link>
+                    </a>
                   </Card>
                 ))}
               </div>
@@ -99,10 +103,15 @@ export default function ContactsTab() {
               <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                 {pensionCompanies.map((company, i) => (
                   <Card key={i} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20 hover:bg-secondary/20">
-                    <Link to="/" className="flex items-center p-5 space-x-4 h-full">
+                    <a 
+                      href="/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center p-5 space-x-4 h-full"
+                    >
                       <Shield className="h-6 w-6 text-primary shrink-0" />
                       <span className="font-medium text-base">{company.name}</span>
-                    </Link>
+                    </a>
                   </Card>
                 ))}
               </div>
@@ -113,4 +122,3 @@ export default function ContactsTab() {
     </div>
   );
 }
-
