@@ -60,28 +60,28 @@ export default function ContactsTab() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <Card className="border border-border/50 shadow-sm bg-gradient-to-br from-background to-secondary/10">
+    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
+      <Card className="border border-border/50 shadow-lg bg-gradient-to-br from-background to-secondary/20 w-full">
         <CardHeader>
-          <CardTitle className="text-2xl font-medium text-primary">Полезни контакти</CardTitle>
-          <CardDescription>Връзки към пенсионни дружества и държавни институции</CardDescription>
+          <CardTitle className="text-3xl font-semibold text-primary">Полезни контакти</CardTitle>
+          <CardDescription className="text-base">Връзки към пенсионни дружества и държавни институции</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="institutions" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="institutions">Държавни институции</TabsTrigger>
               <TabsTrigger value="companies">Пенсионни компании</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="institutions" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+            <TabsContent value="institutions" className="space-y-6">
+              <div className="grid gap-5 md:grid-cols-2">
                 {governmentInstitutions.map((institution, i) => (
                   <Card key={i} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20">
-                    <Link to="/" className="block p-4">
-                      <div className="flex items-start space-x-3">
-                        <institution.icon className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <Link to="/" className="block p-5">
+                      <div className="flex items-start space-x-4">
+                        <institution.icon className="h-6 w-6 text-primary mt-1 shrink-0" />
                         <div>
-                          <h3 className="font-medium">{institution.title}</h3>
+                          <h3 className="font-medium text-lg">{institution.title}</h3>
                           {institution.description && (
                             <p className="text-sm text-muted-foreground">
                               {institution.description}
@@ -95,13 +95,13 @@ export default function ContactsTab() {
               </div>
             </TabsContent>
             
-            <TabsContent value="companies" className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <TabsContent value="companies" className="space-y-6">
+              <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                 {pensionCompanies.map((company, i) => (
                   <Card key={i} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20 hover:bg-secondary/20">
-                    <Link to="/" className="flex items-center p-4 space-x-3 h-full">
-                      <Shield className="h-5 w-5 text-primary shrink-0" />
-                      <span className="font-medium">{company.name}</span>
+                    <Link to="/" className="flex items-center p-5 space-x-4 h-full">
+                      <Shield className="h-6 w-6 text-primary shrink-0" />
+                      <span className="font-medium text-base">{company.name}</span>
                     </Link>
                   </Card>
                 ))}
@@ -110,100 +110,7 @@ export default function ContactsTab() {
           </Tabs>
         </CardContent>
       </Card>
-
-      <Card className="border border-border/50 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl font-medium">Свържете се с нас</CardTitle>
-          <CardDescription>Нашите пенсионни консултанти са на разположение</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Phone className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h3 className="font-medium">Телефон</h3>
-                  <p className="text-muted-foreground">+359 2 123 4567</p>
-                  <p className="text-sm text-muted-foreground">
-                    Понеделник до Петък, 9:00 - 17:00
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <Mail className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h3 className="font-medium">Имейл</h3>
-                  <p className="text-muted-foreground">
-                    support@retirementplanner.bg
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Отговаряме в рамките на 24 часа
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h3 className="font-medium">Адрес</h3>
-                  <p className="text-muted-foreground">бул. Витоша 15</p>
-                  <p className="text-muted-foreground">София 1000, България</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <Clock className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h3 className="font-medium">Работно време</h3>
-                  <p className="text-muted-foreground">
-                    Понеделник до Петък: 9:00 - 17:00
-                  </p>
-                  <p className="text-muted-foreground">
-                    Събота и Неделя: Затворено
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="rounded-lg overflow-hidden border border-border h-[200px] relative">
-                <div className="absolute inset-0 bg-muted flex items-center justify-center">
-                  <p className="text-muted-foreground text-sm">
-                    Интерактивна карта
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-medium">Бърз достъп</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    asChild
-                  >
-                    <Link to="/">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Калкулатор
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    asChild
-                  >
-                    <Link to="/">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Информация
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
+
