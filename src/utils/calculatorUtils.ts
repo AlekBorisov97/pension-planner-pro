@@ -1,4 +1,7 @@
-import { retirementAgesByYear } from "@/constants/retirementAge";
+import {
+  retirementAgesByYear,
+  workExperienceRequirementsByYear,
+} from "@/constants/retirementAge";
 
 export interface RetirementInputs {
   dateOfBirth: Date;
@@ -84,7 +87,10 @@ export const formatPercentage = (value: number): string => {
   }).format(value / 100);
 };
 
-export const getMinimumRetirementAge = (year, gender) => {
+export const getMinimumRetirementAge = (
+  year: number,
+  gender: "male" | "female",
+) => {
   const entry = retirementAgesByYear.find((e) => e.year === year);
 
   if (entry) {
@@ -93,4 +99,17 @@ export const getMinimumRetirementAge = (year, gender) => {
 
   // After 2037, it remains 65 for both
   return 65;
+};
+
+export const getMinimumWorkExperience = (
+  year: number,
+  gender: "male" | "female",
+) => {
+  const entry = workExperienceRequirementsByYear.find((e) => e.year === year);
+  if (entry) {
+    return gender === "male" ? entry.male : entry.female;
+  }
+
+  // From 2027 onwards, fixed values
+  return gender === "male" ? 40 : 37;
 };

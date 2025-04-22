@@ -23,3 +23,19 @@ export const retirementAgesByYear = [
   { year: 2037, female: 65.0, male: 65.0 },
   // From 2037 onward, it's always 65
 ];
+
+export const workExperienceRequirementsByYear = [
+  { year: 2016, female: 35.17, male: 38.17 },
+  { year: 2017, female: 35.33, male: 38.33 },
+  { year: 2018, female: 35.5, male: 38.5 },
+  { year: 2019, female: 35.67, male: 38.67 },
+  { year: 2020, female: 35.83, male: 38.83 },
+  { year: 2021, female: 36.0, male: 39.0 },
+  { year: 2022, female: 36.17, male: 39.17 },
+  { year: 2023, female: 36.33, male: 39.33 },
+  { year: 2024, female: 36.5, male: 39.5 },
+  { year: 2025, female: 36.67, male: 39.67 },
+  { year: 2026, female: 36.83, male: 39.83 },
+  { year: 2027, female: 37.0, male: 40.0 },
+  // ... the rest all have 37.00/40.00 up to 2065
+];

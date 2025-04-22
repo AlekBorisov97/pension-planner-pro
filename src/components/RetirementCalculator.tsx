@@ -39,6 +39,7 @@ import {
   paymentOptions,
   RetirementInputs,
   getMinimumRetirementAge,
+  getMinimumWorkExperience,
 } from "@/utils/calculatorUtils";
 import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
@@ -195,6 +196,7 @@ export default function RetirementCalculator() {
     const dateOfBirth = form.watch("dateOfBirth");
     const gender = form.watch("gender");
     const workExperienceYears = form.watch("workExperienceYears");
+    const workExperienceMonths = form.watch("workExperienceMonths");
     const retirementDate = form.watch("retirementDate");
 
     const isComplete = Boolean(
@@ -226,11 +228,18 @@ export default function RetirementCalculator() {
         retirement.getFullYear(),
         gender,
       );
-      const minWorkExperience = 15;
+
+      const minWorkExperience = getMinimumWorkExperience(
+        retirement.getFullYear(),
+        gender,
+      );
+
+      const totalWorkExperience =
+        workExperienceYears + workExperienceMonths / 12;
 
       setIsRetirementEligible(
         ageAtRetirement >= minRetirementAge &&
-          workExperienceYears >= minWorkExperience,
+          totalWorkExperience >= minWorkExperience,
       );
 
       if (step === 1) {
