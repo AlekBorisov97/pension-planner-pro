@@ -38,6 +38,7 @@ import {
   pensionFunders,
   paymentOptions,
   RetirementInputs,
+  getMinimumRetirementAge,
 } from "@/utils/calculatorUtils";
 import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
@@ -102,7 +103,6 @@ export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<ReturnType<
     typeof calculateRetirement
   > | null>(null);
-  const [basicInfoComplete, setBasicInfoComplete] = useState(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   const [isRetirementEligible, setIsRetirementEligible] = useState<
@@ -204,19 +204,28 @@ export default function RetirementCalculator() {
         retirementDate,
     );
 
-    setBasicInfoComplete(isComplete);
-
     if (isComplete) {
-      // Calculate age at retirement
       const birthDate = new Date(dateOfBirth);
       const retirement = new Date(retirementDate);
 
-      const ageAtRetirement =
-        retirement.getFullYear() - birthDate.getFullYear();
+      let ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
+
+      // Adjust if retirement date is before the birthday in the retirement year
+      const birthMonthDay = new Date(
+        retirement.getFullYear(),
+        birthDate.getMonth(),
+        birthDate.getDate(),
+      );
+      if (retirement < birthMonthDay) {
+        ageAtRetirement--;
+      }
+
       setCalculatedAge(ageAtRetirement);
 
-      // Simple eligibility check (example logic - customize as needed)
-      const minRetirementAge = gender === "male" ? 64 : 61;
+      const minRetirementAge = getMinimumRetirementAge(
+        retirement.getFullYear(),
+        gender,
+      );
       const minWorkExperience = 15;
 
       setIsRetirementEligible(

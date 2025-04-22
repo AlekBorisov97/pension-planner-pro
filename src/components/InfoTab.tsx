@@ -123,28 +123,6 @@ export default function InfoTab({
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <div>
-            <h3 className="text-lg font-medium mb-2 text-primary/90">Кога?</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              За да добие човек в България право на пенсия от НОИ обичайно са
-              необходими две неща:
-              <ul className="list-disc list-inside text-muted-foreground leading-relaxed mt-2">
-                <li className="ml-2 pl-6">
-                  Да е навършил възраст за пенсиониране. Тук можете да проверите
-                  дали сте навършили възрастта за пенсиониране;
-                </li>
-                <li className="ml-2 pl-6">
-                  Да има определения от закона осигурителен стаж. Тук можете да
-                  проверите дали имате изискуемия от закона осигурителен стаж;
-                </li>
-              </ul>
-              За да добие човек право на пенсия от УПФ е достатъчно само да
-              навършил възрастта за пенсиониране.
-            </p>
-          </div>
-
-          <Separator className="bg-primary/10" />
-
-          <div>
             <h3 className="text-lg font-medium mb-2 text-primary/90">Къде?</h3>
             <p className="text-muted-foreground leading-relaxed">
               Задължителното осигуряване за пенсия, за което на всеки, работещ
@@ -179,6 +157,28 @@ export default function InfoTab({
               държавни служители, морски лица, работещи в културни организации,
               учители, съдии и т.н., които трябва да консултират конкретно в
               техния случай какви са изискванията при пенсиониране;
+            </p>
+          </div>
+
+          <Separator className="bg-primary/10" />
+
+          <div>
+            <h3 className="text-lg font-medium mb-2 text-primary/90">Кога?</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              За да добие човек в България право на пенсия от НОИ обичайно са
+              необходими две неща:
+              <ul className="list-disc list-inside text-muted-foreground leading-relaxed mt-2">
+                <li className="ml-2 pl-6">
+                  Да е навършил възраст за пенсиониране. Тук можете да проверите
+                  дали сте навършили възрастта за пенсиониране;
+                </li>
+                <li className="ml-2 pl-6">
+                  Да има определения от закона осигурителен стаж. Тук можете да
+                  проверите дали имате изискуемия от закона осигурителен стаж;
+                </li>
+              </ul>
+              За да добие човек право на пенсия от УПФ е достатъчно само да
+              навършил възрастта за пенсиониране.
             </p>
           </div>
 

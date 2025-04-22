@@ -1,3 +1,5 @@
+import { retirementAgesByYear } from "@/constants/retirementAge";
+
 export interface RetirementInputs {
   dateOfBirth: Date;
   gender: "male" | "female";
@@ -80,4 +82,15 @@ export const formatPercentage = (value: number): string => {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(value / 100);
+};
+
+export const getMinimumRetirementAge = (year, gender) => {
+  const entry = retirementAgesByYear.find((e) => e.year === year);
+
+  if (entry) {
+    return gender === "male" ? entry.male : entry.female;
+  }
+
+  // After 2037, it remains 65 for both
+  return 65;
 };

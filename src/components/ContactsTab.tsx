@@ -37,16 +37,44 @@ export default function ContactsTab() {
   ];
 
   const pensionCompanies = [
-    { name: "ПОК Доверие", icon: Building, link: "https://www.poc-doverie.bg/bg" },
+    {
+      name: "ПОК Доверие",
+      icon: Building,
+      link: "https://www.poc-doverie.bg/bg",
+    },
     { name: "ПОК ДСК-Родина", icon: Building, link: "https://dskrodina.bg/" },
-    { name: "ПОД Алианц България", icon: Building, link: "https://www.allianz.bg/bg_BG/individuals/retirement-provision.html" },
-    { name: "ОББ Пенсионно осигуряване", icon: Building, link: "https://ubb-pensions.bg/" },
+    {
+      name: "ПОД Алианц България",
+      icon: Building,
+      link: "https://www.allianz.bg/bg_BG/individuals/retirement-provision.html",
+    },
+    {
+      name: "ОББ Пенсионно осигуряване",
+      icon: Building,
+      link: "https://ubb-pensions.bg/",
+    },
     { name: "ПОК Съгласие", icon: Building, link: "https://www.saglasie.bg/" },
-    { name: "ПОАД ЦКБ-Сила", icon: Building, link: "https://www.ccb-sila.com/" },
+    {
+      name: "ПОАД ЦКБ-Сила",
+      icon: Building,
+      link: "https://www.ccb-sila.com/",
+    },
     { name: "ПОД Бъдеще АД", icon: Building, link: "https://www.budeshte.bg/" },
-    { name: "ПОД Топлина", icon: Building, link: "https://www.pod-toplina.bg/" },
-    { name: "Пенсионноосигурителен институт АД", icon: Building, link: "https://www.pensionins.com/" },
-    { name: "ПОД ДаллБогг: Живот и Здраве ЕАД", icon: Building, link: "https://dallbogg.bg/" },
+    {
+      name: "ПОД Топлина",
+      icon: Building,
+      link: "https://www.pod-toplina.bg/",
+    },
+    {
+      name: "Пенсионноосигурителен институт АД",
+      icon: Building,
+      link: "https://www.pensionins.com/",
+    },
+    {
+      name: "ПОД ДаллБогг: Живот и Здраве ЕАД",
+      icon: Building,
+      link: "https://dallbogg.bg/",
+    },
   ];
 
   return (
@@ -72,11 +100,14 @@ export default function ContactsTab() {
             <TabsContent value="institutions" className="space-y-6">
               <div className="grid gap-5 md:grid-cols-2">
                 {governmentInstitutions.map((institution) => (
-                  <Card key={institution.title} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20">
-                    <a 
-                      href={institution.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                  <Card
+                    key={institution.title}
+                    className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20"
+                  >
+                    <a
+                      href={institution.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="block p-5"
                     >
                       <div className="flex items-start space-x-4">
@@ -101,15 +132,20 @@ export default function ContactsTab() {
             <TabsContent value="companies" className="space-y-6">
               <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                 {pensionCompanies.map((company) => (
-                  <Card key={company.name} className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20 hover:bg-secondary/20">
-                    <a 
-                      href={company.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                  <Card
+                    key={company.name}
+                    className="overflow-hidden border border-border/50 transition-all hover:shadow-md hover:border-primary/20 hover:bg-secondary/20"
+                  >
+                    <a
+                      href={company.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center p-5 space-x-4 h-full"
                     >
                       <Shield className="h-6 w-6 text-primary shrink-0" />
-                      <span className="font-medium text-base">{company.name}</span>
+                      <span className="font-medium text-base">
+                        {company.name}
+                      </span>
                     </a>
                   </Card>
                 ))}
