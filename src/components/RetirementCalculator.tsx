@@ -109,6 +109,10 @@ export default function RetirementCalculator() {
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
   >(null);
+  const [isExperienceEnough, setIsExperienceEnough] = useState<boolean | null>(
+    null,
+  );
+  const [isRetirementAge, setIsRetirementAge] = useState<boolean | null>(null);
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
   const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
   const [showSmallFundOptions, setShowSmallFundOptions] = useState(false);
@@ -237,16 +241,29 @@ export default function RetirementCalculator() {
       const totalWorkExperience =
         workExperienceYears + workExperienceMonths / 12;
 
+      setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
+      setIsRetirementAge(ageAtRetirement >= minRetirementAge);
       setIsRetirementEligible(
         ageAtRetirement >= minRetirementAge &&
           totalWorkExperience >= minWorkExperience,
       );
 
-      if (step === 1) {
+      if (
+        step === 1 &&
+        ageAtRetirement >= minRetirementAge &&
+        totalWorkExperience >= minWorkExperience
+      ) {
         setStep(2);
+      } else if (
+        ageAtRetirement < minRetirementAge ||
+        totalWorkExperience < minWorkExperience
+      ) {
+        setStep(1);
       }
     } else {
       setCalculatedAge(null);
+      setIsExperienceEnough(null);
+      setIsRetirementAge(null);
       setIsRetirementEligible(null);
       setStep(1);
     }
@@ -839,25 +856,43 @@ export default function RetirementCalculator() {
                       transition={{ duration: 0.3 }}
                     >
                       <Alert
-                        variant={
-                          isRetirementEligible ? "default" : "destructive"
-                        }
+                        variant={isRetirementAge ? "default" : "destructive"}
                         className={cn(
                           "mt-4 flex items-center",
-                          isRetirementEligible
+                          isRetirementAge
                             ? "bg-green-50 text-green-800 border-green-200"
                             : "bg-red-50 text-red-800 border-red-200",
                         )}
                       >
-                        {isRetirementEligible ? (
+                        {isRetirementAge ? (
                           <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
                         ) : (
                           <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
                         )}
                         <AlertDescription className="text-sm">
-                          {isRetirementEligible
-                            ? `Отговаряте на условията за пенсиониране. Възрастта ви при пенсиониране ще бъде ${calculatedAge} години.`
-                            : `Не отговаряте на условията за пенсиониране. Възрастта ви при пенсиониране ще бъде ${calculatedAge} години.`}
+                          {isRetirementAge
+                            ? `Към избраната дата имате навършени години за пенсия. `
+                            : `Към избраната дата нямате навършени години за пенсия. `}
+                        </AlertDescription>
+                      </Alert>
+                      <Alert
+                        variant={isExperienceEnough ? "default" : "destructive"}
+                        className={cn(
+                          "mt-4 flex items-center",
+                          isExperienceEnough
+                            ? "bg-green-50 text-green-800 border-green-200"
+                            : "bg-red-50 text-red-800 border-red-200",
+                        )}
+                      >
+                        {isExperienceEnough ? (
+                          <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
+                        )}
+                        <AlertDescription className="text-sm">
+                          {isExperienceEnough
+                            ? `Към избраната дата имате необходимия стаж за пенсия.`
+                            : `Към избраната дата нямате необходимия стаж за пенсия.`}
                         </AlertDescription>
                       </Alert>
                     </motion.div>
