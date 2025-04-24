@@ -16,13 +16,16 @@ export interface RetirementInputs {
 }
 
 export const pensionFunders = [
-  "ДСК Родина",
-  "Алианц България",
-  "NN Пенсионно осигуряване",
   "Доверие",
+  "ДСК-Родина",
+  "Алианц",
+  "ОББ",
   "Съгласие",
   "ЦКБ-Сила",
   "Бъдеще",
+  "Топлина",
+  "ПОИ",
+  "ДаллБогг",
 ];
 
 export const paymentOptions = ["Payment 1", "Payment 2"];
