@@ -123,7 +123,7 @@ export default function RetirementCalculator() {
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === "undefined") return {};
 
-    const savedData = localStorage.getItem(STORAGE_KEY);
+    const savedData = sessionStorage.getItem(STORAGE_KEY);
     if (!savedData) return {};
 
     try {
@@ -384,10 +384,10 @@ export default function RetirementCalculator() {
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      // Save to localStorage
+      // Save to sessionStorage
       const formValues = form.getValues();
       if (Object.keys(formValues).length > 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
       }
 
       // Check step completion
