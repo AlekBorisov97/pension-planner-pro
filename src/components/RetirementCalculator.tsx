@@ -109,6 +109,12 @@ export default function RetirementCalculator() {
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
   >(null);
+  const [transferToNOIDate, setTransferToNOIDate] = useState<string | null>(
+    null,
+  );
+  const [isTransferToNOIPossible, setIsTransferToNOIPossible] = useState<
+    "available" | "unavailable" | null
+  >(null);
   const [isExperienceEnough, setIsExperienceEnough] = useState<boolean | null>(
     null,
   );
@@ -214,6 +220,34 @@ export default function RetirementCalculator() {
       const birthDate = new Date(dateOfBirth);
       const retirement = new Date(retirementDate);
 
+      const transferDate = (() => {
+        const year = retirement.getFullYear();
+        const month = retirement.getMonth(); // Month is 0-based in JS
+        const day = retirement.getDate();
+
+        if (year >= 2038) {
+          return new Date(year - 5, month, day);
+        } else if (year >= 2036) {
+          return new Date(year - 4, month, day);
+        } else if (year >= 2031) {
+          return new Date(year - 3, month, day);
+        } else if (year >= 2026) {
+          return new Date(year - 2, month, day);
+        } else {
+          return new Date(year - 1, month, day);
+        }
+      })();
+
+      const isTransferBeforeRetirement = transferDate.getTime() <= Date.now();
+      setIsTransferToNOIPossible(
+        isTransferBeforeRetirement ? "unavailable" : "available",
+      );
+      setTransferToNOIDate(
+        format(transferDate, "dd.MM.yyyy", {
+          locale: bg,
+        }),
+      );
+
       let ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
 
       // Adjust if retirement date is before the birthday in the retirement year
@@ -262,6 +296,7 @@ export default function RetirementCalculator() {
       }
     } else {
       setCalculatedAge(null);
+      setIsTransferToNOIPossible(null);
       setIsExperienceEnough(null);
       setIsRetirementAge(null);
       setIsRetirementEligible(null);
@@ -875,28 +910,68 @@ export default function RetirementCalculator() {
                             : `Към избраната дата нямате навършени години за пенсия. `}
                         </AlertDescription>
                       </Alert>
-                      <Alert
-                        variant={isExperienceEnough ? "default" : "destructive"}
-                        className={cn(
-                          "mt-4 flex items-center",
-                          isExperienceEnough
-                            ? "bg-green-50 text-green-800 border-green-200"
-                            : "bg-red-50 text-red-800 border-red-200",
-                        )}
-                      >
-                        {isExperienceEnough ? (
-                          <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
-                        )}
-                        <AlertDescription className="text-sm">
-                          {isExperienceEnough
-                            ? `Към избраната дата имате необходимия стаж за пенсия.`
-                            : `Към избраната дата нямате необходимия стаж за пенсия.`}
-                        </AlertDescription>
-                      </Alert>
+                      {isRetirementAge && (
+                        <Alert
+                          variant={
+                            isExperienceEnough ? "default" : "destructive"
+                          }
+                          className={cn(
+                            "mt-4 flex items-center",
+                            isExperienceEnough
+                              ? "bg-green-50 text-green-800 border-green-200"
+                              : "bg-red-50 text-red-800 border-red-200",
+                          )}
+                        >
+                          {isExperienceEnough ? (
+                            <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
+                          )}
+                          <AlertDescription className="text-sm">
+                            {isExperienceEnough
+                              ? `Към избраната дата имате необходимия стаж за пенсия.`
+                              : `Към избраната дата нямате необходимия стаж за пенсия.`}
+                          </AlertDescription>
+                        </Alert>
+                      )}
                     </motion.div>
                   )}
+                  {calculatedAge !== null &&
+                    isRetirementAge &&
+                    isTransferToNOIPossible && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Alert
+                          variant={
+                            isTransferToNOIPossible === "available"
+                              ? "default"
+                              : "destructive"
+                          }
+                          className={cn(
+                            "mt-4 flex items-center",
+                            isTransferToNOIPossible === "available"
+                              ? "bg-green-50 text-green-800 border-green-200"
+                              : "bg-red-50 text-red-800 border-red-200",
+                          )}
+                        >
+                          {isTransferToNOIPossible === "available" ? (
+                            <CheckCircle className="h-5 w-5 text-green-600 mr-2 shrink-0" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-600 mr-2 shrink-0" />
+                          )}
+                          <AlertDescription className="text-sm">
+                            {isTransferToNOIPossible === "available"
+                              ? `Срокът за прехвърляне в НОИ изтича на  `
+                              : `Срокът за прехвърляне в НОИ е изтекъл на `}
+                            {transferToNOIDate}
+                          </AlertDescription>
+                        </Alert>
+                      </motion.div>
+                    )}
                 </AnimatePresence>
               </div>
 
