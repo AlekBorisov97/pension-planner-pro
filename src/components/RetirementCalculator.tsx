@@ -315,7 +315,7 @@ export default function RetirementCalculator() {
       "funder:",
       pensionFunder,
     );
-
+    // TODO -> Сметка за варианти за плащане - клетка А18 и калкулатор ПП
     if (additionalFunds > 0 && pensionFunder) {
       // Check if funds are <= 10000 for small fund options
       const isSmallFund = additionalFunds <= 10000;
@@ -936,7 +936,9 @@ export default function RetirementCalculator() {
                       )}
                     </motion.div>
                   )}
-                  {calculatedAge !== null &&
+                </AnimatePresence>
+                <AnimatePresence>
+                {calculatedAge !== null &&
                     isRetirementAge &&
                     isTransferToNOIPossible && (
                       <motion.div
@@ -1046,7 +1048,7 @@ export default function RetirementCalculator() {
                                 <SelectValue placeholder="Изберете пенсионен фонд" />
                               </SelectTrigger>
                               <SelectContent>
-                                {pensionFunders.map((funder) => (
+                                {Object.keys(pensionFunders).map((funder) => (
                                   <SelectItem key={funder} value={funder}>
                                     {funder}
                                   </SelectItem>

@@ -15,18 +15,18 @@ export interface RetirementInputs {
   paymentOption?: string;
 }
 
-export const pensionFunders = [
-  "Доверие",
-  "ДСК-Родина",
-  "Алианц",
-  "ОББ",
-  "Съгласие",
-  "ЦКБ-Сила",
-  "Бъдеще",
-  "Топлина",
-  "ПОИ",
-  "ДаллБогг",
-];
+export const pensionFunders: Record<string, number> = {
+  "Доверие": 0.35,
+  "ДСК-Родина": 0.2,
+  "Алианц": 0.05,
+  "ОББ": 0.5,
+  "Съгласие": 0.75,
+  "ЦКБ-Сила": 0.37,
+  "Бъдеще": 0.3,
+  "Топлина": 0.5,
+  "ПОИ": 0.5,
+  "ДаллБогг": 0.5
+};
 
 export const paymentOptions = ["Payment 1", "Payment 2"];
 
