@@ -11,8 +11,10 @@ import { Calculator, TrendingUp, Users, Info, ArrowRight } from "lucide-react";
 
 export default function InfoTab({
   onGoToCalculator,
+  onGoToContacts,
 }: {
   onGoToCalculator: () => void;
+  onGoToContacts: () => void;
 }) {
   return (
     <div className="space-y-8 animate-fade-in">
@@ -46,7 +48,16 @@ export default function InfoTab({
           <CardContent>
             <p className="text-muted-foreground">
               Можете да проверите какъв е размерът на Вашата държавна пенсия на
-              сайта на НОИ тук (изисква се ПИК на НОИ).
+              сайта на НОИ{" "}
+              <a
+                href="https://www.nssi.bg/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80"
+              >
+                тук
+              </a>{" "}
+              (изисква се ПИК на НОИ).
             </p>
           </CardContent>
         </Card>
@@ -69,14 +80,12 @@ export default function InfoTab({
                 калкулатор
               </span>{" "}
               или на сайта на Вашия УПФ{" "}
-              <a
-                href="https://example.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-primary hover:opacity-80"
+              <span
+                onClick={onGoToContacts}
+                className="underline cursor-pointer text-primary hover:opacity-80"
               >
                 тук
-              </a>
+              </span>
               .
             </p>
           </CardContent>
@@ -95,14 +104,12 @@ export default function InfoTab({
               по-благоприятно да получавате две пенсии – пенсия от НОИ в намален
               размер плюс втора пенсия от УПФ или само една пенсия от НОИ в
               пълен размер{" "}
-              <a
-                href="https://www.nssi.bg/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-primary hover:opacity-80"
+              <span
+                onClick={onGoToCalculator}
+                className="underline cursor-pointer text-primary hover:opacity-80"
               >
                 тук
-              </a>
+              </span>{" "}
               .
             </p>
           </CardContent>

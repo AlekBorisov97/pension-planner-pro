@@ -8,7 +8,11 @@ import {
 import { Building, FileText, Shield, Key } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function ContactsTab() {
+export default function ContactsTab({
+  defaultTabProp,
+}: {
+  defaultTabProp?: string;
+}) {
   const governmentInstitutions = [
     {
       title: "Пенсионен калкулатор НОИ",
@@ -89,7 +93,7 @@ export default function ContactsTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="institutions" className="w-full">
+          <Tabs defaultValue={defaultTabProp ?? 'institutions'} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="institutions">
                 Държавни институции

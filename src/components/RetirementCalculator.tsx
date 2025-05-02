@@ -56,6 +56,7 @@ const DEFAULT_BIRTH_DATE = new Date("1960-01-01");
 const MIN_BIRTH_DATE = new Date("1960-01-01"); // No dates before 1960-01-01
 const TODAY = new Date();
 const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
+const MIN_RETIREMENT_DATE = new Date("1960-01-01");
 
 const formSchema = z.object({
   dateOfBirth: z.date({
@@ -863,7 +864,7 @@ export default function RetirementCalculator() {
                               selected={field.value}
                               onSelect={field.onChange}
                               defaultMonth={TODAY}
-                              fromDate={TODAY}
+                              fromDate={MIN_RETIREMENT_DATE}
                               toDate={MAX_RETIREMENT_DATE} // Up to 40 years in future
                               initialFocus
                               className="rounded-md border p-3 pointer-events-auto"
@@ -938,7 +939,7 @@ export default function RetirementCalculator() {
                   )}
                 </AnimatePresence>
                 <AnimatePresence>
-                {calculatedAge !== null &&
+                  {calculatedAge !== null &&
                     isRetirementAge &&
                     isTransferToNOIPossible && (
                       <motion.div

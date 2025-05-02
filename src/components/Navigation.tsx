@@ -10,6 +10,9 @@ export default function Navigation() {
   const [scrollDirection, setScrollDirection] = useState("up");
   const lastScrollY = useRef(0);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [defaultContactsTab, setDefaultContactsTab] = useState<string | undefined>(undefined);
+  const [animationTrigger, setAnimationTrigger] = useState<boolean>(true);
+  const [navPosition, setNavPosition] = useState<string>('')
 
   useEffect(() => {
     const header = document.querySelector("header");
@@ -37,20 +40,30 @@ export default function Navigation() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY, headerHeight, scrollDirection]);
 
-  const navPosition =
+    const newNavPosition =
     scrollDirection === "down"
       ? "fixed top-0 left-0 right-0 z-10"
       : lastScrollY.current > 0
         ? "sticky top-0 z-10"
         : "relative";
+        setNavPosition(newNavPosition)
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, headerHeight, scrollDirection, animationTrigger]);
+
 
   const goToCalculator = () => {
-    setActiveTab("calculator");
-    // Smooth scroll to top when navigating to calculator
     window.scrollTo({ top: 0, behavior: "smooth" });
+    setAnimationTrigger(prev => !prev)
+    setActiveTab("calculator");
+  };
+
+  const goToContacts = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setAnimationTrigger(prev => !prev)
+    setDefaultContactsTab('companies')
+    setActiveTab("contacts");
+    
   };
 
   return (
@@ -122,7 +135,7 @@ export default function Navigation() {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-          <InfoTab onGoToCalculator={goToCalculator} />
+          <InfoTab onGoToCalculator={goToCalculator} onGoToContacts={goToContacts} />
         </motion.div>
       </TabsContent>
 
@@ -150,7 +163,7 @@ export default function Navigation() {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-          <ContactsTab />
+          <ContactsTab defaultTabProp={defaultContactsTab} />
         </motion.div>
       </TabsContent>
     </Tabs>
