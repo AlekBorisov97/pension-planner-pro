@@ -182,116 +182,111 @@ const pv = (
   fv: number = 0,
   type: 0 | 1 = 0,
 ): number => {
-  if (rate === 0) {
-    return -(pmt * nper + fv);
-  } else {
-    const pvFactor = (1 - Math.pow(1 + rate, -nper)) / rate;
-    const adjPmt = pmt * (1 + rate * type);
-    const pvValue = -(adjPmt * pvFactor + fv * Math.pow(1 + rate, -nper));
-    return pvValue;
+  if (rate === 0) return -(pmt * nper + fv);
+
+  const pvFactor = (1 - Math.pow(1 + rate, -nper)) / rate;
+  const adjustedPmt = pmt * (1 + rate * type);
+
+  return -(adjustedPmt * pvFactor + fv * Math.pow(1 + rate, -nper));
+};
+
+const sumDiscountedLifeExpectancy = (
+  fromAge: number,
+  toAge: number,
+  interest: number
+): number => {
+  let sum = 0;
+
+  for (let age = fromAge; age <= toAge; age++) {
+    const lifeExpectancy = calculateLifeExpectancy(age);
+    const discountFactor = Math.pow(1 + interest / 100, age);
+    sum += lifeExpectancy / discountFactor;
   }
+
+  return sum;
 };
 
-export const calculateColumnH = (years: number, interest: number) => {
-  const columnE = 1 / (1 + interest / 100);
-  const columnF = Math.pow(columnE, years);
-  const columnG = Math.pow(columnE, 1 / 12);
-  return (1 - columnF) / (1 - columnG);
+export const calculateLifeExpectancy = (age: number): number => {
+  if (age === 0) return 1;
+
+  const previous = calculateLifeExpectancy(age - 1);
+  const mortality = mortalityRate.find(rate => rate.age === age - 1)?.px.total ?? 1;
+
+  return previous * mortality;
 };
 
-export const calculateMonthlySchedueledSumH6 = (
+export const calculateDiscountFactorSum = (years: number, interest: number): number => {
+  const monthlyRate = 1 / (1 + interest / 100);
+  const compounded = Math.pow(monthlyRate, years);
+  const monthlyCompounded = Math.pow(monthlyRate, 1 / 12);
+
+  return (1 - compounded) / (1 - monthlyCompounded);
+};
+
+// Calculates Monthly Scheduled Sum (Cell H6)
+export const calculateMonthlyScheduledSumH6 = (
   fullAmount: number,
   age: number,
   interest: number,
-  guaranteedPeriodInMonths: number,
-  sum: number,
+  guaranteeMonths: number,
+  monthlyPayout: number,
 ): number => {
-  const pvWTF = pv((interest / 100) / 12,guaranteedPeriodInMonths, sum * (-1) )
+  const monthlyRate = (interest / 100) / 12;
+  const pvGuaranteed = pv(monthlyRate, guaranteeMonths, -monthlyPayout);
 
-  let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
-  for (let i = Math.round(age + guaranteedPeriodInMonths/12); i <= 100; i++) {
-    const columnBCell = calculateLXColumnB(i);
-    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
-
-    sumForColumnD += columnCCell;
-  }
-
-  const currentColumnBCell = calculateLXColumnB(
-    age,
-  );
-  const currentColumnCCell =
-  currentColumnBCell /
-    Math.pow(1 + interest / 100, age);
+  const startAge = Math.round(age + guaranteeMonths / 12);
+  const columnDSum = sumDiscountedLifeExpectancy(startAge, 100, interest);
 
 
-    const currentColumnBCellWithMonthsGuaranteed = calculateLXColumnB(
-      Math.round(age + guaranteedPeriodInMonths/12),
-    );
-    const currentColumnCCellWithMonthsGuaranteed =
-    currentColumnBCellWithMonthsGuaranteed /
-      Math.pow(1 + interest / 100, Math.round(age + guaranteedPeriodInMonths/12));
+  const currentB = calculateLifeExpectancy(age);
+  const currentC = currentB / Math.pow(1 + interest / 100, age);
 
-  return (fullAmount - pvWTF) / (12 * (sumForColumnD / currentColumnCCell - ((11 / 24) * currentColumnCCellWithMonthsGuaranteed) / currentColumnCCell));
+  const BwithGuarantee = calculateLifeExpectancy(startAge);
+  const CwithGuarantee = BwithGuarantee / Math.pow(1 + interest / 100, startAge);
+
+  const denominator = 12 * (columnDSum / currentC - (11 / 24) * CwithGuarantee / currentC);
+
+  return (fullAmount - pvGuaranteed) / denominator;
 };
 
-export const calculateMonthlyGaranteedMonthsSumG6 = (
+// Calculates Monthly Sum (Cell G6) when guaranteed period is in full years
+export const calculateMonthlyGuaranteedSumG6 = (
   fullAmount: number,
   age: number,
   interest: number,
-  guaranteedPeriodInYears: number,
+  guaranteeYears: number,
 ): number => {
-  let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
-  for (let i = age + guaranteedPeriodInYears; i <= 100; i++) {
-    const columnBCell = calculateLXColumnB(i);
-    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
+  const startAge = age + guaranteeYears;
 
-    sumForColumnD += columnCCell;
-  }
+  const columnDSum = sumDiscountedLifeExpectancy(startAge, 100, interest);
+  const currentB = calculateLifeExpectancy(age);
+  const currentC = currentB / Math.pow(1 + interest / 100, age);
 
-  const currentColumnBCell = calculateLXColumnB(age);
-  const currentColumnCCell =
-    currentColumnBCell / Math.pow(1 + interest / 100, age);
+  const guaranteedB = calculateLifeExpectancy(startAge);
+  const guaranteedC = guaranteedB / Math.pow(1 + interest / 100, startAge);
 
-  const currentColumnBCellGuaranteed = calculateLXColumnB(
-    age + guaranteedPeriodInYears,
-  );
-  const currentColumnCCellGuaranteed =
-    currentColumnBCellGuaranteed /
-    Math.pow(1 + interest / 100, age + guaranteedPeriodInYears);
+  const H = calculateDiscountFactorSum(guaranteeYears, interest);
 
-  const currentColumnHCell = calculateColumnH(
-    guaranteedPeriodInYears,
-    interest,
-  );
+  const denominator = 12 * (columnDSum / currentC - (11 / 24) * guaranteedC / currentC) + H;
 
-  return (
-    fullAmount /
-    (12 *
-      (sumForColumnD / currentColumnCCell -
-        ((11 / 24) * currentColumnCCellGuaranteed) / currentColumnCCell) +
-      currentColumnHCell)
-  );
+  return fullAmount / denominator;
 };
 
+// Calculates Monthly Sum (Cell F6) with no guaranteed period
 export const calculateMonthlySumF6 = (
   fullAmount: number,
   age: number,
   interest: number,
 ): number => {
-  let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
-  for (let i = age; i <= 100; i++) {
-    const columnBCell = calculateLXColumnB(i);
-    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
+  const columnDSum = sumDiscountedLifeExpectancy(age, 100, interest);
+  const currentB = calculateLifeExpectancy(age);
+  const currentC = currentB / Math.pow(1 + interest / 100, age);
 
-    sumForColumnD += columnCCell;
-  }
+  const denominator = 12 * (columnDSum / currentC - 11 / 24);
 
-  const currentColumnBCell = calculateLXColumnB(age);
-  const currentColumnCCell =
-    currentColumnBCell / Math.pow(1 + interest / 100, age);
-
-  return fullAmount / (12 * (sumForColumnD / currentColumnCCell - 11 / 24));
+  return fullAmount / denominator;
 };
+
 
 /**
  * TABLE PARSER
