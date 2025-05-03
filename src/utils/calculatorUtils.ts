@@ -175,6 +175,104 @@ export const calculateLXColumnB = (age: number) => {
   return result;
 };
 
+const pv = (
+  rate: number,
+  nper: number,
+  pmt: number,
+  fv: number = 0,
+  type: 0 | 1 = 0,
+): number => {
+  if (rate === 0) {
+    return -(pmt * nper + fv);
+  } else {
+    const pvFactor = (1 - Math.pow(1 + rate, -nper)) / rate;
+    const adjPmt = pmt * (1 + rate * type);
+    const pvValue = -(adjPmt * pvFactor + fv * Math.pow(1 + rate, -nper));
+    return pvValue;
+  }
+};
+
+export const calculateColumnH = (years: number, interest: number) => {
+  const columnE = 1 / (1 + interest / 100);
+  const columnF = Math.pow(columnE, years);
+  const columnG = Math.pow(columnE, 1 / 12);
+  return (1 - columnF) / (1 - columnG);
+};
+
+export const calculateMonthlySchedueledSumH6 = (
+  fullAmount: number,
+  age: number,
+  interest: number,
+  guaranteedPeriodInMonths: number,
+  sum: number,
+): number => {
+  const pvWTF = pv((interest / 100) / 12,guaranteedPeriodInMonths, sum * (-1) )
+
+  let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
+  for (let i = Math.round(age + guaranteedPeriodInMonths/12); i <= 100; i++) {
+    const columnBCell = calculateLXColumnB(i);
+    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
+
+    sumForColumnD += columnCCell;
+  }
+
+  const currentColumnBCell = calculateLXColumnB(
+    age,
+  );
+  const currentColumnCCell =
+  currentColumnBCell /
+    Math.pow(1 + interest / 100, age);
+
+
+    const currentColumnBCellWithMonthsGuaranteed = calculateLXColumnB(
+      Math.round(age + guaranteedPeriodInMonths/12),
+    );
+    const currentColumnCCellWithMonthsGuaranteed =
+    currentColumnBCellWithMonthsGuaranteed /
+      Math.pow(1 + interest / 100, Math.round(age + guaranteedPeriodInMonths/12));
+
+  return (fullAmount - pvWTF) / (12 * (sumForColumnD / currentColumnCCell - ((11 / 24) * currentColumnCCellWithMonthsGuaranteed) / currentColumnCCell));
+};
+
+export const calculateMonthlyGaranteedMonthsSumG6 = (
+  fullAmount: number,
+  age: number,
+  interest: number,
+  guaranteedPeriodInYears: number,
+): number => {
+  let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
+  for (let i = age + guaranteedPeriodInYears; i <= 100; i++) {
+    const columnBCell = calculateLXColumnB(i);
+    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
+
+    sumForColumnD += columnCCell;
+  }
+
+  const currentColumnBCell = calculateLXColumnB(age);
+  const currentColumnCCell =
+    currentColumnBCell / Math.pow(1 + interest / 100, age);
+
+  const currentColumnBCellGuaranteed = calculateLXColumnB(
+    age + guaranteedPeriodInYears,
+  );
+  const currentColumnCCellGuaranteed =
+    currentColumnBCellGuaranteed /
+    Math.pow(1 + interest / 100, age + guaranteedPeriodInYears);
+
+  const currentColumnHCell = calculateColumnH(
+    guaranteedPeriodInYears,
+    interest,
+  );
+
+  return (
+    fullAmount /
+    (12 *
+      (sumForColumnD / currentColumnCCell -
+        ((11 / 24) * currentColumnCCellGuaranteed) / currentColumnCCell) +
+      currentColumnHCell)
+  );
+};
+
 export const calculateMonthlySumF6 = (
   fullAmount: number,
   age: number,
@@ -183,15 +281,14 @@ export const calculateMonthlySumF6 = (
   let sumForColumnD = 0; // the sum of all columns C after the age in table Kalulator PP
   for (let i = age; i <= 100; i++) {
     const columnBCell = calculateLXColumnB(i);
-    const columnCCell = columnBCell / Math.pow(1 + (interest / 100), i + 1);
+    const columnCCell = columnBCell / Math.pow(1 + interest / 100, i);
 
     sumForColumnD += columnCCell;
   }
 
-
   const currentColumnBCell = calculateLXColumnB(age);
   const currentColumnCCell =
-    currentColumnBCell / Math.pow(1 + (interest / 100), age + 1);
+    currentColumnBCell / Math.pow(1 + interest / 100, age);
 
   return fullAmount / (12 * (sumForColumnD / currentColumnCCell - 11 / 24));
 };

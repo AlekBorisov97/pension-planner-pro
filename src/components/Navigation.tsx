@@ -5,7 +5,8 @@ import RetirementCalculator from "./RetirementCalculator";
 import InfoTab from "./InfoTab";
 import ContactsTab from "./ContactsTab";
 import {
-  calculateLXColumnB,
+  calculateMonthlyGaranteedMonthsSumG6,
+  calculateMonthlySchedueledSumH6,
   calculateMonthlySumF6,
 } from "@/utils/calculatorUtils";
 
@@ -19,6 +20,14 @@ export default function Navigation() {
   >(undefined);
   const [animationTrigger, setAnimationTrigger] = useState<boolean>(true);
   const [navPosition, setNavPosition] = useState<string>("");
+
+  console.log(
+    calculateMonthlyGaranteedMonthsSumG6(119500, 59, 0.2, 10),
+    " ------ > ",
+    calculateMonthlySumF6(119500, 59, 0.2),
+    ' ------- > ',
+    calculateMonthlySchedueledSumH6(119500, 59, 0.2, 120, 198.22)
+  );
 
   useEffect(() => {
     const header = document.querySelector("header");
