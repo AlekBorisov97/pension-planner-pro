@@ -4,15 +4,21 @@ import { motion } from "framer-motion";
 import RetirementCalculator from "./RetirementCalculator";
 import InfoTab from "./InfoTab";
 import ContactsTab from "./ContactsTab";
+import {
+  calculateLXColumnB,
+  calculateMonthlySumF6,
+} from "@/utils/calculatorUtils";
 
 export default function Navigation() {
   const [activeTab, setActiveTab] = useState("info");
   const [scrollDirection, setScrollDirection] = useState("up");
   const lastScrollY = useRef(0);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const [defaultContactsTab, setDefaultContactsTab] = useState<string | undefined>(undefined);
+  const [defaultContactsTab, setDefaultContactsTab] = useState<
+    string | undefined
+  >(undefined);
   const [animationTrigger, setAnimationTrigger] = useState<boolean>(true);
-  const [navPosition, setNavPosition] = useState<string>('')
+  const [navPosition, setNavPosition] = useState<string>("");
 
   useEffect(() => {
     const header = document.querySelector("header");
@@ -42,28 +48,26 @@ export default function Navigation() {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     const newNavPosition =
-    scrollDirection === "down"
-      ? "fixed top-0 left-0 right-0 z-10"
-      : lastScrollY.current > 0
-        ? "sticky top-0 z-10"
-        : "relative";
-        setNavPosition(newNavPosition)
+      scrollDirection === "down"
+        ? "fixed top-0 left-0 right-0 z-10"
+        : lastScrollY.current > 0
+          ? "sticky top-0 z-10"
+          : "relative";
+    setNavPosition(newNavPosition);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, headerHeight, scrollDirection, animationTrigger]);
 
-
   const goToCalculator = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setAnimationTrigger(prev => !prev)
+    setAnimationTrigger((prev) => !prev);
     setActiveTab("calculator");
   };
 
   const goToContacts = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setAnimationTrigger(prev => !prev)
-    setDefaultContactsTab('companies')
+    setAnimationTrigger((prev) => !prev);
+    setDefaultContactsTab("companies");
     setActiveTab("contacts");
-    
   };
 
   return (
@@ -135,7 +139,10 @@ export default function Navigation() {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-          <InfoTab onGoToCalculator={goToCalculator} onGoToContacts={goToContacts} />
+          <InfoTab
+            onGoToCalculator={goToCalculator}
+            onGoToContacts={goToContacts}
+          />
         </motion.div>
       </TabsContent>
 

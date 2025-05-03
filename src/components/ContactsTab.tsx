@@ -93,7 +93,10 @@ export default function ContactsTab({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={defaultTabProp ?? 'institutions'} className="w-full">
+          <Tabs
+            defaultValue={defaultTabProp ?? "institutions"}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="institutions">
                 Държавни институции
