@@ -40,7 +40,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import {
-  calculateRetirement,
   pensionFunders,
   getMinimumRetirementAge,
   getMinimumWorkExperience,
@@ -50,7 +49,7 @@ import {
   calculateMonthlyGuaranteedSumG6,
   calculateMonthlyScheduledSumH6,
 } from "@/utils/calculatorUtils";
-import CalculationResult from "./CalculationResult";
+import CalculationResult, { CalculationResultProps } from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -104,6 +103,9 @@ const formSchema = z.object({
     .optional(),
   installmentAmount: z.number().min(1, "Сумата трябва да е поне 1").optional(),
   nationalPensionFunds: z.number().min(0, "Сумата трябва да е 0 или повече"),
+  nationalPensionFundsCutOut: z
+    .number()
+    .min(0, "Сумата трябва да е 0 или повече"),
   monthlyPaymentForSmallFunds: z
     .number()
     .int()
@@ -115,9 +117,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function RetirementCalculator() {
   const { toast } = useToast();
-  const [calculationResult, setCalculationResult] = useState<ReturnType<
-    typeof calculateRetirement
-  > | null>(null);
+  const [calculationResult, setCalculationResult] = useState<{
+    standardMonthlyPension: number;
+    enhancedMonthlyPension: number;
+  } | null>(null);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   const [isRetirementEligible, setIsRetirementEligible] = useState<
@@ -176,12 +179,14 @@ export default function RetirementCalculator() {
       retirementDate: savedData.retirementDate || TODAY,
       additionalPensionFunds: savedData.additionalPensionFunds || 0,
       nationalPensionFunds: savedData.nationalPensionFunds || 0,
+      nationalPensionFundsCutOut: savedData.nationalPensionFundsCutOut || 0,
       pensionFunder: savedData.pensionFunder || undefined,
       selectedOption: savedData.selectedOption || undefined,
       periodYears: savedData.periodYears || undefined,
       installmentPeriod: savedData.installmentPeriod || undefined,
       installmentAmount: savedData.installmentAmount || undefined,
-      monthlyPaymentForSmallFunds: savedData.monthlyPaymentForSmallFunds || undefined,
+      monthlyPaymentForSmallFunds:
+        savedData.monthlyPaymentForSmallFunds || undefined,
     },
   });
 
@@ -202,6 +207,7 @@ export default function RetirementCalculator() {
       form.setValue("installmentPeriod", undefined);
       form.setValue("installmentAmount", undefined);
       form.setValue("nationalPensionFunds", 0);
+      form.setValue("nationalPensionFundsCutOut", 0);
 
       // Reset UI states for large funds
       setShowOptionDropdown(false);
@@ -365,9 +371,9 @@ export default function RetirementCalculator() {
           setShowSubmitButton(true);
         }
       } else {
-        const options = form.watch("selectedOption")
-        if (options) setShowSubmitButton(true)
-          else setShowSubmitButton(false)
+        const options = form.watch("selectedOption");
+        if (options) setShowSubmitButton(true);
+        else setShowSubmitButton(false);
       }
 
       // Update threshold state for future comparison
@@ -630,57 +636,44 @@ export default function RetirementCalculator() {
           pensionFunders[data.pensionFunder],
         );
         console.log("HELLO FROM THE OPTION 1 TEAM", result);
-        return;
+        break;
       case "option2":
         result = calculateMonthlyGuaranteedSumG6(
           data.additionalPensionFunds,
           calculatedAge,
           pensionFunders[data.pensionFunder],
-          data.periodYears
+          data.periodYears,
         );
         console.log("HELLO FROM THE OPTION 2 TEAM", result);
-        return;
-
+        break;
       case "option3":
-        console.log('hello');
-        
+        console.log("hello");
+
         result = calculateMonthlyScheduledSumH6(
           data.additionalPensionFunds,
           calculatedAge,
           pensionFunders[data.pensionFunder],
           data.installmentPeriod,
-          data.installmentAmount
+          data.installmentAmount,
         );
         console.log("HELLO FROM THE OPTION 3 TEAM", result);
-        return;
+        break;
 
       default:
         console.log("SOMETHIGNS WRONG");
         return;
     }
-    /**
-     * 
-    const inputData: RetirementInputs = {
-      dateOfBirth: data.dateOfBirth,
-      gender: data.gender,
-      workExperienceYears: data.workExperienceYears,
-      workExperienceMonths: data.workExperienceMonths,
-      retirementDate: data.retirementDate,
-      additionalPensionFunds: data.additionalPensionFunds,
-      pensionFunder: data.pensionFunder,
-      nationalPensionFunds: data.nationalPensionFunds,
-    };
-    
-    const result = calculateRetirement(inputData);
-    setCalculationResult(result);
-    
+
+    setCalculationResult({
+      standardMonthlyPension: data.nationalPensionFunds,
+      enhancedMonthlyPension: data.nationalPensionFundsCutOut + result,
+    });
     setTimeout(() => {
       const resultElement = document.getElementById("calculation-result");
       if (resultElement) {
         resultElement.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100);
-    */
   };
 
   function PensionTooltip() {
@@ -1471,24 +1464,14 @@ export default function RetirementCalculator() {
                   >
                     <Separator />
                     <h3 className="text-lg font-medium">
-                      Национални пенсионни данни
+                      Прогнозна пенсия от Държавното обществено осигуряване
+                      (ДОО)
                     </h3>
                     <div className="space-y-2 max-w-md">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="nationalPensionFunds">
-                          Национални пенсионни фондове (лв.)
+                          Пенсия от НОИ в пълен размер
                         </Label>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="w-[200px] text-sm">
-                              Натрупаната сума в националните ви пенсионни
-                              фондове.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
                       </div>
                       <Controller
                         control={form.control}
@@ -1509,6 +1492,37 @@ export default function RetirementCalculator() {
                       {form.formState.errors.nationalPensionFunds && (
                         <p className="text-sm text-destructive">
                           {form.formState.errors.nationalPensionFunds.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2 max-w-md">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="nationalPensionFundsCutOut">
+                          Пенсия от НОИ в намален размер
+                        </Label>
+                      </div>
+                      <Controller
+                        control={form.control}
+                        name="nationalPensionFundsCutOut"
+                        render={({ field }) => (
+                          <Input
+                            id="nationalPensionFundsCutOut"
+                            type="number"
+                            min={0}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                            value={field.value === 0 ? "" : field.value}
+                            placeholder="Въведете сума в лева"
+                          />
+                        )}
+                      />
+                      {form.formState.errors.nationalPensionFundsCutOut && (
+                        <p className="text-sm text-destructive">
+                          {
+                            form.formState.errors.nationalPensionFundsCutOut
+                              .message
+                          }
                         </p>
                       )}
                     </div>

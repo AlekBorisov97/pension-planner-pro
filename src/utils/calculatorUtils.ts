@@ -34,17 +34,6 @@ export interface NationalMortalityData {
   };
 }
 
-export interface RetirementInputs {
-  dateOfBirth: Date;
-  gender: "male" | "female";
-  workExperienceYears: number;
-  workExperienceMonths: number;
-  retirementDate: Date;
-  additionalPensionFunds: number;
-  pensionFunder: string;
-  nationalPensionFunds: number;
-}
-
 export const pensionFunders: Record<string, number> = {
   Доверие: 0.35,
   "ДСК-Родина": 0.2,
@@ -56,15 +45,6 @@ export const pensionFunders: Record<string, number> = {
   Топлина: 0.5,
   ПОИ: 0.5,
   ДаллБогг: 0.5,
-};
-
-export const calculateRetirement = (inputs: RetirementInputs) => {
-  return {
-    standardMonthlyPension: 0, // Not using national pension for small funds
-    enhancedMonthlyPension: 40,
-    difference: 240,
-    percentageIncrease: 100, // 100% increase as we're not using standard pension
-  };
 };
 
 export const formatCurrency = (amount: number): string => {
