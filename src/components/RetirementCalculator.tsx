@@ -5,7 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
-import { CalendarIcon, HelpCircle, CheckCircle, XCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  HelpCircle,
+  CheckCircle,
+  XCircle,
+  InfoIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,10 +42,13 @@ import { cn } from "@/lib/utils";
 import {
   calculateRetirement,
   pensionFunders,
-  paymentOptions,
-  RetirementInputs,
   getMinimumRetirementAge,
   getMinimumWorkExperience,
+  calculateMonthlySumF6,
+  minimumOSVPension,
+  formatCurrency,
+  calculateMonthlyGuaranteedSumG6,
+  calculateMonthlyScheduledSumH6,
 } from "@/utils/calculatorUtils";
 import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
@@ -95,7 +104,11 @@ const formSchema = z.object({
     .optional(),
   installmentAmount: z.number().min(1, "Сумата трябва да е поне 1").optional(),
   nationalPensionFunds: z.number().min(0, "Сумата трябва да е 0 или повече"),
-  paymentOption: z.string().optional(),
+  monthlyPaymentForSmallFunds: z
+    .number()
+    .int()
+    .min(1, "Периодът трябва да е поне 1 месец")
+    .optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -123,9 +136,12 @@ export default function RetirementCalculator() {
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
   const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
   const [showSmallFundOptions, setShowSmallFundOptions] = useState(false);
+  const [showOneTimePaymentOption, setShowOneTimePaymentOption] =
+    useState(false);
   const [previousFundsThreshold, setPreviousFundsThreshold] = useState<
     "small" | "large" | null
   >(null);
+  const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
 
   const loadSavedFormData = (): Partial<FormValues> => {
     if (typeof window === "undefined") return {};
@@ -165,7 +181,7 @@ export default function RetirementCalculator() {
       periodYears: savedData.periodYears || undefined,
       installmentPeriod: savedData.installmentPeriod || undefined,
       installmentAmount: savedData.installmentAmount || undefined,
-      paymentOption: savedData.paymentOption || undefined,
+      monthlyPaymentForSmallFunds: savedData.monthlyPaymentForSmallFunds || undefined,
     },
   });
 
@@ -194,7 +210,7 @@ export default function RetirementCalculator() {
       setStep(2);
     } else {
       // For large funds (>10000), reset small fund specific fields
-      form.setValue("paymentOption", undefined);
+      form.setValue("monthlyPaymentForSmallFunds", undefined);
 
       // Reset UI states for small funds
       setShowSmallFundOptions(false);
@@ -309,20 +325,27 @@ export default function RetirementCalculator() {
   const checkPensionFundComplete = () => {
     const additionalFunds = form.watch("additionalPensionFunds") || 0;
     const pensionFunder = form.watch("pensionFunder");
-
+    const retirementDate = form.watch("retirementDate");
     console.log(
       "Check pension fund - funds:",
       additionalFunds,
       "funder:",
       pensionFunder,
     );
-    // TODO -> Сметка за варианти за плащане - клетка А18 и калкулатор ПП
+
     if (additionalFunds > 0 && pensionFunder) {
-      // Check if funds are <= 10000 for small fund options
-      const isSmallFund = additionalFunds <= 10000;
+      const monthlySum = calculateMonthlySumF6(
+        additionalFunds,
+        calculatedAge,
+        pensionFunders[pensionFunder],
+      );
+      const minOSV = minimumOSVPension(retirementDate);
+      const isMonthlySumLessThan15Percent = monthlySum < 0.15 * minOSV;
 
       // Check if we crossed the threshold
-      const currentThreshold = isSmallFund ? "small" : "large";
+      const currentThreshold = isMonthlySumLessThan15Percent
+        ? "small"
+        : "large";
       if (
         previousFundsThreshold !== null &&
         previousFundsThreshold !== currentThreshold
@@ -330,17 +353,32 @@ export default function RetirementCalculator() {
         console.log(
           `Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`,
         );
-        resetFormStateForThreshold(isSmallFund);
+        resetFormStateForThreshold(isMonthlySumLessThan15Percent);
+      }
+
+      if (isMonthlySumLessThan15Percent) {
+        if (additionalFunds < 3 * minOSV) {
+          setShowOneTimePaymentOption(true);
+          setShowSubmitButton(false);
+        } else {
+          setShowOneTimePaymentOption(false);
+          setShowSubmitButton(true);
+        }
+      } else {
+        const options = form.watch("selectedOption")
+        if (options) setShowSubmitButton(true)
+          else setShowSubmitButton(false)
       }
 
       // Update threshold state for future comparison
       setPreviousFundsThreshold(currentThreshold);
 
       // Update UI states based on fund amount
-      setShowSmallFundOptions(isSmallFund);
-      setShowOptionDropdown(!isSmallFund);
 
-      if (!isSmallFund) {
+      setShowSmallFundOptions(isMonthlySumLessThan15Percent);
+      setShowOptionDropdown(!isMonthlySumLessThan15Percent);
+
+      if (!isMonthlySumLessThan15Percent) {
         // For large funds (>10000)
         console.log("Setting step to 3 for large fund options");
         if (step < 3) setStep(3);
@@ -452,39 +490,6 @@ export default function RetirementCalculator() {
         ].includes(name || "")
       ) {
         checkOptionFieldsComplete();
-      }
-
-      if (["paymentOption"].includes(name || "")) {
-        // When payment option changes for small funds, calculate and show result
-        if (
-          form.watch("additionalPensionFunds") <= 10000 &&
-          form.watch("paymentOption")
-        ) {
-          const inputData: RetirementInputs = {
-            dateOfBirth: form.getValues("dateOfBirth"),
-            gender: form.getValues("gender"),
-            workExperienceYears: form.getValues("workExperienceYears"),
-            workExperienceMonths: form.getValues("workExperienceMonths"),
-            retirementDate: form.getValues("retirementDate"),
-            additionalPensionFunds: form.getValues("additionalPensionFunds"),
-            pensionFunder: form.getValues("pensionFunder"),
-            nationalPensionFunds: 0, // Not used for small funds
-            paymentOption: form.getValues("paymentOption"),
-          };
-
-          const result = calculateRetirement(inputData);
-          setCalculationResult(result);
-
-          setTimeout(() => {
-            const resultElement = document.getElementById("calculation-result");
-            if (resultElement) {
-              resultElement.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }
-          }, 100);
-        }
       }
     });
 
@@ -612,6 +617,49 @@ export default function RetirementCalculator() {
   ]);
 
   const onSubmit = (data: FormValues) => {
+    if (showSmallFundOptions) {
+      console.log("HELLO FROM THE MONTHLY TEAM");
+      return;
+    }
+    let result = 0;
+    switch (data.selectedOption) {
+      case "option1":
+        result = calculateMonthlySumF6(
+          data.additionalPensionFunds,
+          calculatedAge,
+          pensionFunders[data.pensionFunder],
+        );
+        console.log("HELLO FROM THE OPTION 1 TEAM", result);
+        return;
+      case "option2":
+        result = calculateMonthlyGuaranteedSumG6(
+          data.additionalPensionFunds,
+          calculatedAge,
+          pensionFunders[data.pensionFunder],
+          data.periodYears
+        );
+        console.log("HELLO FROM THE OPTION 2 TEAM", result);
+        return;
+
+      case "option3":
+        console.log('hello');
+        
+        result = calculateMonthlyScheduledSumH6(
+          data.additionalPensionFunds,
+          calculatedAge,
+          pensionFunders[data.pensionFunder],
+          data.installmentPeriod,
+          data.installmentAmount
+        );
+        console.log("HELLO FROM THE OPTION 3 TEAM", result);
+        return;
+
+      default:
+        console.log("SOMETHIGNS WRONG");
+        return;
+    }
+    /**
+     * 
     const inputData: RetirementInputs = {
       dateOfBirth: data.dateOfBirth,
       gender: data.gender,
@@ -621,18 +669,18 @@ export default function RetirementCalculator() {
       additionalPensionFunds: data.additionalPensionFunds,
       pensionFunder: data.pensionFunder,
       nationalPensionFunds: data.nationalPensionFunds,
-      paymentOption: data.paymentOption,
     };
-
+    
     const result = calculateRetirement(inputData);
     setCalculationResult(result);
-
+    
     setTimeout(() => {
       const resultElement = document.getElementById("calculation-result");
       if (resultElement) {
         resultElement.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100);
+    */
   };
 
   function PensionTooltip() {
@@ -1077,30 +1125,73 @@ export default function RetirementCalculator() {
                           className="space-y-4"
                         >
                           <div className="space-y-2">
-                            <Label htmlFor="paymentOption">
-                              Опция за плащане
-                            </Label>
-                            <Controller
-                              control={form.control}
-                              name="paymentOption"
-                              render={({ field }) => (
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value}
+                            <Label>Опция за плащане</Label>
+
+                            {showOneTimePaymentOption ? (
+                              <div className="flex flex-col">
+                                <div className="text-center pb-3">
+                                  <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
+                                    Имате право на еднократно плащане
+                                  </span>
+                                </div>
+                                <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
+                                  <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
+                                    <div className="text-3xl font-bold mb-2">
+                                      {formatCurrency(
+                                        form.watch("additionalPensionFunds") ??
+                                          0,
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            ) : (
+                              <>
+                                <Alert
+                                  variant={"default"}
+                                  className={cn(
+                                    "mt-4 flex items-center",
+
+                                    "bg-blue-50 text-blue-600 border-blue-200",
+                                  )}
                                 >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Изберете опция за плащане" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {paymentOptions.map((option) => (
-                                      <SelectItem key={option} value={option}>
-                                        {option}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            />
+                                  <InfoIcon className="h-5 w-5 text-blue-600 mr-2 shrink-0" />
+                                  <AlertDescription className="text-sm">
+                                    Имате право на разсрочена пенсия
+                                  </AlertDescription>
+                                </Alert>
+                                <Controller
+                                  control={form.control}
+                                  name="monthlyPaymentForSmallFunds"
+                                  render={({ field }) => (
+                                    <Input
+                                      id="workExperienceMonths"
+                                      type="number"
+                                      min={0}
+                                      max={11}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          parseInt(e.target.value) || 0,
+                                        )
+                                      }
+                                      value={
+                                        field.value === 0 ? "" : field.value
+                                      }
+                                      placeholder="Въведете месеци - TODO: добави валидация"
+                                    />
+                                  )}
+                                />
+                                {form.formState.errors
+                                  .monthlyPaymentForSmallFunds && (
+                                  <p className="text-sm text-destructive">
+                                    {
+                                      form.formState.errors
+                                        .monthlyPaymentForSmallFunds.message
+                                    }
+                                  </p>
+                                )}
+                              </>
+                            )}
                           </div>
                         </motion.div>
                       )}
@@ -1147,10 +1238,10 @@ export default function RetirementCalculator() {
                                   htmlFor="option1"
                                   className="font-medium cursor-pointer"
                                 >
-                                  Опция 1: Еднократно плащане
+                                  Пожизнена пенсия без допълнителни условия
                                 </Label>
                                 <p className="text-sm text-muted-foreground">
-                                  Получаване на цялата сума наведнъж.
+                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
                                 </p>
                               </div>
                             </div>
@@ -1166,11 +1257,10 @@ export default function RetirementCalculator() {
                                   htmlFor="option2"
                                   className="font-medium cursor-pointer"
                                 >
-                                  Опция 2: Разсрочено плащане (фиксиран период)
+                                  Пожизнена пенсия с гарантиран период
                                 </Label>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  Получаване на средствата на равни месечни
-                                  вноски за фиксиран период.
+                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
                                 </p>
 
                                 <AnimatePresence>
@@ -1184,7 +1274,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2 ml-0 mt-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="periodYears">
-                                            Период (години)
+                                            Период на гаранция (в години)
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -1245,10 +1335,10 @@ export default function RetirementCalculator() {
                                   htmlFor="option3"
                                   className="font-medium cursor-pointer"
                                 >
-                                  Опция 3: Програмирано теглене
+                                  Пожизнена пенсия с разсрочено плащане
                                 </Label>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  Гъвкава схема на изплащане с променливи суми.
+                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
                                 </p>
 
                                 <AnimatePresence>
@@ -1263,7 +1353,8 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentPeriod">
-                                            Период на разсрочване
+                                            Брой и размер в лв. на разсрочени
+                                            плащания{" "}
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -1271,8 +1362,7 @@ export default function RetirementCalculator() {
                                             </TooltipTrigger>
                                             <TooltipContent>
                                               <p className="w-[200px] text-sm">
-                                                Периодът за получаване на
-                                                разсрочените плащания.
+                                                Години
                                               </p>
                                             </TooltipContent>
                                           </Tooltip>
@@ -1333,6 +1423,7 @@ export default function RetirementCalculator() {
                                               id="installmentAmount"
                                               type="number"
                                               min={1}
+                                              step="any"
                                               onChange={(e) =>
                                                 field.onChange(
                                                   parseFloat(e.target.value) ||
@@ -1421,7 +1512,20 @@ export default function RetirementCalculator() {
                         </p>
                       )}
                     </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
+              <AnimatePresence>
+                {showSubmitButton && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6"
+                  >
+                    <Separator />
                     <div>
                       <Button
                         type="submit"

@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import RetirementCalculator from "./RetirementCalculator";
 import InfoTab from "./InfoTab";
 import ContactsTab from "./ContactsTab";
-import { calculateMonthlyGuaranteedSumG6, calculateMonthlySumF6, calculateMonthlyScheduledSumH6 } from "@/utils/calculatorUtils";
 
 export default function Navigation() {
   const [activeTab, setActiveTab] = useState("info");
@@ -16,14 +15,6 @@ export default function Navigation() {
   >(undefined);
   const [animationTrigger, setAnimationTrigger] = useState<boolean>(true);
   const [navPosition, setNavPosition] = useState<string>("");
-
-  console.log(
-    calculateMonthlyGuaranteedSumG6(119, 65, 0.2, 10),
-    " ------ > ",
-    calculateMonthlySumF6(119, 65, 0.2),
-    ' ------- > ',
-    calculateMonthlyScheduledSumH6(119, 65, 0.2, 200, 150)
-  );
 
   useEffect(() => {
     const header = document.querySelector("header");

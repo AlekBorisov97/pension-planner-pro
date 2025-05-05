@@ -43,7 +43,6 @@ export interface RetirementInputs {
   additionalPensionFunds: number;
   pensionFunder: string;
   nationalPensionFunds: number;
-  paymentOption?: string;
 }
 
 export const pensionFunders: Record<string, number> = {
@@ -59,48 +58,12 @@ export const pensionFunders: Record<string, number> = {
   ДаллБогг: 0.5,
 };
 
-export const paymentOptions = ["Payment 1", "Payment 2"];
-
 export const calculateRetirement = (inputs: RetirementInputs) => {
-  // For small funds (≤10000), we'll calculate based only on the payment option
-  if (inputs.additionalPensionFunds <= 10000) {
-    let result = 0;
-
-    if (inputs.paymentOption === "Payment 1") {
-      result = inputs.additionalPensionFunds / 2;
-    } else if (inputs.paymentOption === "Payment 2") {
-      result = inputs.additionalPensionFunds / 3;
-    } else {
-      // Default calculation if no option selected
-      result = inputs.additionalPensionFunds;
-    }
-
-    return {
-      standardMonthlyPension: 0, // Not using national pension for small funds
-      enhancedMonthlyPension: result / 240,
-      difference: result / 240,
-      percentageIncrease: 100, // 100% increase as we're not using standard pension
-    };
-  }
-
-  // Calculate standard monthly pension (for larger funds)
-  const standardMonthlyPension = inputs.nationalPensionFunds / 240; // Simplified calculation
-
-  // Apply payment option modifiers for large funds
-  let enhancedMonthlyPension = standardMonthlyPension;
-
-  // For larger funds (>10000), use standard calculation
-  enhancedMonthlyPension += inputs.additionalPensionFunds / 240;
-
-  // Calculate difference and percentage increase
-  const difference = enhancedMonthlyPension - standardMonthlyPension;
-  const percentageIncrease = (difference / standardMonthlyPension) * 100;
-
   return {
-    standardMonthlyPension,
-    enhancedMonthlyPension,
-    difference,
-    percentageIncrease,
+    standardMonthlyPension: 0, // Not using national pension for small funds
+    enhancedMonthlyPension: 40,
+    difference: 240,
+    percentageIncrease: 100, // 100% increase as we're not using standard pension
   };
 };
 
@@ -193,7 +156,7 @@ const pv = (
 const sumDiscountedLifeExpectancy = (
   fromAge: number,
   toAge: number,
-  interest: number
+  interest: number,
 ): number => {
   let sum = 0;
 
@@ -207,15 +170,20 @@ const sumDiscountedLifeExpectancy = (
 };
 
 export const calculateLifeExpectancy = (age: number): number => {
+  if (!age) return 1;
   if (age === 0) return 1;
 
   const previous = calculateLifeExpectancy(age - 1);
-  const mortality = mortalityRate.find(rate => rate.age === age - 1)?.px.total ?? 1;
+  const mortality =
+    mortalityRate.find((rate) => rate.age === age - 1)?.px.total ?? 1;
 
   return previous * mortality;
 };
 
-export const calculateDiscountFactorSum = (years: number, interest: number): number => {
+export const calculateDiscountFactorSum = (
+  years: number,
+  interest: number,
+): number => {
   const monthlyRate = 1 / (1 + interest / 100);
   const compounded = Math.pow(monthlyRate, years);
   const monthlyCompounded = Math.pow(monthlyRate, 1 / 12);
@@ -231,20 +199,21 @@ export const calculateMonthlyScheduledSumH6 = (
   guaranteeMonths: number,
   monthlyPayout: number,
 ): number => {
-  const monthlyRate = (interest / 100) / 12;
+  const monthlyRate = interest / 100 / 12;
   const pvGuaranteed = pv(monthlyRate, guaranteeMonths, -monthlyPayout);
 
   const startAge = Math.round(age + guaranteeMonths / 12);
   const columnDSum = sumDiscountedLifeExpectancy(startAge, 100, interest);
 
-
   const currentB = calculateLifeExpectancy(age);
   const currentC = currentB / Math.pow(1 + interest / 100, age);
 
   const BwithGuarantee = calculateLifeExpectancy(startAge);
-  const CwithGuarantee = BwithGuarantee / Math.pow(1 + interest / 100, startAge);
+  const CwithGuarantee =
+    BwithGuarantee / Math.pow(1 + interest / 100, startAge);
 
-  const denominator = 12 * (columnDSum / currentC - (11 / 24) * CwithGuarantee / currentC);
+  const denominator =
+    12 * (columnDSum / currentC - ((11 / 24) * CwithGuarantee) / currentC);
 
   return (fullAmount - pvGuaranteed) / denominator;
 };
@@ -267,7 +236,8 @@ export const calculateMonthlyGuaranteedSumG6 = (
 
   const H = calculateDiscountFactorSum(guaranteeYears, interest);
 
-  const denominator = 12 * (columnDSum / currentC - (11 / 24) * guaranteedC / currentC) + H;
+  const denominator =
+    12 * (columnDSum / currentC - ((11 / 24) * guaranteedC) / currentC) + H;
 
   return fullAmount / denominator;
 };
@@ -286,7 +256,6 @@ export const calculateMonthlySumF6 = (
 
   return fullAmount / denominator;
 };
-
 
 /**
  * TABLE PARSER
