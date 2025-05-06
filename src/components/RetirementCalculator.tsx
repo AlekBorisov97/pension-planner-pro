@@ -766,6 +766,7 @@ export default function RetirementCalculator() {
                       name="workExperienceYears"
                       render={({ field }) => (
                         <Input
+                          onWheel={(e) => e.currentTarget.blur()}
                           id="workExperienceYears"
                           type="number"
                           min={0}
@@ -796,6 +797,7 @@ export default function RetirementCalculator() {
                       name="workExperienceMonths"
                       render={({ field }) => (
                         <Input
+                          onWheel={(e) => e.currentTarget.blur()}
                           id="workExperienceMonths"
                           type="number"
                           min={0}
@@ -990,6 +992,7 @@ export default function RetirementCalculator() {
                           name="additionalPensionFunds"
                           render={({ field }) => (
                             <Input
+                              onWheel={(e) => e.currentTarget.blur()}
                               id="additionalPensionFunds"
                               type="number"
                               min={0}
@@ -1103,6 +1106,7 @@ export default function RetirementCalculator() {
                                   name="monthlyPaymentForSmallFunds"
                                   render={({ field }) => (
                                     <Input
+                                      onWheel={(e) => e.currentTarget.blur()}
                                       id="workExperienceMonths"
                                       type="number"
                                       min={0}
@@ -1231,6 +1235,9 @@ export default function RetirementCalculator() {
                                           name="periodYears"
                                           render={({ field }) => (
                                             <Input
+                                              onWheel={(e) =>
+                                                e.currentTarget.blur()
+                                              }
                                               id="periodYears"
                                               type="number"
                                               min={1}
@@ -1310,6 +1317,9 @@ export default function RetirementCalculator() {
                                           name="installmentPeriod"
                                           render={({ field }) => (
                                             <Input
+                                              onWheel={(e) =>
+                                                e.currentTarget.blur()
+                                              }
                                               id="installmentPeriod"
                                               type="number"
                                               min={1}
@@ -1358,6 +1368,9 @@ export default function RetirementCalculator() {
                                           name="installmentAmount"
                                           render={({ field }) => (
                                             <Input
+                                              onWheel={(e) =>
+                                                e.currentTarget.blur()
+                                              }
                                               id="installmentAmount"
                                               type="number"
                                               min={1}
@@ -1423,6 +1436,7 @@ export default function RetirementCalculator() {
                         name="nationalPensionFunds"
                         render={({ field }) => (
                           <Input
+                            onWheel={(e) => e.currentTarget.blur()}
                             id="nationalPensionFunds"
                             type="number"
                             min={0}
@@ -1451,6 +1465,7 @@ export default function RetirementCalculator() {
                         name="nationalPensionFundsCutOut"
                         render={({ field }) => (
                           <Input
+                            onWheel={(e) => e.currentTarget.blur()}
                             id="nationalPensionFundsCutOut"
                             type="number"
                             min={0}
