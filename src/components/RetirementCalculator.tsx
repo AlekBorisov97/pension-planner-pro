@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, addYears } from "date-fns";
 import { bg } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,7 +67,8 @@ const TODAY = new Date();
 const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
 const MIN_RETIREMENT_DATE = new Date("1960-01-01");
 
-const formSchema = z.object({
+
+const formSchema = (minInstallmentAmount: number, maxInstallmentAmount: number) => z.object({
   dateOfBirth: z.date({
     required_error: "Моля, изберете дата на раждане.",
   }),
@@ -93,16 +94,23 @@ const formSchema = z.object({
   }),
   selectedOption: z.enum(["option1", "option2", "option3"]).optional(),
   periodYears: z
-    .number()
+    .number({
+      invalid_type_error: "Моля, въведете години",
+    })
     .int()
-    .min(1, "Периодът трябва да е поне 1 година")
+    .min(2, "Периодът трябва да между 2 и 10 години")
+    .max(10, "Периодът трябва да между 2 и 10 години")
     .optional(),
   installmentPeriod: z
-    .number()
+    .number({
+      invalid_type_error: "Моля, въведете години",
+    })
     .int()
-    .min(1, "Периодът трябва да е поне 1")
+    .min(1, " Периодът на разсрочване е от 1 до 240 месеца.")
+    .max(240, " Периодът на разсрочване е от 1 до 240 месеца.")
     .optional(),
-  installmentAmount: z.number().min(1, "Сумата трябва да е поне 1").optional(),
+  installmentAmount: z.number().min(minInstallmentAmount, `Сумата не може да бъде по-малка от ${formatCurrency(minInstallmentAmount)}`)
+  .max(maxInstallmentAmount, `Сумата не може да бъде по-голяма от ${formatCurrency(maxInstallmentAmount)}`).optional(),
   nationalPensionFunds: z.number().min(0, "Сумата трябва да е 0 или повече"),
   nationalPensionFundsCutOut: z
     .number()
@@ -114,7 +122,7 @@ const formSchema = z.object({
     .optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof formSchema>>;
 
 export default function RetirementCalculator() {
   const { toast } = useToast();
@@ -168,10 +176,15 @@ export default function RetirementCalculator() {
     }
   };
 
+  const [minInstallmentAmount, setMinInstallmentAmount] = useState(0);
+const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
+
   const savedData = loadSavedFormData();
 
+  const schema = useMemo(() => formSchema(minInstallmentAmount, maxInstallmentAmount), [minInstallmentAmount, maxInstallmentAmount]);
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       dateOfBirth: savedData.dateOfBirth || DEFAULT_BIRTH_DATE,
       gender: savedData.gender || undefined,
@@ -350,6 +363,8 @@ export default function RetirementCalculator() {
         pensionFunders[pensionFunder],
       );
       const minOSV = minimumOSVPension(retirementDate);
+      setMinInstallmentAmount(0.15 * minOSV)
+      setMaxInstallmentAmount(minOSV)
       const isMonthlySumLessThan15Percent = monthlySum < 0.15 * minOSV;
 
       // Check if we crossed the threshold
@@ -1298,8 +1313,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentPeriod">
-                                            Брой и размер в лв. на разсрочени
-                                            плащания{" "}
+                                            Периодът на разсрочване{" "}
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
