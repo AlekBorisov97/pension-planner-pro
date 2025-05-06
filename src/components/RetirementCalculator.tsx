@@ -641,7 +641,7 @@ export default function RetirementCalculator() {
           });
           return;
         }
-        if(!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
+        if (!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
           toast({
             title: "Прогнозна пенсия е непопълнена",
             variant: "destructive",
@@ -1198,24 +1198,25 @@ export default function RetirementCalculator() {
                                   </p>
                                 )}
 
-                                {!isNaN(partialCalculationResult) && partialCalculationResult && (
-                                  <div className="flex flex-col">
-                                    <div className="text-center pb-3">
-                                      <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
-                                        Първоначален размер:
-                                      </span>
+                                {!isNaN(partialCalculationResult) &&
+                                  partialCalculationResult && (
+                                    <div className="flex flex-col">
+                                      <div className="text-center pb-3">
+                                        <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
+                                          Първоначален размер:
+                                        </span>
+                                      </div>
+                                      <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
+                                        <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
+                                          <div className="text-3xl font-bold mb-2">
+                                            {formatCurrency(
+                                              partialCalculationResult,
+                                            )}
+                                          </div>
+                                        </CardContent>
+                                      </Card>
                                     </div>
-                                    <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
-                                      <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
-                                        <div className="text-3xl font-bold mb-2">
-                                          {formatCurrency(
-                                            partialCalculationResult,
-                                          )}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                )}
+                                  )}
                               </>
                             )}
                           </div>
