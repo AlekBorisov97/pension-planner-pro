@@ -9,7 +9,7 @@ import {
 import { formatCurrency } from "@/utils/calculatorUtils";
 import { cn } from "@/lib/utils";
 
-export interface CalculationResultProps {
+interface CalculationResultProps {
   result: {
     standardMonthlyPension?: number;
     enhancedMonthlyPension?: number;

@@ -49,7 +49,7 @@ import {
   calculateMonthlyGuaranteedSumG6,
   calculateMonthlyScheduledSumH6,
 } from "@/utils/calculatorUtils";
-import CalculationResult, { CalculationResultProps } from "./CalculationResult";
+import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -58,6 +58,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { title } from "process";
 
 const STORAGE_KEY = "retirement-calculator-form-data";
 const DEFAULT_BIRTH_DATE = new Date("1960-01-01");
@@ -190,24 +191,28 @@ export default function RetirementCalculator() {
     },
   });
 
+  const resetBigFundsInputs = () => {
+    form.setValue("periodYears", undefined);
+    form.setValue("installmentPeriod", undefined);
+    form.setValue("installmentAmount", undefined);
+  };
+
   // Reset form state when threshold is crossed
   const resetFormStateForThreshold = (isSmallFund: boolean) => {
-    console.log(
-      `Resetting form state for ${isSmallFund ? "small" : "large"} fund`,
-    );
-
     // Reset calculation results
     setCalculationResult(null);
 
     // Reset form fields that are specific to the path
     if (isSmallFund) {
       // For small funds (≤10000), reset large fund specific fields
+      console.log("HERE");
+
       form.setValue("selectedOption", undefined);
       form.setValue("periodYears", undefined);
       form.setValue("installmentPeriod", undefined);
       form.setValue("installmentAmount", undefined);
-      form.setValue("nationalPensionFunds", 0);
-      form.setValue("nationalPensionFundsCutOut", 0);
+      form.setValue("nationalPensionFunds", undefined);
+      form.setValue("nationalPensionFundsCutOut", undefined);
 
       // Reset UI states for large funds
       setShowOptionDropdown(false);
@@ -215,7 +220,6 @@ export default function RetirementCalculator() {
       setShowSmallFundOptions(true);
       setStep(2);
     } else {
-      // For large funds (>10000), reset small fund specific fields
       form.setValue("monthlyPaymentForSmallFunds", undefined);
 
       // Reset UI states for small funds
@@ -370,10 +374,6 @@ export default function RetirementCalculator() {
           setShowOneTimePaymentOption(false);
           setShowSubmitButton(true);
         }
-      } else {
-        const options = form.watch("selectedOption");
-        if (options) setShowSubmitButton(true);
-        else setShowSubmitButton(false);
       }
 
       // Update threshold state for future comparison
@@ -401,65 +401,17 @@ export default function RetirementCalculator() {
     }
   };
 
-  // Check if option-specific fields are completed
   const checkOptionFieldsComplete = () => {
-    if (step < 3) return; // Only check when we're actually on the options step
+    if (step < 3) return;
 
-    const additionalFunds = form.watch("additionalPensionFunds") || 0;
     const selectedOption = form.watch("selectedOption");
-    console.log("Checking option fields, selected option:", selectedOption);
-
-    // For small funds (≤10000), we don't show national pension step
-    if (additionalFunds <= 10000) {
-      console.log("Funds ≤ 10000, not showing national pension step");
-      setShowNationalPensionStep(false);
-      return;
-    }
-
-    // For Option 1 with large funds, show national pension step immediately
-    if (selectedOption === "option1") {
+    if (selectedOption) {
       console.log("Option 1 selected, showing national pension step");
       setShowNationalPensionStep(true);
       setStep(4);
       return;
     }
-
-    if (selectedOption === "option2") {
-      const periodYears = form.watch("periodYears");
-      console.log("Option 2 selected, period years:", periodYears);
-
-      if (periodYears && periodYears > 0) {
-        console.log("Period years valid, showing national pension step");
-        setShowNationalPensionStep(true);
-        setStep(4);
-      } else {
-        setShowNationalPensionStep(false);
-      }
-    }
-
-    if (selectedOption === "option3") {
-      const installmentPeriod = form.watch("installmentPeriod");
-      const installmentAmount = form.watch("installmentAmount");
-      console.log(
-        "Option 3 selected, period:",
-        installmentPeriod,
-        "amount:",
-        installmentAmount,
-      );
-
-      if (
-        installmentPeriod &&
-        installmentPeriod > 0 &&
-        installmentAmount &&
-        installmentAmount > 0
-      ) {
-        console.log("Installment fields valid, showing national pension step");
-        setShowNationalPensionStep(true);
-        setStep(4);
-      } else {
-        setShowNationalPensionStep(false);
-      }
-    }
+    setShowNationalPensionStep(false);
   };
 
   useEffect(() => {
@@ -497,6 +449,11 @@ export default function RetirementCalculator() {
       ) {
         checkOptionFieldsComplete();
       }
+
+      if (["selectedOption"].includes(name)) {
+        resetBigFundsInputs();
+        if (formValues.selectedOption) setShowSubmitButton(true);
+      }
     });
 
     // Initial check
@@ -526,17 +483,6 @@ export default function RetirementCalculator() {
           `Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`,
         );
         resetFormStateForThreshold(isSmallFund);
-
-        // Show toast notification about the reset
-        toast({
-          title: isSmallFund
-            ? "Намалена сума на фонда"
-            : "Увеличена сума на фонда",
-          description: isSmallFund
-            ? "Формулярът е нулиран за малки фондове под 10,000 лв."
-            : "Формулярът е нулиран за големи фондове над 10,000 лв.",
-          duration: 5000,
-        });
       }
 
       // Update threshold state
@@ -601,17 +547,6 @@ export default function RetirementCalculator() {
 
   // Separate effect for option-specific fields
   useEffect(() => {
-    const selectedOption = form.watch("selectedOption");
-    const additionalFunds = form.watch("additionalPensionFunds") || 0;
-
-    // Skip if not on option 2 or 3, or if it's a small fund
-    if (
-      additionalFunds <= 10000 ||
-      (selectedOption !== "option2" && selectedOption !== "option3")
-    ) {
-      return;
-    }
-
     // Reset calculation result when option-specific fields change
     setCalculationResult(null);
 
@@ -623,10 +558,8 @@ export default function RetirementCalculator() {
   ]);
 
   const onSubmit = (data: FormValues) => {
-    if (showSmallFundOptions) {
-      console.log("HELLO FROM THE MONTHLY TEAM");
-      return;
-    }
+    if (showSmallFundOptions) return;
+
     let result = 0;
     switch (data.selectedOption) {
       case "option1":
@@ -635,19 +568,32 @@ export default function RetirementCalculator() {
           calculatedAge,
           pensionFunders[data.pensionFunder],
         );
-        console.log("HELLO FROM THE OPTION 1 TEAM", result);
         break;
       case "option2":
+        if (!data.periodYears) {
+          toast({
+            title: "Период е непопълнен",
+            variant: "destructive",
+            duration: 2000,
+          });
+          return;
+        }
         result = calculateMonthlyGuaranteedSumG6(
           data.additionalPensionFunds,
           calculatedAge,
           pensionFunders[data.pensionFunder],
           data.periodYears,
         );
-        console.log("HELLO FROM THE OPTION 2 TEAM", result);
         break;
       case "option3":
-        console.log("hello");
+        if (!data.installmentPeriod || !data.installmentAmount) {
+          toast({
+            title: "Период и/или сума са непопълнени",
+            variant: "destructive",
+            duration: 2000,
+          });
+          return;
+        }
 
         result = calculateMonthlyScheduledSumH6(
           data.additionalPensionFunds,
@@ -656,11 +602,10 @@ export default function RetirementCalculator() {
           data.installmentPeriod,
           data.installmentAmount,
         );
-        console.log("HELLO FROM THE OPTION 3 TEAM", result);
         break;
 
       default:
-        console.log("SOMETHIGNS WRONG");
+        console.error("SOMETHIGNS WRONG");
         return;
     }
 
