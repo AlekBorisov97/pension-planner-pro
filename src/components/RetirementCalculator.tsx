@@ -1198,7 +1198,7 @@ export default function RetirementCalculator() {
                                   </p>
                                 )}
 
-                                {partialCalculationResult && (
+                                {!isNaN(partialCalculationResult) && partialCalculationResult && (
                                   <div className="flex flex-col">
                                     <div className="text-center pb-3">
                                       <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
