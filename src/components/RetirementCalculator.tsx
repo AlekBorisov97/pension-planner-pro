@@ -67,60 +67,79 @@ const TODAY = new Date();
 const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
 const MIN_RETIREMENT_DATE = new Date("1960-01-01");
 
-
-const formSchema = (minInstallmentAmount: number, maxInstallmentAmount: number) => z.object({
-  dateOfBirth: z.date({
-    required_error: "Моля, изберете дата на раждане.",
-  }),
-  gender: z.enum(["male", "female"], {
-    required_error: "Моля, изберете пол.",
-  }),
-  workExperienceYears: z
-    .number()
-    .int()
-    .min(0, "Годините трябва да са 0 или повече")
-    .max(80, "Годините трябва да са 80 или по-малко"),
-  workExperienceMonths: z
-    .number()
-    .int()
-    .min(0, "Месеците трябва да са 0 или повече")
-    .max(11, "Месеците трябва да са 11 или по-малко"),
-  retirementDate: z.date({
-    required_error: "Моля, изберете дата на пенсиониране.",
-  }),
-  additionalPensionFunds: z.number().min(0, "Сумата трябва да е 0 или повече"),
-  pensionFunder: z.string({
-    required_error: "Моля, изберете пенсионен фонд.",
-  }),
-  selectedOption: z.enum(["option1", "option2", "option3"]).optional(),
-  periodYears: z
-    .number({
-      invalid_type_error: "Моля, въведете години",
-    })
-    .int()
-    .min(2, "Периодът трябва да между 2 и 10 години")
-    .max(10, "Периодът трябва да между 2 и 10 години")
-    .optional(),
-  installmentPeriod: z
-    .number({
-      invalid_type_error: "Моля, въведете години",
-    })
-    .int()
-    .min(1, " Периодът на разсрочване е от 1 до 240 месеца.")
-    .max(240, " Периодът на разсрочване е от 1 до 240 месеца.")
-    .optional(),
-  installmentAmount: z.number().min(minInstallmentAmount, `Сумата не може да бъде по-малка от ${formatCurrency(minInstallmentAmount)}`)
-  .max(maxInstallmentAmount, `Сумата не може да бъде по-голяма от ${formatCurrency(maxInstallmentAmount)}`).optional(),
-  nationalPensionFunds: z.number().min(0, "Сумата трябва да е 0 или повече"),
-  nationalPensionFundsCutOut: z
-    .number()
-    .min(0, "Сумата трябва да е 0 или повече"),
-  monthlyPaymentForSmallFunds: z
-    .number()
-    .int()
-    .min(1, "Периодът трябва да е поне 1 месец")
-    .optional(),
-});
+const formSchema = (
+  minInstallmentAmount: number,
+  maxInstallmentAmount: number,
+) =>
+  z.object({
+    dateOfBirth: z.date({
+      required_error: "Моля, изберете дата на раждане.",
+    }),
+    gender: z.enum(["male", "female"], {
+      required_error: "Моля, изберете пол.",
+    }),
+    workExperienceYears: z
+      .number()
+      .int()
+      .min(0, "Годините трябва да са 0 или повече")
+      .max(80, "Годините трябва да са 80 или по-малко"),
+    workExperienceMonths: z
+      .number({
+        invalid_type_error: "Моля, въведете месеци",
+      })
+      .int()
+      .optional(),
+    retirementDate: z.date({
+      required_error: "Моля, изберете дата на пенсиониране.",
+    }),
+    additionalPensionFunds: z
+      .number()
+      .min(0, "Сумата трябва да е 0 или повече"),
+    pensionFunder: z.string({
+      required_error: "Моля, изберете пенсионен фонд.",
+    }),
+    selectedOption: z.enum(["option1", "option2", "option3"]).optional(),
+    periodYears: z
+      .number({
+        invalid_type_error: "Моля, въведете години",
+      })
+      .int()
+      .min(2, "Периодът трябва да между 2 и 10 години")
+      .max(10, "Периодът трябва да между 2 и 10 години")
+      .optional(),
+    installmentPeriod: z
+      .number({
+        invalid_type_error: "Моля, въведете години",
+      })
+      .int()
+      .min(1, " Периодът на разсрочване е от 1 до 240 месеца.")
+      .max(240, " Периодът на разсрочване е от 1 до 240 месеца.")
+      .optional(),
+    installmentAmount: z
+      .number()
+      .min(
+        minInstallmentAmount,
+        `Сумата не може да бъде по-малка от ${formatCurrency(minInstallmentAmount)}`,
+      )
+      .max(
+        maxInstallmentAmount,
+        `Сумата не може да бъде по-голяма от ${formatCurrency(maxInstallmentAmount)}`,
+      )
+      .optional(),
+    nationalPensionFunds: z
+      .number()
+      .min(0, "Сумата трябва да е 0 или повече")
+      .optional(),
+    nationalPensionFundsCutOut: z
+      .number()
+      .min(0, "Сумата трябва да е 0 или повече")
+      .optional(),
+    monthlyPaymentForSmallFunds: z
+      .number()
+      .int()
+      .min(1, "Периодът трябва да е поне 1 месец")
+      .optional(),
+  });
 
 type FormValues = z.infer<ReturnType<typeof formSchema>>;
 
@@ -130,6 +149,13 @@ export default function RetirementCalculator() {
     standardMonthlyPension: number;
     enhancedMonthlyPension: number;
   } | null>(null);
+  const [partialCalculationResult, setPartialCalculationResult] = useState<
+    number | null
+  >(null);
+  const [
+    showMonthlyPaymentForSmallFundsError,
+    setShowMonthlyPaymentForSmallFundsError,
+  ] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   const [isRetirementEligible, setIsRetirementEligible] = useState<
@@ -177,11 +203,14 @@ export default function RetirementCalculator() {
   };
 
   const [minInstallmentAmount, setMinInstallmentAmount] = useState(0);
-const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
+  const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
 
   const savedData = loadSavedFormData();
 
-  const schema = useMemo(() => formSchema(minInstallmentAmount, maxInstallmentAmount), [minInstallmentAmount, maxInstallmentAmount]);
+  const schema = useMemo(
+    () => formSchema(minInstallmentAmount, maxInstallmentAmount),
+    [minInstallmentAmount, maxInstallmentAmount],
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -205,6 +234,8 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
   });
 
   const resetBigFundsInputs = () => {
+    setPartialCalculationResult(null);
+    setShowMonthlyPaymentForSmallFundsError(false);
     form.setValue("periodYears", undefined);
     form.setValue("installmentPeriod", undefined);
     form.setValue("installmentAmount", undefined);
@@ -217,9 +248,6 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
 
     // Reset form fields that are specific to the path
     if (isSmallFund) {
-      // For small funds (≤10000), reset large fund specific fields
-      console.log("HERE");
-
       form.setValue("selectedOption", undefined);
       form.setValue("periodYears", undefined);
       form.setValue("installmentPeriod", undefined);
@@ -363,8 +391,8 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
         pensionFunders[pensionFunder],
       );
       const minOSV = minimumOSVPension(retirementDate);
-      setMinInstallmentAmount(0.15 * minOSV)
-      setMaxInstallmentAmount(minOSV)
+      setMinInstallmentAmount(0.15 * minOSV);
+      setMaxInstallmentAmount(minOSV);
       const isMonthlySumLessThan15Percent = monthlySum < 0.15 * minOSV;
 
       // Check if we crossed the threshold
@@ -400,7 +428,6 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
       setShowOptionDropdown(!isMonthlySumLessThan15Percent);
 
       if (!isMonthlySumLessThan15Percent) {
-        // For large funds (>10000)
         console.log("Setting step to 3 for large fund options");
         if (step < 3) setStep(3);
 
@@ -408,7 +435,6 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
         // It will be shown again only if appropriate option conditions are met
         setShowNationalPensionStep(false);
       } else {
-        // For small funds (≤10000)
         console.log("Setting step to 2 for small fund options");
         if (step > 2) setStep(2);
         setShowNationalPensionStep(false); // Don't show national pension step for small funds
@@ -506,10 +532,6 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
       // Update UI based on fund size
       if (isSmallFund) {
         // Set up UI for small funds
-        console.log(
-          "Additional funds <= 10000, showing small fund options:",
-          additionalFunds,
-        );
         setShowOptionDropdown(false);
         setShowSmallFundOptions(true);
         setShowNationalPensionStep(false);
@@ -517,11 +539,6 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
           setStep(2);
         }
       } else {
-        // Set up UI for large funds
-        console.log(
-          "Additional funds > 10000, showing large fund options:",
-          additionalFunds,
-        );
         setShowOptionDropdown(true);
         setShowSmallFundOptions(false);
         if (step < 3) {
@@ -573,7 +590,22 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
   ]);
 
   const onSubmit = (data: FormValues) => {
-    if (showSmallFundOptions) return;
+    if (showSmallFundOptions) {
+      if (showOneTimePaymentOption) return;
+      const firstMonthlyPayment =
+        data.additionalPensionFunds / data.monthlyPaymentForSmallFunds;
+      if (
+        firstMonthlyPayment < minInstallmentAmount ||
+        firstMonthlyPayment > maxInstallmentAmount
+      ) {
+        setPartialCalculationResult(null);
+        setShowMonthlyPaymentForSmallFundsError(true);
+        return;
+      }
+      setShowMonthlyPaymentForSmallFundsError(false);
+      setPartialCalculationResult(firstMonthlyPayment);
+      return;
+    }
 
     let result = 0;
     switch (data.selectedOption) {
@@ -604,6 +636,14 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
         if (!data.installmentPeriod || !data.installmentAmount) {
           toast({
             title: "Период и/или сума са непопълнени",
+            variant: "destructive",
+            duration: 2000,
+          });
+          return;
+        }
+        if(!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
+          toast({
+            title: "Прогнозна пенсия е непопълнена",
             variant: "destructive",
             duration: 2000,
           });
@@ -1122,10 +1162,8 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
                                   render={({ field }) => (
                                     <Input
                                       onWheel={(e) => e.currentTarget.blur()}
-                                      id="workExperienceMonths"
+                                      id="monthlyPaymentForSmallFunds"
                                       type="number"
-                                      min={0}
-                                      max={11}
                                       onChange={(e) =>
                                         field.onChange(
                                           parseInt(e.target.value) || 0,
@@ -1134,7 +1172,7 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
                                       value={
                                         field.value === 0 ? "" : field.value
                                       }
-                                      placeholder="Въведете месеци - TODO: добави валидация"
+                                      placeholder="Въведете месеци"
                                     />
                                   )}
                                 />
@@ -1146,6 +1184,37 @@ const [maxInstallmentAmount, setMaxInstallmentAmount] = useState(1);
                                         .monthlyPaymentForSmallFunds.message
                                     }
                                   </p>
+                                )}
+
+                                {showMonthlyPaymentForSmallFundsError && (
+                                  <p className="text-sm text-destructive">
+                                    <div>
+                                      {`Сумата за месец трябва да е между ${formatCurrency(minInstallmentAmount)} и ${formatCurrency(maxInstallmentAmount)}`}
+                                    </div>
+                                    <div>
+                                      {form.watch("additionalPensionFunds") &&
+                                        `Периодът може да е между ${Math.ceil(form.watch("additionalPensionFunds") / maxInstallmentAmount)} и ${Math.floor(form.watch("additionalPensionFunds") / minInstallmentAmount)} месеца`}
+                                    </div>
+                                  </p>
+                                )}
+
+                                {partialCalculationResult && (
+                                  <div className="flex flex-col">
+                                    <div className="text-center pb-3">
+                                      <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
+                                        Първоначален размер:
+                                      </span>
+                                    </div>
+                                    <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
+                                      <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
+                                        <div className="text-3xl font-bold mb-2">
+                                          {formatCurrency(
+                                            partialCalculationResult,
+                                          )}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
                                 )}
                               </>
                             )}
