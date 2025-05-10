@@ -147,6 +147,7 @@ export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<{
     standardMonthlyPension: number;
     enhancedMonthlyPension: number;
+    showRecommend: boolean;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
     number | null
@@ -667,6 +668,7 @@ export default function RetirementCalculator() {
     setCalculationResult({
       standardMonthlyPension: data.nationalPensionFunds,
       enhancedMonthlyPension: data.nationalPensionFundsCutOut + result,
+      showRecommend: data.selectedOption != 'option3'
     });
     setTimeout(() => {
       const resultElement = document.getElementById("calculation-result");
