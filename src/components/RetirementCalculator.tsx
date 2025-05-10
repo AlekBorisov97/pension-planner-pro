@@ -159,8 +159,12 @@ export default function RetirementCalculator() {
   ] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
-  const [minWorkExperience, setMinWorkExperience] = useState<number | null>(null);
-  const [currentWorkExperience, setCurrentWorkExperience] = useState<number | null>(null);
+  const [minWorkExperience, setMinWorkExperience] = useState<number | null>(
+    null,
+  );
+  const [currentWorkExperience, setCurrentWorkExperience] = useState<
+    number | null
+  >(null);
 
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
@@ -346,7 +350,7 @@ export default function RetirementCalculator() {
           totalWorkExperience >= minWorkExperience,
       );
       setMinWorkExperience(minWorkExperience);
-      setCurrentWorkExperience(totalWorkExperience)
+      setCurrentWorkExperience(totalWorkExperience);
 
       if (
         step === 1 &&
@@ -363,7 +367,7 @@ export default function RetirementCalculator() {
     } else {
       setCalculatedAge(null);
       setMinWorkExperience(null);
-      setCurrentWorkExperience(null)
+      setCurrentWorkExperience(null);
       setIsTransferToNOIPossible(null);
       setIsExperienceEnough(null);
       setIsRetirementAge(null);

@@ -1,4 +1,3 @@
-
 import Navigation from "@/components/Navigation";
 
 const Index = () => {
