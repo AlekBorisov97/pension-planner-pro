@@ -150,14 +150,12 @@ const sumDiscountedLifeExpectancy = (
 };
 
 export const calculateLifeExpectancy = (age: number): number => {
-  let ageToCalc = Math.floor(age);
+  if (!age) return 1;
+  if (age === 0) return 1;
 
-  if (!ageToCalc) return 1;
-  if (ageToCalc === 0) return 1;
-
-  const previous = calculateLifeExpectancy(ageToCalc - 1);
+  const previous = calculateLifeExpectancy(age - 1);
   const mortality =
-    mortalityRate.find((rate) => rate.age === ageToCalc - 1)?.px.total ?? 1;
+    mortalityRate.find((rate) => rate.age === age - 1)?.px.total ?? 1;
 
   return previous * mortality;
 };
