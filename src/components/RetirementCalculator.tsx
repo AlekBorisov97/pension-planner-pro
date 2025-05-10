@@ -159,7 +159,8 @@ export default function RetirementCalculator() {
   ] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
-  const [minRetirementAge, setMinRetirementAge] = useState<number | null>(null);
+  const [minWorkExperience, setMinWorkExperience] = useState<number | null>(null);
+  const [currentWorkExperience, setCurrentWorkExperience] = useState<number | null>(null);
 
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
@@ -344,7 +345,8 @@ export default function RetirementCalculator() {
         ageAtRetirement >= minRetirementAge &&
           totalWorkExperience >= minWorkExperience,
       );
-      setMinRetirementAge(minRetirementAge);
+      setMinWorkExperience(minWorkExperience);
+      setCurrentWorkExperience(totalWorkExperience)
 
       if (
         step === 1 &&
@@ -360,7 +362,8 @@ export default function RetirementCalculator() {
       }
     } else {
       setCalculatedAge(null);
-      setMinRetirementAge(null);
+      setMinWorkExperience(null);
+      setCurrentWorkExperience(null)
       setIsTransferToNOIPossible(null);
       setIsExperienceEnough(null);
       setIsRetirementAge(null);
@@ -943,8 +946,8 @@ export default function RetirementCalculator() {
                         )}
                         <AlertDescription className="text-sm">
                           {isRetirementAge
-                            ? `Към избраната дата имате навършени години за пенсия. Необходимият стаж за пенсия е ${formatYearsAndMonths(minRetirementAge)}`
-                            : `Към избраната дата нямате навършени години за пенсия. Не ви достигат ${formatYearsAndMonths(minRetirementAge - calculatedAge)} стаж за пенсия.`}
+                            ? `Към избраната дата имате навършени години за пенсия.`
+                            : `Към избраната дата нямате навършени години за пенсия.`}
                         </AlertDescription>
                       </Alert>
                       {isRetirementAge && (
@@ -966,8 +969,8 @@ export default function RetirementCalculator() {
                           )}
                           <AlertDescription className="text-sm">
                             {isExperienceEnough
-                              ? `Към избраната дата имате необходимия стаж за пенсия.`
-                              : `Към избраната дата нямате необходимия стаж за пенсия.`}
+                              ? `Към избраната дата имате необходимия стаж за пенсия. Необходимият стаж за пенсия е ${formatYearsAndMonths(minWorkExperience)}`
+                              : `Към избраната дата нямате необходимия стаж за пенсия. Не ви достигат ${formatYearsAndMonths(minWorkExperience - currentWorkExperience)} стаж за пенсия.`}
                           </AlertDescription>
                         </Alert>
                       )}
