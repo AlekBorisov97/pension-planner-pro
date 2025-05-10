@@ -20,7 +20,7 @@ export default function InfoTab({
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col items-center text-center space-y-6 py-8 mb-8">
         <h1 className="text-4xl font-bold tracking-tight text-primary">
-          Направете избор за Вашето пенсиониране
+          Направете избор за Вашата пенсия
         </h1>
         <p className="text-xl max-w-2xl text-muted-foreground">
           С помощта на нашия пенсионен калкулатор, сравнете дали във Вашия
@@ -50,14 +50,25 @@ export default function InfoTab({
               Можете да проверите какъв е размерът на Вашата държавна пенсия на
               сайта на НОИ{" "}
               <a
-                href="https://www.nssi.bg/"
+                href="https://reps.nssi.bg/PensionsCalc/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline text-primary hover:opacity-80"
+                className="underline text-primary hover:opacity-80 font-semibold"
               >
                 тук
               </a>{" "}
               (изисква се ПИК на НОИ).
+            </p>
+            <p className="text-muted-foreground">
+              Ако нямате издаден ПИК на НОИ, можете да заявите такъв {" "}
+              <a
+                href="https://reps.nssi.bg/epik/(S(zwcxdghyeyshsigi3yvfqkrz))/NSSIePIK.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80 font-semibold"
+              >
+                тук.
+              </a>
             </p>
           </CardContent>
         </Card>
@@ -72,21 +83,25 @@ export default function InfoTab({
           <CardContent>
             <p className="text-muted-foreground">
               Можете да проверите какъв е размерът на Вашата втора пенсия с
-              помощта на нашия{" "}
-              <span
-                onClick={onGoToCalculator}
-                className="underline cursor-pointer text-primary hover:opacity-80"
-              >
-                калкулатор
-              </span>{" "}
-              или на сайта на Вашия УПФ{" "}
+              помощта на нашия калкулатор или на сайта на Вашия УПФ{" "}
               <span
                 onClick={onGoToContacts}
-                className="underline cursor-pointer text-primary hover:opacity-80"
+                className="underline cursor-pointer text-primary hover:opacity-80 font-semibold"
               >
                 тук
               </span>
               .
+            </p>
+            <p className="text-muted-foreground">
+              Ако не знаете кой е вашият настоящ УПФ, можете да направите проверка {" "}
+              <a
+                href="https://portal.nra.bg/details/report-dzpo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary hover:opacity-80 font-semibold"
+              >
+                тук.
+              </a>
             </p>
           </CardContent>
         </Card>
@@ -106,7 +121,7 @@ export default function InfoTab({
               пълен размер{" "}
               <span
                 onClick={onGoToCalculator}
-                className="underline cursor-pointer text-primary hover:opacity-80"
+                className="underline cursor-pointer text-primary hover:opacity-80 font-semibold"
               >
                 тук
               </span>{" "}
@@ -143,13 +158,14 @@ export default function InfoTab({
                 <li className="ml-2 pl-6">
                   Допълнително задължително пенсионно осигуряване (ДЗПО), което
                   се извършва чрез частни универсални пенсионни фондове (УПФ).
+                  <br />
                   Ако не сте сигурни в кой УПФ се осигурявате, можете да
                   направите проверка на сайта на НАП{" "}
                   <a
                     href="https://nra.bg/wps/portal/nra/nachalo"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-primary hover:opacity-80"
+                    className="underline text-primary hover:opacity-80  font-semibold"
                   >
                     тук
                   </a>{" "}
@@ -158,12 +174,6 @@ export default function InfoTab({
                   Ви праща ежегодно по пощата (или мейл);
                 </li>
               </ul>
-              Законът предвижда и изключения от горните два случая на пенсионно
-              осигуряване – напр. за хора, работещи при първа или втора
-              категория труд, за определени професии като военнослужещи,
-              държавни служители, морски лица, работещи в културни организации,
-              учители, съдии и т.н., които трябва да консултират конкретно в
-              техния случай какви са изискванията при пенсиониране;
             </p>
           </div>
 
@@ -176,15 +186,14 @@ export default function InfoTab({
               необходими две неща:
               <ul className="list-disc list-inside text-muted-foreground leading-relaxed mt-2">
                 <li className="ml-2 pl-6">
-                  Да е навършил възраст за пенсиониране. Тук можете да проверите
-                  дали сте навършили възрастта за пенсиониране;
+                  Да е навършил възраст за пенсиониране.
                 </li>
                 <li className="ml-2 pl-6">
-                  Да има определения от закона осигурителен стаж. Тук можете да
-                  проверите дали имате изискуемия от закона осигурителен стаж;
+                  Да има определения от закона осигурителен стаж.
                 </li>
               </ul>
-              За да добие човек право на пенсия от УПФ е достатъчно само да
+              С помощта на нашия калкулатор можете да проверите дали сте навършили възрастта за пенсиониране и дали имате изискуемия от закона осигурителен стаж за пенсия от НОИ.
+              За да добие човек право на пенсия от УПФ е достатъчно само да е
               навършил възрастта за пенсиониране.
             </p>
           </div>
@@ -248,19 +257,19 @@ export default function InfoTab({
 
           <div>
             <h3 className="text-lg font-medium mb-2 text-primary/90">
-              Избирайте!
+              Изберете
             </h3>
             <p className="text-muted-foreground leading-relaxed">
               Така се стига до въпроса дали „Две пенсии са повече от една?“ и
               отговорът е, зависи:
               <ul className="list-disc list-inside text-muted-foreground leading-relaxed">
                 <li className="ml-2 pl-6">
-                  Ако частното ПОД Ви предлага втора пенсия, която е по-голяма
+                  Ако частният УПФ Ви предлага втора пенсия, която е по-голяма
                   от намалението на държавната пенсия от НОИ, тогава двете
                   пенсии са повече от една;
                 </li>
                 <li className="ml-2 pl-6">
-                  Ако частното ПОД Ви предлага втора пенсия, която е по-малка от
+                  Ако частният УПФ Ви предлага втора пенсия, която е по-малка от
                   намалението на държавната пенсия от НОИ, тогава двете пенсии
                   са по-малко от една;
                 </li>

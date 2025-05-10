@@ -15,7 +15,7 @@ export default function ContactsTab({
 }) {
   const governmentInstitutions = [
     {
-      title: "Пенсионен калкулатор НОИ",
+      title: "Пенсионен калкулатор на НОИ",
       description: "Изисква се ПИК на НОИ",
       icon: FileText,
       link: "https://reps.nssi.bg/PensionsCalc/",
