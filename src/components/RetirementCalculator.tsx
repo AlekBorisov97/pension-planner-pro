@@ -108,11 +108,11 @@ const formSchema = (
       .optional(),
     installmentPeriod: z
       .number({
-        invalid_type_error: "Моля, въведете години",
+        invalid_type_error: "Моля, въведете период в месеци",
       })
       .int()
-      .min(1, " Периодът на разсрочване е от 1 до 240 месеца.")
-      .max(240, " Периодът на разсрочване е от 1 до 240 месеца.")
+      .min(1, "Периодът на разсрочване е от 1 до 240 месеца.")
+      .max(240, "Периодът на разсрочване е от 1 до 240 месеца.")
       .optional(),
     installmentAmount: z
       .number()
@@ -315,10 +315,18 @@ export default function RetirementCalculator() {
         }),
       );
 
-      const diffMs = retirement.getTime() - birthDate.getTime();
+      let ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
 
-      // Convert milliseconds to age in years (365.25 days to account for leap years)
-      const ageAtRetirement = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+      // Adjust if retirement date is before the birthday in the retirement year
+      const birthMonthDay = new Date(
+        retirement.getFullYear(),
+        birthDate.getMonth(),
+        birthDate.getDate(),
+      );
+
+      if (retirement < birthMonthDay) {
+        ageAtRetirement -= 1 / 12;
+      }
 
       setCalculatedAge(ageAtRetirement);
 
@@ -1025,13 +1033,13 @@ export default function RetirementCalculator() {
                   >
                     <Separator />
                     <h3 className="text-lg font-medium">
-                      Допълнителни пенсионни данни
+                      Размер на натрупани средства за втора пенсия
                     </h3>
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="additionalPensionFunds">
-                            Допълнителни пенсионни фондове (лв.)
+                            Сума по Вашата партида в УПФ (лв.)
                           </Label>
                         </div>
                         <Controller
@@ -1066,7 +1074,9 @@ export default function RetirementCalculator() {
 
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="pensionFunder">Пенсионен фонд</Label>
+                          <Label htmlFor="pensionFunder">
+                            Настоящ Универсален пенсионен фонд
+                          </Label>
                           <PensionTooltip />
                         </div>
                         <Controller
@@ -1113,7 +1123,10 @@ export default function RetirementCalculator() {
                           className="space-y-4"
                         >
                           <div className="space-y-2">
-                            <Label>Опция за плащане</Label>
+                            <Label>
+                              Според натрупаната сума по Вашата пенсионна
+                              партида:
+                            </Label>
 
                             {showOneTimePaymentOption ? (
                               <div className="flex flex-col">
@@ -1260,7 +1273,10 @@ export default function RetirementCalculator() {
                                   Пожизнена пенсия без допълнителни условия
                                 </Label>
                                 <p className="text-sm text-muted-foreground">
-                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
+                                  Това е пожизнената пенсия от УПФ с най-голям
+                                  размер, но при нея няма наследяване. В случай
+                                  на смърт на пенсионера наследниците не
+                                  получават нищо.
                                 </p>
                               </div>
                             </div>
@@ -1279,7 +1295,11 @@ export default function RetirementCalculator() {
                                   Пожизнена пенсия с гарантиран период
                                 </Label>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
+                                  При тази пожизнена пенсия, в случай на смърт
+                                  на пенсионера наследниците получават остатъка
+                                  до края на периода на гаранция. След края на
+                                  периода на гаранция размерът на пенсията се
+                                  запазва, но вече няма наследяване.
                                 </p>
 
                                 <AnimatePresence>
@@ -1360,7 +1380,13 @@ export default function RetirementCalculator() {
                                   Пожизнена пенсия с разсрочено плащане
                                 </Label>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  ТУК МОЖЕМ ДА СЛОЖИМ ДОПЪЛНИТЕЛНА ИНФОРМАЦИЯ
+                                  При тази пожизнена пенсия също има
+                                  наследяване, в случай на смърт на пенсионера
+                                  наследниците получават остатъка до края на
+                                  периода на разсрочване. След края на периода
+                                  на разсрочване сумата на пенсията се променя
+                                  съобразно остатъка по партидата на пенсионера,
+                                  но вече няма наследяване.
                                 </p>
 
                                 <AnimatePresence>
@@ -1582,7 +1608,7 @@ export default function RetirementCalculator() {
                         disabled={form.formState.isSubmitting}
                         className="mt-2"
                       >
-                        Изчисли
+                        Сравни
                       </Button>
                     </div>
                   </motion.div>
