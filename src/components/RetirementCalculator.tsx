@@ -58,14 +58,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { title } from "process";
 
 const STORAGE_KEY = "retirement-calculator-form-data";
 const DEFAULT_BIRTH_DATE = new Date("1960-01-01");
 const MIN_BIRTH_DATE = new Date("1960-01-01"); // No dates before 1960-01-01
 const TODAY = new Date();
 const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
-const MIN_RETIREMENT_DATE = new Date("1960-01-01");
+const MIN_RETIREMENT_DATE = new Date("2016-01-01");
 
 const formSchema = (
   minInstallmentAmount: number,
@@ -316,17 +315,10 @@ export default function RetirementCalculator() {
         }),
       );
 
-      let ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
+      const diffMs = retirement.getTime() - birthDate.getTime();
 
-      // Adjust if retirement date is before the birthday in the retirement year
-      const birthMonthDay = new Date(
-        retirement.getFullYear(),
-        birthDate.getMonth(),
-        birthDate.getDate(),
-      );
-      if (retirement < birthMonthDay) {
-        ageAtRetirement--;
-      }
+      // Convert milliseconds to age in years (365.25 days to account for leap years)
+      const ageAtRetirement = diffMs / (1000 * 60 * 60 * 24 * 365.25);
 
       setCalculatedAge(ageAtRetirement);
 
