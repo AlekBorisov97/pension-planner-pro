@@ -13,7 +13,7 @@ interface CalculationResultProps {
   result: {
     standardMonthlyPension?: number;
     enhancedMonthlyPension?: number;
-    showRecommend?: boolean
+    showRecommend?: boolean;
   };
 }
 
@@ -45,17 +45,20 @@ export default function CalculationResult({ result }: CalculationResultProps) {
               </div>
               <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow relative">
                 {result.enhancedMonthlyPension <
-                  result.standardMonthlyPension && result.showRecommend && (
-                  <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-md">
-                    ПРЕПОРЪЧИТЕЛНО
-                  </div>
-                )}
+                  result.standardMonthlyPension &&
+                  result.showRecommend && (
+                    <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-md">
+                      ПРЕПОРЪЧИТЕЛНО
+                    </div>
+                  )}
                 <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                   <div
                     className={cn(
                       "text-3xl font-bold mb-2",
                       result.enhancedMonthlyPension <
-                        result.standardMonthlyPension && result.showRecommend && "text-primary",
+                        result.standardMonthlyPension &&
+                        result.showRecommend &&
+                        "text-primary",
                     )}
                   >
                     {formatCurrency(result.standardMonthlyPension)}
@@ -73,17 +76,20 @@ export default function CalculationResult({ result }: CalculationResultProps) {
               </div>
               <Card className="flex-1 bg-white border border-primary/20 shadow-md hover:shadow-lg transition-shadow relative overflow-hidden">
                 {result.enhancedMonthlyPension >
-                  result.standardMonthlyPension && result.showRecommend && (
-                  <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-md">
-                    ПРЕПОРЪЧИТЕЛНО
-                  </div>
-                )}
+                  result.standardMonthlyPension &&
+                  result.showRecommend && (
+                    <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-md">
+                      ПРЕПОРЪЧИТЕЛНО
+                    </div>
+                  )}
                 <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                   <div
                     className={cn(
                       "text-3xl font-bold mb-2",
                       result.enhancedMonthlyPension >
-                        result.standardMonthlyPension && result.showRecommend && "text-primary",
+                        result.standardMonthlyPension &&
+                        result.showRecommend &&
+                        "text-primary",
                     )}
                   >
                     {formatCurrency(result.enhancedMonthlyPension)}

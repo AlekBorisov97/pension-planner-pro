@@ -320,9 +320,8 @@ export default function RetirementCalculator() {
       const diffMs = retirement.getTime() - birthDate.getTime();
 
       const ageAtRetirement = diffMs / (1000 * 60 * 60 * 24 * 365.25);
-      
-      setCalculatedAge(ageAtRetirement);
 
+      setCalculatedAge(ageAtRetirement);
 
       const minRetirementAge = getMinimumRetirementAge(
         retirement.getFullYear(),
@@ -378,7 +377,7 @@ export default function RetirementCalculator() {
         Math.floor(calculatedAge),
         pensionFunders[pensionFunder],
       );
-      
+
       const minOSV = minimumOSVPension(retirementDate);
       setMinInstallmentAmount(0.15 * minOSV);
       setMaxInstallmentAmount(minOSV);
@@ -656,7 +655,7 @@ export default function RetirementCalculator() {
     setCalculationResult({
       standardMonthlyPension: data.nationalPensionFunds,
       enhancedMonthlyPension: data.nationalPensionFundsCutOut + result,
-      showRecommend: data.selectedOption != 'option3'
+      showRecommend: data.selectedOption != "option3",
     });
     setTimeout(() => {
       const resultElement = document.getElementById("calculation-result");
@@ -1040,12 +1039,17 @@ export default function RetirementCalculator() {
                               onWheel={(e) => e.currentTarget.blur()}
                               id="additionalPensionFunds"
                               type="number"
+                              step="any"
                               min={0}
                               onChange={(e) => {
-                                const value = parseFloat(e.target.value) || 0;
-                                field.onChange(value);
-                                // Debug
-                                console.log("Input changed to:", value);
+                                if (e.target.value === "") {
+                                  field.onChange(0);
+                                  return;
+                                }
+                                if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
+                                  const value = parseFloat(e.target.value) || 0;
+                                  field.onChange(value);
+                                }
                               }}
                               value={field.value === 0 ? "" : field.value}
                               placeholder="Въведете сума"
@@ -1467,12 +1471,23 @@ export default function RetirementCalculator() {
                                               type="number"
                                               min={1}
                                               step="any"
-                                              onChange={(e) =>
-                                                field.onChange(
-                                                  parseFloat(e.target.value) ||
-                                                    "",
-                                                )
-                                              }
+                                              onChange={(e) => {
+                                                if (e.target.value === "") {
+                                                  field.onChange(0);
+                                                  return;
+                                                }
+                                                if (
+                                                  /^\d+(\.\d{0,2})?$/.test(
+                                                    e.target.value,
+                                                  )
+                                                ) {
+                                                  const value =
+                                                    parseFloat(
+                                                      e.target.value,
+                                                    ) || "";
+                                                  field.onChange(value);
+                                                }
+                                              }}
                                               value={field.value || ""}
                                               placeholder="Въведете сума"
                                               className="max-w-[200px]"
@@ -1532,9 +1547,17 @@ export default function RetirementCalculator() {
                             id="nationalPensionFunds"
                             type="number"
                             min={0}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
+                            step="any"
+                            onChange={(e) => {
+                              if (e.target.value === "") {
+                                field.onChange(0);
+                                return;
+                              }
+                              if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
+                                const value = parseFloat(e.target.value) || 0;
+                                field.onChange(value);
+                              }
+                            }}
                             value={field.value === 0 ? "" : field.value}
                             placeholder="Въведете сума в лева"
                           />
@@ -1560,10 +1583,18 @@ export default function RetirementCalculator() {
                             onWheel={(e) => e.currentTarget.blur()}
                             id="nationalPensionFundsCutOut"
                             type="number"
+                            step="any"
                             min={0}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
+                            onChange={(e) => {
+                              if (e.target.value === "") {
+                                field.onChange(0);
+                                return;
+                              }
+                              if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
+                                const value = parseFloat(e.target.value) || 0;
+                                field.onChange(value);
+                              }
+                            }}
                             value={field.value === 0 ? "" : field.value}
                             placeholder="Въведете сума в лева"
                           />
@@ -1598,7 +1629,7 @@ export default function RetirementCalculator() {
                         disabled={form.formState.isSubmitting}
                         className="mt-2"
                       >
-                        Сравни
+                        {showSmallFundOptions ? "Изчисли" : "Сравни"}
                       </Button>
                     </div>
                   </motion.div>
