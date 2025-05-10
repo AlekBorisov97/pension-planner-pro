@@ -344,7 +344,7 @@ export default function RetirementCalculator() {
         ageAtRetirement >= minRetirementAge &&
           totalWorkExperience >= minWorkExperience,
       );
-      setMinRetirementAge(minRetirementAge)
+      setMinRetirementAge(minRetirementAge);
 
       if (
         step === 1 &&
@@ -360,7 +360,7 @@ export default function RetirementCalculator() {
       }
     } else {
       setCalculatedAge(null);
-      setMinRetirementAge(null)
+      setMinRetirementAge(null);
       setIsTransferToNOIPossible(null);
       setIsExperienceEnough(null);
       setIsRetirementAge(null);
