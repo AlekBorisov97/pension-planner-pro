@@ -150,13 +150,15 @@ const sumDiscountedLifeExpectancy = (
 };
 
 export const calculateLifeExpectancy = (age: number): number => {
-  if (!age) return 1;
-  if (age === 0) return 1;
+  let ageToCalc = Math.floor(age)
+  
+  if (!ageToCalc) return 1;
+  if (ageToCalc === 0) return 1;
 
-  const previous = calculateLifeExpectancy(age - 1);
+  const previous = calculateLifeExpectancy(ageToCalc - 1);
   const mortality =
-    mortalityRate.find((rate) => rate.age === age - 1)?.px.total ?? 1;
-
+    mortalityRate.find((rate) => rate.age === ageToCalc - 1)?.px.total ?? 1;
+  
   return previous * mortality;
 };
 
@@ -231,7 +233,6 @@ export const calculateMonthlySumF6 = (
   const columnDSum = sumDiscountedLifeExpectancy(age, 100, interest);
   const currentB = calculateLifeExpectancy(age);
   const currentC = currentB / Math.pow(1 + interest / 100, age);
-
   const denominator = 12 * (columnDSum / currentC - 11 / 24);
 
   return fullAmount / denominator;

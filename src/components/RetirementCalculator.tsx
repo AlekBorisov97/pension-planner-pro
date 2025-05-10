@@ -158,6 +158,7 @@ export default function RetirementCalculator() {
   ] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
+
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
   >(null);
@@ -316,20 +317,12 @@ export default function RetirementCalculator() {
         }),
       );
 
-      let ageAtRetirement = retirement.getFullYear() - birthDate.getFullYear();
+      const diffMs = retirement.getTime() - birthDate.getTime();
 
-      // Adjust if retirement date is before the birthday in the retirement year
-      const birthMonthDay = new Date(
-        retirement.getFullYear(),
-        birthDate.getMonth(),
-        birthDate.getDate(),
-      );
-
-      if (retirement < birthMonthDay) {
-        ageAtRetirement -= 1 / 12;
-      }
-
+      const ageAtRetirement = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+      
       setCalculatedAge(ageAtRetirement);
+
 
       const minRetirementAge = getMinimumRetirementAge(
         retirement.getFullYear(),
@@ -378,19 +371,14 @@ export default function RetirementCalculator() {
     const additionalFunds = form.watch("additionalPensionFunds") || 0;
     const pensionFunder = form.watch("pensionFunder");
     const retirementDate = form.watch("retirementDate");
-    console.log(
-      "Check pension fund - funds:",
-      additionalFunds,
-      "funder:",
-      pensionFunder,
-    );
 
     if (additionalFunds > 0 && pensionFunder) {
       const monthlySum = calculateMonthlySumF6(
         additionalFunds,
-        calculatedAge,
+        Math.floor(calculatedAge),
         pensionFunders[pensionFunder],
       );
+      
       const minOSV = minimumOSVPension(retirementDate);
       setMinInstallmentAmount(0.15 * minOSV);
       setMaxInstallmentAmount(minOSV);
@@ -613,7 +601,7 @@ export default function RetirementCalculator() {
       case "option1":
         result = calculateMonthlySumF6(
           data.additionalPensionFunds,
-          calculatedAge,
+          Math.floor(calculatedAge),
           pensionFunders[data.pensionFunder],
         );
         break;
@@ -628,7 +616,7 @@ export default function RetirementCalculator() {
         }
         result = calculateMonthlyGuaranteedSumG6(
           data.additionalPensionFunds,
-          calculatedAge,
+          Math.floor(calculatedAge),
           pensionFunders[data.pensionFunder],
           data.periodYears,
         );
@@ -653,7 +641,7 @@ export default function RetirementCalculator() {
 
         result = calculateMonthlyScheduledSumH6(
           data.additionalPensionFunds,
-          calculatedAge,
+          Math.floor(calculatedAge),
           pensionFunders[data.pensionFunder],
           data.installmentPeriod,
           data.installmentAmount,
