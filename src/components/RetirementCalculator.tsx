@@ -48,6 +48,7 @@ import {
   formatCurrency,
   calculateMonthlyGuaranteedSumG6,
   calculateMonthlyScheduledSumH6,
+  formatYearsAndMonths,
 } from "@/utils/calculatorUtils";
 import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
@@ -158,6 +159,7 @@ export default function RetirementCalculator() {
   ] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
+  const [minRetirementAge, setMinRetirementAge] = useState<number | null>(null);
 
   const [isRetirementEligible, setIsRetirementEligible] = useState<
     boolean | null
@@ -342,6 +344,7 @@ export default function RetirementCalculator() {
         ageAtRetirement >= minRetirementAge &&
           totalWorkExperience >= minWorkExperience,
       );
+      setMinRetirementAge(minRetirementAge)
 
       if (
         step === 1 &&
@@ -357,6 +360,7 @@ export default function RetirementCalculator() {
       }
     } else {
       setCalculatedAge(null);
+      setMinRetirementAge(null)
       setIsTransferToNOIPossible(null);
       setIsExperienceEnough(null);
       setIsRetirementAge(null);
@@ -939,8 +943,8 @@ export default function RetirementCalculator() {
                         )}
                         <AlertDescription className="text-sm">
                           {isRetirementAge
-                            ? `Към избраната дата имате навършени години за пенсия. `
-                            : `Към избраната дата нямате навършени години за пенсия. `}
+                            ? `Към избраната дата имате навършени години за пенсия. Необходимият стаж за пенсия е ${formatYearsAndMonths(minRetirementAge)}`
+                            : `Към избраната дата нямате навършени години за пенсия. Не ви достигат ${formatYearsAndMonths(minRetirementAge - calculatedAge)} стаж за пенсия.`}
                         </AlertDescription>
                       </Alert>
                       {isRetirementAge && (

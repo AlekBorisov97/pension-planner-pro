@@ -56,6 +56,15 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+export function formatYearsAndMonths(value: number): string {
+  const years = Math.floor(value);
+  const monthsDecimal = value - years;
+
+  const months = Math.round(monthsDecimal * 12);
+
+  return `${years} години и ${months} месеци`;
+}
+
 export const formatPercentage = (value: number): string => {
   return new Intl.NumberFormat("bg-BG", {
     style: "percent",
