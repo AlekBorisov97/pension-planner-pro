@@ -148,7 +148,10 @@ export default function RetirementCalculator() {
   const [calculationResult, setCalculationResult] = useState<{
     standardMonthlyPension: number;
     enhancedMonthlyPension: number;
+    variant3CurrentMonthlyPensionWish: number | undefined;
+    variant3CurrentMonthlyPensionWishMonths: number;
     showRecommend: boolean;
+    showSingleOption: boolean;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
     number | null
@@ -352,16 +355,9 @@ export default function RetirementCalculator() {
       setMinWorkExperience(minWorkExperience);
       setCurrentWorkExperience(totalWorkExperience);
 
-      if (
-        step === 1 &&
-        ageAtRetirement >= minRetirementAge &&
-        totalWorkExperience >= minWorkExperience
-      ) {
+      if (step === 1 && ageAtRetirement >= minRetirementAge) {
         setStep(2);
-      } else if (
-        ageAtRetirement < minRetirementAge ||
-        totalWorkExperience < minWorkExperience
-      ) {
+      } else if (ageAtRetirement < minRetirementAge) {
         setStep(1);
       }
     } else {
@@ -446,8 +442,7 @@ export default function RetirementCalculator() {
 
     const selectedOption = form.watch("selectedOption");
     if (selectedOption) {
-      console.log("Option 1 selected, showing national pension step");
-      setShowNationalPensionStep(true);
+      setShowNationalPensionStep(isRetirementEligible);
       setStep(4);
       return;
     }
@@ -564,10 +559,7 @@ export default function RetirementCalculator() {
 
     // For Option 1 with large funds, show national pension step immediately
     if (selectedOption === "option1") {
-      console.log(
-        "Option 1 selected, showing national pension step immediately",
-      );
-      setShowNationalPensionStep(true);
+      setShowNationalPensionStep(isRetirementEligible);
       setStep(4);
       return;
     }
@@ -640,15 +632,6 @@ export default function RetirementCalculator() {
           });
           return;
         }
-        if (!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
-          toast({
-            title: "Прогнозна пенсия е непопълнена",
-            variant: "destructive",
-            duration: 2000,
-          });
-          return;
-        }
-
         result = calculateMonthlyScheduledSumH6(
           data.additionalPensionFunds,
           Math.floor(calculatedAge),
@@ -656,6 +639,15 @@ export default function RetirementCalculator() {
           data.installmentPeriod,
           data.installmentAmount,
         );
+
+        if (result < minInstallmentAmount) {
+          toast({
+            title: `Сумата на пожизнената пенсия не може да е по-малка от ${formatCurrency(minInstallmentAmount)}. Моля изберете по-кратък срок за разсрочване И/ИЛИ по-малка разсрочена песния.`,
+            variant: "destructive",
+            duration: 4000,
+          });
+          return;
+        }
         break;
 
       default:
@@ -663,11 +655,41 @@ export default function RetirementCalculator() {
         return;
     }
 
-    setCalculationResult({
-      standardMonthlyPension: data.nationalPensionFunds,
-      enhancedMonthlyPension: data.nationalPensionFundsCutOut + result,
-      showRecommend: data.selectedOption != "option3",
-    });
+    if (isRetirementEligible) {
+      if (!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
+        toast({
+          title: "Прогнозна пенсия е непопълнена",
+          variant: "destructive",
+          duration: 2000,
+        });
+        return;
+      }
+      setCalculationResult({
+        standardMonthlyPension: data.nationalPensionFunds,
+        enhancedMonthlyPension: data.nationalPensionFundsCutOut + result,
+        showRecommend: data.selectedOption != "option3",
+        variant3CurrentMonthlyPensionWish:
+          data.selectedOption === "option3"
+            ? data.installmentAmount
+            : undefined,
+        variant3CurrentMonthlyPensionWishMonths:
+          data.selectedOption === "option3" ? data.installmentPeriod : 0,
+        showSingleOption: false,
+      });
+    } else {
+      setCalculationResult({
+        standardMonthlyPension: 0,
+        enhancedMonthlyPension: result,
+        showRecommend: false,
+        variant3CurrentMonthlyPensionWish:
+          data.selectedOption === "option3"
+            ? data.installmentAmount
+            : undefined,
+        variant3CurrentMonthlyPensionWishMonths:
+          data.selectedOption === "option3" ? data.installmentPeriod : 0,
+        showSingleOption: true,
+      });
+    }
     setTimeout(() => {
       const resultElement = document.getElementById("calculation-result");
       if (resultElement) {
@@ -973,8 +995,8 @@ export default function RetirementCalculator() {
                           )}
                           <AlertDescription className="text-sm">
                             {isExperienceEnough
-                              ? `Към избраната дата имате необходимия стаж за пенсия. Необходимият стаж за пенсия е ${formatYearsAndMonths(minWorkExperience)}`
-                              : `Към избраната дата нямате необходимия стаж за пенсия. Не ви достигат ${formatYearsAndMonths(minWorkExperience - currentWorkExperience)} стаж за пенсия.`}
+                              ? `Към избраната дата имате необходимия стаж за пенсия от НОИ. Необходимият стаж за пенсия е ${formatYearsAndMonths(minWorkExperience)}`
+                              : `Към избраната дата нямате необходимия стаж за пенсия от НОИ. Не ви достигат ${formatYearsAndMonths(minWorkExperience - currentWorkExperience)} стаж за пенсия.`}
                           </AlertDescription>
                         </Alert>
                       )}
@@ -1011,8 +1033,8 @@ export default function RetirementCalculator() {
                           )}
                           <AlertDescription className="text-sm">
                             {isTransferToNOIPossible === "available"
-                              ? `Срокът за прехвърляне в НОИ изтича на  `
-                              : `Срокът за прехвърляне в НОИ е изтекъл на `}
+                              ? `Срокът за прехвърляне на Вашите спестявания за втора пенсия от УПФ в НОИ изтича на  `
+                              : `Срокът за прехвърляне на Вашите спестявания за втора пенсия от УПФ в НОИ е изтекъл на `}
                             {transferToNOIDate}
                           </AlertDescription>
                         </Alert>
@@ -1127,19 +1149,27 @@ export default function RetirementCalculator() {
                           transition={{ duration: 0.3 }}
                           className="space-y-4"
                         >
-                          <div className="space-y-2">
+                          <div>
                             <Label>
                               Според натрупаната сума по Вашата пенсионна
                               партида:
                             </Label>
 
                             {showOneTimePaymentOption ? (
-                              <div className="flex flex-col">
-                                <div className="text-center pb-3">
-                                  <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
+                              <div className="flex flex-col gap-2">
+                                <Alert
+                                  variant={"default"}
+                                  className={cn(
+                                    "mt-4 flex items-center",
+
+                                    "bg-blue-50 text-blue-600 border-blue-200",
+                                  )}
+                                >
+                                  <InfoIcon className="h-5 w-5 text-blue-600 mr-2 shrink-0" />
+                                  <AlertDescription className="text-sm">
                                     Имате право на еднократно плащане
-                                  </span>
-                                </div>
+                                  </AlertDescription>
+                                </Alert>
                                 <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
                                   <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                                     <div className="text-3xl font-bold mb-2">
@@ -1156,8 +1186,7 @@ export default function RetirementCalculator() {
                                 <Alert
                                   variant={"default"}
                                   className={cn(
-                                    "mt-4 flex items-center",
-
+                                    "mt-4 mb-2 flex items-center",
                                     "bg-blue-50 text-blue-600 border-blue-200",
                                   )}
                                 >
@@ -1248,7 +1277,33 @@ export default function RetirementCalculator() {
                     className="space-y-6"
                   >
                     <Separator />
-                    <h3 className="text-lg font-medium">Опции за изплащане</h3>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
+                      <div className="space-y-2">
+                        <Label>
+                          Според натрупаната сума по Вашата пенсионна партида:
+                        </Label>
+
+                        <Alert
+                          variant={"default"}
+                          className={cn(
+                            "mt-4 flex items-center",
+
+                            "bg-blue-50 text-blue-600 border-blue-200",
+                          )}
+                        >
+                          <InfoIcon className="h-5 w-5 text-blue-600 mr-2 shrink-0" />
+                          <AlertDescription className="text-sm">
+                            Имате право на пожизнена пенсия
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    </motion.div>
 
                     <div className="space-y-4">
                       <Controller
@@ -1528,7 +1583,7 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* Step 4: National Pension Funds */}
+              {/* Step 4: National Pension Funds  TODO - HIDE WHEN isRetirementElligavle is false */}
               <AnimatePresence>
                 {step >= 4 && showNationalPensionStep && (
                   <motion.div
@@ -1640,7 +1695,9 @@ export default function RetirementCalculator() {
                         disabled={form.formState.isSubmitting}
                         className="mt-2"
                       >
-                        {showSmallFundOptions ? "Изчисли" : "Сравни"}
+                        {showSmallFundOptions || !isRetirementEligible
+                          ? "Изчисли"
+                          : "Сравни"}
                       </Button>
                     </div>
                   </motion.div>
