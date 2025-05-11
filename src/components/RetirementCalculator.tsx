@@ -152,6 +152,8 @@ export default function RetirementCalculator() {
     variant3CurrentMonthlyPensionWishMonths: number;
     showRecommend: boolean;
     showSingleOption: boolean;
+    showMonths: boolean
+    showMonthsValue: number;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
     number | null
@@ -611,7 +613,9 @@ export default function RetirementCalculator() {
           standardMonthlyPension: data.nationalPensionFunds,
           enhancedMonthlyPension:
             data.nationalPensionFundsCutOut + firstMonthlyPayment,
-          showRecommend: data.selectedOption != "option3",
+          showRecommend: false,
+          showMonths: true,
+          showMonthsValue: data.monthlyPaymentForSmallFunds,
           variant3CurrentMonthlyPensionWish: undefined,
           variant3CurrentMonthlyPensionWishMonths: 0,
           showSingleOption: false,
@@ -707,6 +711,8 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: false,
+        showMonths: false,
+        showMonthsValue: 0
       });
     } else {
       setCalculationResult({
@@ -720,6 +726,8 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: true,
+        showMonths: false,
+        showMonthsValue: 0
       });
     }
     setTimeout(() => {
@@ -1270,7 +1278,7 @@ export default function RetirementCalculator() {
                                 )}
 
                                 {!isNaN(partialCalculationResult) &&
-                                  partialCalculationResult && (
+                                  partialCalculationResult && !isRetirementEligible &&(
                                     <div className="flex flex-col">
                                       <div className="text-center pb-3">
                                         <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
@@ -1298,7 +1306,7 @@ export default function RetirementCalculator() {
                                       animate={{ opacity: 1, height: "auto" }}
                                       exit={{ opacity: 0, height: 0 }}
                                       transition={{ duration: 0.3 }}
-                                      className="space-y-6"
+                                      className="space-y-6 mt-2"
                                     >
                                       <Separator />
                                       <h3 className="text-lg font-medium">
