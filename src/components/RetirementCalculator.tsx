@@ -223,6 +223,10 @@ export default function RetirementCalculator() {
     [minInstallmentAmount, maxInstallmentAmount],
   );
 
+  useMemo(() => {
+    setCalculationResult(null);
+  }, [isRetirementEligible]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -670,7 +674,7 @@ export default function RetirementCalculator() {
         showRecommend: data.selectedOption != "option3",
         variant3CurrentMonthlyPensionWish:
           data.selectedOption === "option3"
-            ? data.installmentAmount
+            ? data.installmentAmount + data.nationalPensionFundsCutOut
             : undefined,
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
