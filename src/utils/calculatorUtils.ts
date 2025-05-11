@@ -3,6 +3,7 @@ import {
   retirementAgesByYear,
   workExperienceRequirementsByYear,
 } from "@/constants/retirementAge";
+import { addMonths, addYears } from "date-fns";
 
 export interface MortalityRow {
   age: number;
@@ -85,6 +86,34 @@ export const getMinimumRetirementAge = (
 
   // After 2037, it remains 65 for both
   return 65;
+};
+
+export const calculateRetirementDateFromBirth = (
+  birthDate: Date,
+  gender: "male" | "female",
+): Date => {
+  const birthYear = birthDate.getFullYear();
+
+  for (let year = birthYear + 55; year <= 2100; year++) {
+    const minAge = getMinimumRetirementAge(year, gender);
+    const ageAtYear = year - birthYear;
+
+    if (ageAtYear >= minAge) {
+      const retirementDate = new Date(birthDate);
+      retirementDate.setFullYear(birthDate.getFullYear() + Math.floor(minAge));
+      const monthsFraction = minAge % 1;
+      if (monthsFraction > 0) {
+        retirementDate.setMonth(
+          retirementDate.getMonth() + Math.round(monthsFraction * 12),
+        );
+      }
+
+      return retirementDate;
+    }
+  }
+
+  // Fallback (should not happen if retirementAgesByYear is defined correctly)
+  return new Date(birthDate.getFullYear() + 65, birthDate.getMonth(), birthDate.getDate());
 };
 
 export const getMinimumWorkExperience = (

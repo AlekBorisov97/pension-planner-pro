@@ -17,8 +17,8 @@ interface CalculationResultProps {
     variant3CurrentMonthlyPensionWishMonths?: number;
     showRecommend?: boolean;
     showSingleOption?: boolean;
-    showMonths?: boolean,
-    showMonthsValue?: number
+    showMonths?: boolean;
+    showMonthsValue?: number;
   };
 }
 
@@ -183,7 +183,11 @@ export default function CalculationResult({ result }: CalculationResultProps) {
                       )}
                       <PensionValue
                         amount={result.enhancedMonthlyPension}
-                        label={result.showMonths ? `Разсрочено за ${result.showMonthsValue} месеца` : "Пожизнено"}
+                        label={
+                          result.showMonths
+                            ? `Разсрочено за ${result.showMonthsValue} месеца`
+                            : "Пожизнено"
+                        }
                       />
                     </div>
                   </CardContent>

@@ -49,6 +49,7 @@ import {
   calculateMonthlyGuaranteedSumG6,
   calculateMonthlyScheduledSumH6,
   formatYearsAndMonths,
+  calculateRetirementDateFromBirth,
 } from "@/utils/calculatorUtils";
 import CalculationResult from "./CalculationResult";
 import { useToast } from "@/hooks/use-toast";
@@ -152,7 +153,7 @@ export default function RetirementCalculator() {
     variant3CurrentMonthlyPensionWishMonths: number;
     showRecommend: boolean;
     showSingleOption: boolean;
-    showMonths: boolean
+    showMonths: boolean;
     showMonthsValue: number;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
@@ -184,6 +185,9 @@ export default function RetirementCalculator() {
     null,
   );
   const [isRetirementAge, setIsRetirementAge] = useState<boolean | null>(null);
+  const [calculatedRetirementDate, setCalculatedRetirementDate] = useState<
+    string | null
+  >(null);
   const [showOptionDropdown, setShowOptionDropdown] = useState(false);
   const [showNationalPensionStep, setShowNationalPensionStep] = useState(false);
   const [showSmallFundOptions, setShowSmallFundOptions] = useState(false);
@@ -335,7 +339,8 @@ export default function RetirementCalculator() {
 
       const diffMs = retirement.getTime() - birthDate.getTime();
 
-      const ageAtRetirement = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+      // add one day
+      const ageAtRetirement = (diffMs + 86400000) / (1000 * 60 * 60 * 24 * 365.25);
 
       setCalculatedAge(ageAtRetirement);
 
@@ -351,6 +356,21 @@ export default function RetirementCalculator() {
 
       const totalWorkExperience =
         workExperienceYears + workExperienceMonths / 12;
+
+      if (ageAtRetirement < minRetirementAge) {
+        const autoRetirementDate = calculateRetirementDateFromBirth(
+          birthDate,
+          gender,
+        );
+    
+        setCalculatedRetirementDate(
+          format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
+        );
+      } else {
+        setCalculatedRetirementDate(
+          format(retirement, "dd.MM.yyyy", { locale: bg }),
+        );
+      }
 
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
       setIsRetirementAge(ageAtRetirement >= minRetirementAge);
@@ -623,7 +643,10 @@ export default function RetirementCalculator() {
         setTimeout(() => {
           const resultElement = document.getElementById("calculation-result");
           if (resultElement) {
-            resultElement.scrollIntoView({ behavior: "smooth", block: "start" });
+            resultElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
           }
         }, 100);
       } else {
@@ -712,7 +735,7 @@ export default function RetirementCalculator() {
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: false,
         showMonths: false,
-        showMonthsValue: 0
+        showMonthsValue: 0,
       });
     } else {
       setCalculationResult({
@@ -727,7 +750,7 @@ export default function RetirementCalculator() {
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: true,
         showMonths: false,
-        showMonthsValue: 0
+        showMonthsValue: 0,
       });
     }
     setTimeout(() => {
@@ -1012,8 +1035,8 @@ export default function RetirementCalculator() {
                         )}
                         <AlertDescription className="text-sm">
                           {isRetirementAge
-                            ? `Към избраната дата имате навършени години за пенсия.`
-                            : `Към избраната дата нямате навършени години за пенсия.`}
+                            ? `Към избраната дата имате навършени години за пенсия. Датата на пенсиониране е ${calculatedRetirementDate}.`
+                            : `Към избраната дата нямате навършени години за пенсия. Датата на пенсиониране е ${calculatedRetirementDate}.`}
                         </AlertDescription>
                       </Alert>
                       {isRetirementAge && (
@@ -1278,7 +1301,8 @@ export default function RetirementCalculator() {
                                 )}
 
                                 {!isNaN(partialCalculationResult) &&
-                                  partialCalculationResult && !isRetirementEligible &&(
+                                  partialCalculationResult &&
+                                  !isRetirementEligible && (
                                     <div className="flex flex-col">
                                       <div className="text-center pb-3">
                                         <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
