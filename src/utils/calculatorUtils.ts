@@ -113,7 +113,11 @@ export const calculateRetirementDateFromBirth = (
   }
 
   // Fallback (should not happen if retirementAgesByYear is defined correctly)
-  return new Date(birthDate.getFullYear() + 65, birthDate.getMonth(), birthDate.getDate());
+  return new Date(
+    birthDate.getFullYear() + 65,
+    birthDate.getMonth(),
+    birthDate.getDate(),
+  );
 };
 
 export const getMinimumWorkExperience = (

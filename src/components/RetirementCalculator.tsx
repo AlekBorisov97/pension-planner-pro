@@ -340,7 +340,8 @@ export default function RetirementCalculator() {
       const diffMs = retirement.getTime() - birthDate.getTime();
 
       // add one day
-      const ageAtRetirement = (diffMs + 86400000) / (1000 * 60 * 60 * 24 * 365.25);
+      const ageAtRetirement =
+        (diffMs + 86400000) / (1000 * 60 * 60 * 24 * 365.25);
 
       setCalculatedAge(ageAtRetirement);
 
@@ -357,20 +358,14 @@ export default function RetirementCalculator() {
       const totalWorkExperience =
         workExperienceYears + workExperienceMonths / 12;
 
-      if (ageAtRetirement < minRetirementAge) {
-        const autoRetirementDate = calculateRetirementDateFromBirth(
-          birthDate,
-          gender,
-        );
-    
-        setCalculatedRetirementDate(
-          format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
-        );
-      } else {
-        setCalculatedRetirementDate(
-          format(retirement, "dd.MM.yyyy", { locale: bg }),
-        );
-      }
+      const autoRetirementDate = calculateRetirementDateFromBirth(
+        birthDate,
+        gender,
+      );
+
+      setCalculatedRetirementDate(
+        format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
+      );
 
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
       setIsRetirementAge(ageAtRetirement >= minRetirementAge);
