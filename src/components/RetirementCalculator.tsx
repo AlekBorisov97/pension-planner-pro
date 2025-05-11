@@ -380,6 +380,26 @@ export default function RetirementCalculator() {
         setStep(2);
       } else if (ageAtRetirement < minRetirementAge) {
         setStep(1);
+        setCalculatedAge(null);
+        setMinWorkExperience(null);
+        setCurrentWorkExperience(null);
+        setIsTransferToNOIPossible(null);
+        setIsExperienceEnough(false);
+        setIsRetirementAge(false);
+        setIsRetirementEligible(false);
+        setShowSubmitButton(false)
+        setCalculationResult(null)
+
+        form.setValue("additionalPensionFunds", 0);
+        form.setValue("additionalPensionFunds", 0);
+        form.setValue("nationalPensionFunds", 0);
+        form.setValue("nationalPensionFundsCutOut", 0);
+        form.setValue("pensionFunder", undefined);
+        form.setValue("selectedOption", undefined);
+        form.setValue("periodYears", undefined);
+        form.setValue("installmentPeriod", undefined);
+        form.setValue("installmentAmount", undefined);
+        form.setValue("monthlyPaymentForSmallFunds", undefined);
       }
     } else {
       setCalculatedAge(null);
