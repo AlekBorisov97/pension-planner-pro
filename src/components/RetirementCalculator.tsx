@@ -597,8 +597,36 @@ export default function RetirementCalculator() {
         setShowMonthlyPaymentForSmallFundsError(true);
         return;
       }
-      setShowMonthlyPaymentForSmallFundsError(false);
-      setPartialCalculationResult(firstMonthlyPayment);
+
+      if (isRetirementEligible) {
+        if (!data.nationalPensionFunds || !data.nationalPensionFundsCutOut) {
+          toast({
+            title: "Прогнозна пенсия е непопълнена",
+            variant: "destructive",
+            duration: 2000,
+          });
+          return;
+        }
+        setCalculationResult({
+          standardMonthlyPension: data.nationalPensionFunds,
+          enhancedMonthlyPension:
+            data.nationalPensionFundsCutOut + firstMonthlyPayment,
+          showRecommend: data.selectedOption != "option3",
+          variant3CurrentMonthlyPensionWish: undefined,
+          variant3CurrentMonthlyPensionWishMonths: 0,
+          showSingleOption: false,
+        });
+        setTimeout(() => {
+          const resultElement = document.getElementById("calculation-result");
+          if (resultElement) {
+            resultElement.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 100);
+      } else {
+        setShowMonthlyPaymentForSmallFundsError(false);
+        setPartialCalculationResult(firstMonthlyPayment);
+        setCalculationResult(null);
+      }
       return;
     }
 
@@ -1260,6 +1288,134 @@ export default function RetirementCalculator() {
                                       </Card>
                                     </div>
                                   )}
+
+                                {step === 2 &&
+                                  isRetirementEligible &&
+                                  !showOneTimePaymentOption &&
+                                  showSmallFundOptions && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.3 }}
+                                      className="space-y-6"
+                                    >
+                                      <Separator />
+                                      <h3 className="text-lg font-medium">
+                                        Прогнозна пенсия от Държавното
+                                        обществено осигуряване (ДОО)
+                                      </h3>
+                                      <div className="space-y-2 max-w-md">
+                                        <div className="flex items-center gap-2">
+                                          <Label htmlFor="nationalPensionFunds">
+                                            Пенсия от НОИ в пълен размер
+                                          </Label>
+                                        </div>
+                                        <Controller
+                                          control={form.control}
+                                          name="nationalPensionFunds"
+                                          render={({ field }) => (
+                                            <Input
+                                              onWheel={(e) =>
+                                                e.currentTarget.blur()
+                                              }
+                                              id="nationalPensionFunds"
+                                              type="number"
+                                              min={0}
+                                              step="any"
+                                              onChange={(e) => {
+                                                if (e.target.value === "") {
+                                                  field.onChange(0);
+                                                  return;
+                                                }
+                                                if (
+                                                  /^\d+(\.\d{0,2})?$/.test(
+                                                    e.target.value,
+                                                  )
+                                                ) {
+                                                  const value =
+                                                    parseFloat(
+                                                      e.target.value,
+                                                    ) || 0;
+                                                  field.onChange(value);
+                                                }
+                                              }}
+                                              value={
+                                                field.value === 0
+                                                  ? ""
+                                                  : field.value
+                                              }
+                                              placeholder="Въведете сума в лева"
+                                            />
+                                          )}
+                                        />
+                                        {form.formState.errors
+                                          .nationalPensionFunds && (
+                                          <p className="text-sm text-destructive">
+                                            {
+                                              form.formState.errors
+                                                .nationalPensionFunds.message
+                                            }
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="space-y-2 max-w-md">
+                                        <div className="flex items-center gap-2">
+                                          <Label htmlFor="nationalPensionFundsCutOut">
+                                            Пенсия от НОИ в намален размер
+                                          </Label>
+                                        </div>
+                                        <Controller
+                                          control={form.control}
+                                          name="nationalPensionFundsCutOut"
+                                          render={({ field }) => (
+                                            <Input
+                                              onWheel={(e) =>
+                                                e.currentTarget.blur()
+                                              }
+                                              id="nationalPensionFundsCutOut"
+                                              type="number"
+                                              step="any"
+                                              min={0}
+                                              onChange={(e) => {
+                                                if (e.target.value === "") {
+                                                  field.onChange(0);
+                                                  return;
+                                                }
+                                                if (
+                                                  /^\d+(\.\d{0,2})?$/.test(
+                                                    e.target.value,
+                                                  )
+                                                ) {
+                                                  const value =
+                                                    parseFloat(
+                                                      e.target.value,
+                                                    ) || 0;
+                                                  field.onChange(value);
+                                                }
+                                              }}
+                                              value={
+                                                field.value === 0
+                                                  ? ""
+                                                  : field.value
+                                              }
+                                              placeholder="Въведете сума в лева"
+                                            />
+                                          )}
+                                        />
+                                        {form.formState.errors
+                                          .nationalPensionFundsCutOut && (
+                                          <p className="text-sm text-destructive">
+                                            {
+                                              form.formState.errors
+                                                .nationalPensionFundsCutOut
+                                                .message
+                                            }
+                                          </p>
+                                        )}
+                                      </div>
+                                    </motion.div>
+                                  )}
                               </>
                             )}
                           </div>
@@ -1587,7 +1743,7 @@ export default function RetirementCalculator() {
                 )}
               </AnimatePresence>
 
-              {/* Step 4: National Pension Funds  TODO - HIDE WHEN isRetirementElligavle is false */}
+              {/* Step 4: National Pension Funds */}
               <AnimatePresence>
                 {step >= 4 && showNationalPensionStep && (
                   <motion.div
