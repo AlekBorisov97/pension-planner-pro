@@ -3,7 +3,6 @@ import {
   retirementAgesByYear,
   workExperienceRequirementsByYear,
 } from "@/constants/retirementAge";
-import { addMonths, addYears } from "date-fns";
 
 export interface MortalityRow {
   age: number;
@@ -63,7 +62,7 @@ export function formatYearsAndMonths(value: number): string {
 
   const months = Math.round(monthsDecimal * 12);
 
-  return `${years} години и ${months} месеци`;
+  return `${years} години и ${months} месеца`;
 }
 
 export const formatPercentage = (value: number): string => {
@@ -88,6 +87,8 @@ export const getMinimumRetirementAge = (
   return 65;
 };
 
+import { add } from "date-fns";
+
 export const calculateRetirementDateFromBirth = (
   birthDate: Date,
   gender: "male" | "female",
@@ -99,25 +100,23 @@ export const calculateRetirementDateFromBirth = (
     const ageAtYear = year - birthYear;
 
     if (ageAtYear >= minAge) {
-      const retirementDate = new Date(birthDate);
-      retirementDate.setFullYear(birthDate.getFullYear() + Math.floor(minAge));
-      const monthsFraction = minAge % 1;
-      if (monthsFraction > 0) {
-        retirementDate.setMonth(
-          retirementDate.getMonth() + Math.round(monthsFraction * 12),
-        );
-      }
+      const fullYears = Math.floor(minAge);
+      const monthsFraction = (minAge - fullYears) * 12;
 
-      return retirementDate;
+      const fullMonths = Math.floor(monthsFraction);
+      const extraDays = Math.round((monthsFraction - fullMonths) * 30); // day precision
+
+      // Use date-fns `add` for safe arithmetic
+      const afterYears = add(birthDate, { years: fullYears });
+      const afterMonths = add(afterYears, { months: fullMonths });
+      const finalDate = add(afterMonths, { days: extraDays });
+
+      return finalDate;
     }
   }
 
-  // Fallback (should not happen if retirementAgesByYear is defined correctly)
-  return new Date(
-    birthDate.getFullYear() + 65,
-    birthDate.getMonth(),
-    birthDate.getDate(),
-  );
+  // Fallback
+  return add(birthDate, { years: 65 });
 };
 
 export const getMinimumWorkExperience = (

@@ -363,6 +363,10 @@ export default function RetirementCalculator() {
         gender,
       );
 
+      console.log(
+        calculateRetirementDateFromBirth(new Date("1960-01-01"), "male"),
+      );
+
       setCalculatedRetirementDate(
         format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
       );
@@ -378,18 +382,7 @@ export default function RetirementCalculator() {
 
       if (step === 1 && ageAtRetirement >= minRetirementAge) {
         setStep(2);
-      } else if (ageAtRetirement < minRetirementAge) {
-        setStep(1);
-        setCalculatedAge(null);
-        setMinWorkExperience(null);
-        setCurrentWorkExperience(null);
-        setIsTransferToNOIPossible(null);
-        setIsExperienceEnough(false);
-        setIsRetirementAge(false);
-        setIsRetirementEligible(false);
-        setShowSubmitButton(false)
-        setCalculationResult(null)
-
+      } else if (step !== 1 && ageAtRetirement < minRetirementAge) {
         form.setValue("additionalPensionFunds", 0);
         form.setValue("additionalPensionFunds", 0);
         form.setValue("nationalPensionFunds", 0);
@@ -400,6 +393,8 @@ export default function RetirementCalculator() {
         form.setValue("installmentPeriod", undefined);
         form.setValue("installmentAmount", undefined);
         form.setValue("monthlyPaymentForSmallFunds", undefined);
+
+        setStep(1);
       }
     } else {
       setCalculatedAge(null);
@@ -494,9 +489,9 @@ export default function RetirementCalculator() {
     const subscription = form.watch((value, { name, type }) => {
       // Save to sessionStorage
       const formValues = form.getValues();
-      if (Object.keys(formValues).length > 0) {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
-      }
+      // if (Object.keys(formValues).length > 0) {
+      //   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+      // }
 
       // Check step completion
       if (
@@ -508,6 +503,8 @@ export default function RetirementCalculator() {
           "retirementDate",
         ].includes(name || "")
       ) {
+        console.log("I AM IN HERE", step, name);
+
         checkBasicInfoComplete();
       }
 
@@ -1050,8 +1047,8 @@ export default function RetirementCalculator() {
                         )}
                         <AlertDescription className="text-sm">
                           {isRetirementAge
-                            ? `Към избраната дата имате навършени години за пенсия. Датата на пенсиониране е ${calculatedRetirementDate}.`
-                            : `Към избраната дата нямате навършени години за пенсия. Датата на пенсиониране е ${calculatedRetirementDate}.`}
+                            ? `Към избраната дата имате навършени години за пенсия. Навършили сте години за пенсия на ${calculatedRetirementDate}.`
+                            : `Към избраната дата нямате навършени години за пенсия. Ще навършите години за пенсия на ${calculatedRetirementDate}.`}
                         </AlertDescription>
                       </Alert>
                       {isRetirementAge && (
