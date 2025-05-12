@@ -95,19 +95,20 @@ export const calculateRetirementDateFromBirth = (
 ): Date => {
   // Create a copy of the birth date to avoid modifying the original
   const birthDateCopy = new Date(birthDate);
-  
+
   // Find the applicable retirement age
   let applicableData = null;
-  
+
   // We need to find the first year where (birthYear + retirementAgeYears) >= year
   // and the person has enough months
   for (const data of retirementAgesByYear) {
-    const potentialRetirementYear = birthDateCopy.getFullYear() + data[gender].years;
-    
+    const potentialRetirementYear =
+      birthDateCopy.getFullYear() + data[gender].years;
+
     if (potentialRetirementYear > data.year) {
       continue; // Haven't reached the right year yet
     }
-    
+
     if (potentialRetirementYear === data.year) {
       // Check if birth month + retirement months reaches the required months
       const totalMonths = birthDateCopy.getMonth() + data[gender].months;
@@ -116,24 +117,27 @@ export const calculateRetirementDateFromBirth = (
         continue;
       }
     }
-    
+
     applicableData = data;
     break;
   }
-  
+
   // If we didn't find any (birth year too late), use the last available data
   if (!applicableData) {
     applicableData = retirementAgesByYear[retirementAgesByYear.length - 1];
   }
-  
+
   // Calculate the retirement date
   const retirementDate = new Date(birthDateCopy);
-  retirementDate.setFullYear(retirementDate.getFullYear() + applicableData[gender].years);
-  retirementDate.setMonth(retirementDate.getMonth() + applicableData[gender].months);
-  
+  retirementDate.setFullYear(
+    retirementDate.getFullYear() + applicableData[gender].years,
+  );
+  retirementDate.setMonth(
+    retirementDate.getMonth() + applicableData[gender].months,
+  );
+
   return retirementDate;
 };
-
 
 export const getMinimumWorkExperience = (
   year: number,

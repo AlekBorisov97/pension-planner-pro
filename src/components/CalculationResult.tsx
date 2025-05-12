@@ -17,8 +17,6 @@ interface CalculationResultProps {
     variant3CurrentMonthlyPensionWishMonths?: number;
     showRecommend?: boolean;
     showSingleOption?: boolean;
-    showMonths?: boolean;
-    showMonthsValue?: number;
   };
 }
 
@@ -49,7 +47,7 @@ export default function CalculationResult({ result }: CalculationResultProps) {
             "leading-tight break-words",
           )}
         >
-          {isSplit ? `Разсрочено за ${months} месеца` : label}
+          {isSplit ? `За период от ${months} месеца` : label}
         </div>
       </div>
     );
@@ -183,11 +181,7 @@ export default function CalculationResult({ result }: CalculationResultProps) {
                       )}
                       <PensionValue
                         amount={result.enhancedMonthlyPension}
-                        label={
-                          result.showMonths
-                            ? `Разсрочено за ${result.showMonthsValue} месеца`
-                            : "Пожизнено"
-                        }
+                        label={"Пожизнено"}
                       />
                     </div>
                   </CardContent>

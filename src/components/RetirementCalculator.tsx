@@ -153,8 +153,6 @@ export default function RetirementCalculator() {
     variant3CurrentMonthlyPensionWishMonths: number;
     showRecommend: boolean;
     showSingleOption: boolean;
-    showMonths: boolean;
-    showMonthsValue: number;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
     number | null
@@ -349,9 +347,9 @@ export default function RetirementCalculator() {
         retirement.getFullYear(),
         gender,
       );
-      
+
       const minRetirementAge = years + months / 12;
-      
+
       const minWorkExperience = getMinimumWorkExperience(
         retirement.getFullYear(),
         gender,
@@ -644,13 +642,13 @@ export default function RetirementCalculator() {
         }
         setCalculationResult({
           standardMonthlyPension: data.nationalPensionFunds,
-          enhancedMonthlyPension:
-            data.nationalPensionFundsCutOut + firstMonthlyPayment,
+          enhancedMonthlyPension: data.nationalPensionFundsCutOut,
           showRecommend: false,
-          showMonths: true,
-          showMonthsValue: data.monthlyPaymentForSmallFunds,
-          variant3CurrentMonthlyPensionWish: undefined,
-          variant3CurrentMonthlyPensionWishMonths: 0,
+
+          variant3CurrentMonthlyPensionWish:
+            data.nationalPensionFundsCutOut + firstMonthlyPayment,
+          variant3CurrentMonthlyPensionWishMonths:
+            data.monthlyPaymentForSmallFunds,
           showSingleOption: false,
         });
         setTimeout(() => {
@@ -747,8 +745,6 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: false,
-        showMonths: false,
-        showMonthsValue: 0,
       });
     } else {
       setCalculationResult({
@@ -762,8 +758,6 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: true,
-        showMonths: false,
-        showMonthsValue: 0,
       });
     }
     setTimeout(() => {
@@ -1316,10 +1310,17 @@ export default function RetirementCalculator() {
                                 {!isNaN(partialCalculationResult) &&
                                   partialCalculationResult &&
                                   !isRetirementEligible && (
-                                    <div className="flex flex-col">
-                                      <div className="text-center pb-3">
+                                    <div className="flex flex-col pt-3">
+                                      <div className="text-center">
                                         <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
                                           Първоначален размер:
+                                        </span>
+                                      </div>
+                                      <div className="text-center pb-3">
+                                        <span className="text-xs font-medium text-primary/80">
+                                          За да направите сравнение с държавната
+                                          пенсия моля въведете данни за стаж и
+                                          прогнозен размер на пенсия от ДОО.
                                         </span>
                                       </div>
                                       <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
