@@ -370,12 +370,11 @@ export default function RetirementCalculator() {
       setCalculatedRetirementDate(
         format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
       );
-
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
       setIsRetirementAge(ageAtRetirement >= minRetirementAge);
       setIsRetirementEligible(
         ageAtRetirement >= minRetirementAge &&
-          totalWorkExperience >= minWorkExperience,
+          totalWorkExperience > 0,
       );
       setMinWorkExperience(minWorkExperience);
       setCurrentWorkExperience(totalWorkExperience);
