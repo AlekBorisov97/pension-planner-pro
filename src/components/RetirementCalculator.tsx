@@ -489,13 +489,11 @@ export default function RetirementCalculator() {
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      // Save to sessionStorage
       const formValues = form.getValues();
-      // if (Object.keys(formValues).length > 0) {
-      //   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
-      // }
+      if (Object.keys(formValues).length > 0) {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+      }
 
-      // Check step completion
       if (
         [
           "dateOfBirth",
@@ -505,8 +503,6 @@ export default function RetirementCalculator() {
           "retirementDate",
         ].includes(name || "")
       ) {
-        console.log("I AM IN HERE", step, name);
-
         checkBasicInfoComplete();
       }
 
@@ -531,13 +527,16 @@ export default function RetirementCalculator() {
       }
     });
 
-    // Initial check
     checkBasicInfoComplete();
     checkPensionFundComplete();
     checkOptionFieldsComplete();
 
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
+  useEffect(() => {
+    if (form.watch("selectedOption")) setShowSubmitButton(true);
+  }, [form.watch("selectedOption")]);
 
   // Force re-check when additionalPensionFunds changes
   useEffect(() => {
