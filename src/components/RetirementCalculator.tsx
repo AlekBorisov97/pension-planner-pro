@@ -345,11 +345,13 @@ export default function RetirementCalculator() {
 
       setCalculatedAge(ageAtRetirement);
 
-      const minRetirementAge = getMinimumRetirementAge(
+      const { years, months } = getMinimumRetirementAge(
         retirement.getFullYear(),
         gender,
       );
-
+      
+      const minRetirementAge = years + months / 12;
+      
       const minWorkExperience = getMinimumWorkExperience(
         retirement.getFullYear(),
         gender,
