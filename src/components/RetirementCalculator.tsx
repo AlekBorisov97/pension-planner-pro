@@ -1152,7 +1152,11 @@ export default function RetirementCalculator() {
                                   return;
                                 }
                                 if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
-                                  const value = parseFloat(e.target.value) || 0;
+                                  let value = parseFloat(e.target.value) || 0;
+                                  if(value > 999999) {
+                                    field.onChange(999999);
+                                    return
+                                  }
                                   field.onChange(value);
                                 }
                               }}
@@ -1381,10 +1385,14 @@ export default function RetirementCalculator() {
                                                     e.target.value,
                                                   )
                                                 ) {
-                                                  const value =
+                                                  let value =
                                                     parseFloat(
                                                       e.target.value,
                                                     ) || 0;
+                                                  if(value > 9999){
+                                                    field.onChange(9999);
+                                                    return
+                                                  } 
                                                   field.onChange(value);
                                                 }
                                               }}
@@ -1435,10 +1443,11 @@ export default function RetirementCalculator() {
                                                     e.target.value,
                                                   )
                                                 ) {
-                                                  const value =
+                                                  let value =
                                                     parseFloat(
                                                       e.target.value,
                                                     ) || 0;
+                                                    if(value > 9999) value = 9999
                                                   field.onChange(value);
                                                 }
                                               }}
@@ -1828,7 +1837,14 @@ export default function RetirementCalculator() {
                                 return;
                               }
                               if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
-                                const value = parseFloat(e.target.value) || 0;
+                                let value =
+                                                    parseFloat(
+                                                      e.target.value,
+                                                    ) || 0;
+                                                  if(value > 9999){
+                                                    field.onChange(9999);
+                                                    return
+                                                  } 
                                 field.onChange(value);
                               }
                             }}
@@ -1865,7 +1881,14 @@ export default function RetirementCalculator() {
                                 return;
                               }
                               if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
-                                const value = parseFloat(e.target.value) || 0;
+                                let value =
+                                                    parseFloat(
+                                                      e.target.value,
+                                                    ) || 0;
+                                                  if(value > 9999){
+                                                    field.onChange(9999);
+                                                    return
+                                                  } 
                                 field.onChange(value);
                               }
                             }}
