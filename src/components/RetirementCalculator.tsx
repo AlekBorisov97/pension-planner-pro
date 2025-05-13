@@ -153,6 +153,7 @@ export default function RetirementCalculator() {
     variant3CurrentMonthlyPensionWishMonths: number;
     showRecommend: boolean;
     showSingleOption: boolean;
+    isOption3Selected: boolean;
   } | null>(null);
   const [partialCalculationResult, setPartialCalculationResult] = useState<
     number | null
@@ -643,12 +644,12 @@ export default function RetirementCalculator() {
           standardMonthlyPension: data.nationalPensionFunds,
           enhancedMonthlyPension: data.nationalPensionFundsCutOut,
           showRecommend: false,
-
           variant3CurrentMonthlyPensionWish:
             data.nationalPensionFundsCutOut + firstMonthlyPayment,
           variant3CurrentMonthlyPensionWishMonths:
             data.monthlyPaymentForSmallFunds,
           showSingleOption: false,
+          isOption3Selected: false
         });
         setTimeout(() => {
           const resultElement = document.getElementById("calculation-result");
@@ -744,6 +745,7 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: false,
+        isOption3Selected: data.selectedOption === "option3"
       });
     } else {
       setCalculationResult({
@@ -757,6 +759,7 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: true,
+        isOption3Selected: data.selectedOption === "option3"
       });
     }
     setTimeout(() => {
@@ -1666,7 +1669,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentPeriod">
-                                            Периодът на разсрочване{" "}
+                                            Период на разсрочване{" "}
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -1716,7 +1719,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentAmount">
-                                            Сума
+                                            Месечна сума на разсроченото плащане
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
