@@ -1016,6 +1016,11 @@ export default function RetirementCalculator() {
                         {form.formState.errors.retirementDate.message}
                       </p>
                     )}
+                    {isRetirementAge !== null && isRetirementAge === false && (
+                      <p className="text-sm text-destructive">
+                        За да продължите, моля въведете дата на пенсиониране, когато ще имате навършени години за пенсия.
+                      </p>
+                    )}
                   </div>
                 </div>
 
