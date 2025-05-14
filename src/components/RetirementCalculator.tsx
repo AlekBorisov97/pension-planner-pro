@@ -374,8 +374,7 @@ export default function RetirementCalculator() {
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
       setIsRetirementAge(ageAtRetirement >= minRetirementAge);
       setIsRetirementEligible(
-        ageAtRetirement >= minRetirementAge &&
-          totalWorkExperience > 0,
+        ageAtRetirement >= minRetirementAge && totalWorkExperience > 0,
       );
       setMinWorkExperience(minWorkExperience);
       setCurrentWorkExperience(totalWorkExperience);
@@ -649,7 +648,7 @@ export default function RetirementCalculator() {
           variant3CurrentMonthlyPensionWishMonths:
             data.monthlyPaymentForSmallFunds,
           showSingleOption: false,
-          isOption3Selected: false
+          isOption3Selected: false,
         });
         setTimeout(() => {
           const resultElement = document.getElementById("calculation-result");
@@ -745,7 +744,7 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: false,
-        isOption3Selected: data.selectedOption === "option3"
+        isOption3Selected: data.selectedOption === "option3",
       });
     } else {
       setCalculationResult({
@@ -759,7 +758,7 @@ export default function RetirementCalculator() {
         variant3CurrentMonthlyPensionWishMonths:
           data.selectedOption === "option3" ? data.installmentPeriod : 0,
         showSingleOption: true,
-        isOption3Selected: data.selectedOption === "option3"
+        isOption3Selected: data.selectedOption === "option3",
       });
     }
     setTimeout(() => {
@@ -1018,7 +1017,8 @@ export default function RetirementCalculator() {
                     )}
                     {isRetirementAge !== null && isRetirementAge === false && (
                       <p className="text-sm text-destructive">
-                        За да продължите, моля въведете дата на пенсиониране, когато ще имате навършени години за пенсия.
+                        За да продължите, моля въведете дата на пенсиониране,
+                        когато ще имате навършени години за пенсия.
                       </p>
                     )}
                   </div>
@@ -1158,9 +1158,9 @@ export default function RetirementCalculator() {
                                 }
                                 if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
                                   let value = parseFloat(e.target.value) || 0;
-                                  if(value > 999999) {
+                                  if (value > 999999) {
                                     field.onChange(999999);
-                                    return
+                                    return;
                                   }
                                   field.onChange(value);
                                 }
@@ -1394,10 +1394,10 @@ export default function RetirementCalculator() {
                                                     parseFloat(
                                                       e.target.value,
                                                     ) || 0;
-                                                  if(value > 9999){
+                                                  if (value > 9999) {
                                                     field.onChange(9999);
-                                                    return
-                                                  } 
+                                                    return;
+                                                  }
                                                   field.onChange(value);
                                                 }
                                               }}
@@ -1452,7 +1452,8 @@ export default function RetirementCalculator() {
                                                     parseFloat(
                                                       e.target.value,
                                                     ) || 0;
-                                                    if(value > 9999) value = 9999
+                                                  if (value > 9999)
+                                                    value = 9999;
                                                   field.onChange(value);
                                                 }
                                               }}
@@ -1842,14 +1843,11 @@ export default function RetirementCalculator() {
                                 return;
                               }
                               if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
-                                let value =
-                                                    parseFloat(
-                                                      e.target.value,
-                                                    ) || 0;
-                                                  if(value > 9999){
-                                                    field.onChange(9999);
-                                                    return
-                                                  } 
+                                let value = parseFloat(e.target.value) || 0;
+                                if (value > 9999) {
+                                  field.onChange(9999);
+                                  return;
+                                }
                                 field.onChange(value);
                               }
                             }}
@@ -1886,14 +1884,11 @@ export default function RetirementCalculator() {
                                 return;
                               }
                               if (/^\d+(\.\d{0,2})?$/.test(e.target.value)) {
-                                let value =
-                                                    parseFloat(
-                                                      e.target.value,
-                                                    ) || 0;
-                                                  if(value > 9999){
-                                                    field.onChange(9999);
-                                                    return
-                                                  } 
+                                let value = parseFloat(e.target.value) || 0;
+                                if (value > 9999) {
+                                  field.onChange(9999);
+                                  return;
+                                }
                                 field.onChange(value);
                               }
                             }}

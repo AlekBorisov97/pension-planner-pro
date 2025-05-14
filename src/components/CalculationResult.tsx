@@ -102,8 +102,12 @@ export default function CalculationResult({ result }: CalculationResultProps) {
                     )}
                     <PensionValue
                       amount={result.enhancedMonthlyPension}
-                      label={result.isOption3Selected ? `Пожизнено след ${result.variant3CurrentMonthlyPensionWishMonths} месеца` : "Пожизнено"}
-                      />
+                      label={
+                        result.isOption3Selected
+                          ? `Пожизнено след ${result.variant3CurrentMonthlyPensionWishMonths} месеца`
+                          : "Пожизнено"
+                      }
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -182,7 +186,11 @@ export default function CalculationResult({ result }: CalculationResultProps) {
                       )}
                       <PensionValue
                         amount={result.enhancedMonthlyPension}
-                        label={result.isOption3Selected ? `Пожизнено след ${result.variant3CurrentMonthlyPensionWishMonths} месеца` : "Пожизнено"}
+                        label={
+                          result.isOption3Selected
+                            ? `Пожизнено след ${result.variant3CurrentMonthlyPensionWishMonths} месеца`
+                            : "Пожизнено"
+                        }
                       />
                     </div>
                   </CardContent>
