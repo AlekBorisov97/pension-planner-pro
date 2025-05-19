@@ -1,5 +1,7 @@
 
-import { Shield } from "lucide-react";
+import { Shield, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const PrivacyPolicy = () => {
   return (
@@ -11,41 +13,50 @@ const PrivacyPolicy = () => {
       </header>
 
       <main className="flex-1 px-4 pb-16 pt-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-medium">Политика за поверителност</h2>
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <Link to="/">
+            <Button variant="outline" className="mb-4 gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              <span>Обратно към сайта</span>
+            </Button>
+          </Link>
+          
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-medium">Политика за поверителност</h2>
+            </div>
 
-          <div className="space-y-4 text-muted-foreground">
-            <p>Ние уважаваме правото Ви на лична неприкосновеност.</p>
-            
-            <p>
-              Този сайт не съхранява, не изпраща и не обработва лични данни на сървър. 
-              Въведената от Вас информация (напр. рождена дата, дата на пенсиониране, 
-              размер на пенсията) се използва само на Вашето устройство, с цел извършване 
-              на изчисления директно в браузъра.
-            </p>
-            
-            <p className="font-medium">Ние:</p>
-            <ul className="space-y-2 pl-5 list-disc">
-              <li>Не съхраняваме никакви лични данни;</li>
-              <li>Не изпращаме информация към външни сървъри;</li>
-              <li>
-                Не използваме външни инструменти за анализ или проследяване (напр. Google Analytics), 
-                освен ако не е изрично посочено;
-              </li>
-              <li>Не използваме бисквитки (cookies) за съхранение на въведена от Вас информация.</li>
-            </ul>
-            
-            <p>
-              Ако в бъдеще се променят условията по обработката на данни, ще актуализираме 
-              тази политика и ще Ви уведомим при следващо посещение.
-            </p>
-            
-            <p>
-              За въпроси, свързани с поверителността, можете да се свържете с нас на: [имейл].
-            </p>
+            <div className="space-y-4 text-muted-foreground">
+              <p>Ние уважаваме правото Ви на лична неприкосновеност.</p>
+              
+              <p>
+                Този сайт не съхранява, не изпраща и не обработва лични данни на сървър. 
+                Въведената от Вас информация (напр. рождена дата, дата на пенсиониране, 
+                размер на пенсията) се използва само на Вашето устройство, с цел извършване 
+                на изчисления директно в браузъра.
+              </p>
+              
+              <p className="font-medium">Ние:</p>
+              <ul className="space-y-2 pl-5 list-disc">
+                <li>Не съхраняваме никакви лични данни;</li>
+                <li>Не изпращаме информация към външни сървъри;</li>
+                <li>
+                  Не използваме външни инструменти за анализ или проследяване (напр. Google Analytics), 
+                  освен ако не е изрично посочено;
+                </li>
+                <li>Не използваме бисквитки (cookies) за съхранение на въведена от Вас информация.</li>
+              </ul>
+              
+              <p>
+                Ако в бъдеще се променят условията по обработката на данни, ще актуализираме 
+                тази политика и ще Ви уведомим при следващо посещение.
+              </p>
+              
+              <p>
+                За въпроси, свързани с поверителността, можете да се свържете с нас на: [имейл].
+              </p>
+            </div>
           </div>
         </div>
       </main>
