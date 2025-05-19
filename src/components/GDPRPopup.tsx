@@ -41,7 +41,7 @@ const GDPRPopup = () => {
           </p>
           
           <p className="mb-2">Ние:</p>
-          <ul className="mb-4 space-y-2 pl-5">
+          <ul className="mb-4 space-y-2 pl-5 list-disc">
             <li>Не съхраняваме никакви лични данни;</li>
             <li>Не изпращаме информация към външни сървъри;</li>
             <li>
