@@ -308,34 +308,6 @@ export default function RetirementCalculator() {
       const birthDate = new Date(dateOfBirth);
       const retirement = new Date(retirementDate);
 
-      const transferDate = (() => {
-        const year = retirement.getFullYear();
-        const month = retirement.getMonth(); // Month is 0-based in JS
-        const day = retirement.getDate();
-
-        if (year >= 2038) {
-          return new Date(year - 5, month, day);
-        } else if (year >= 2036) {
-          return new Date(year - 4, month, day);
-        } else if (year >= 2031) {
-          return new Date(year - 3, month, day);
-        } else if (year >= 2026) {
-          return new Date(year - 2, month, day);
-        } else {
-          return new Date(year - 1, month, day);
-        }
-      })();
-
-      const isTransferBeforeRetirement = transferDate.getTime() <= Date.now();
-      setIsTransferToNOIPossible(
-        isTransferBeforeRetirement ? "unavailable" : "available",
-      );
-      setTransferToNOIDate(
-        format(transferDate, "dd.MM.yyyy", {
-          locale: bg,
-        }),
-      );
-
       const diffMs = retirement.getTime() - birthDate.getTime();
 
       // add one day
@@ -364,8 +336,32 @@ export default function RetirementCalculator() {
         gender,
       );
 
-      console.log(
-        calculateRetirementDateFromBirth(new Date("1960-01-01"), "male"),
+      const transferDate = (() => {
+        const year = autoRetirementDate.getFullYear();
+        const month = autoRetirementDate.getMonth();
+        const day = autoRetirementDate.getDate();
+
+        if (year >= 2038) {
+          return new Date(year - 5, month, day);
+        } else if (year >= 2036) {
+          return new Date(year - 4, month, day);
+        } else if (year >= 2031) {
+          return new Date(year - 3, month, day);
+        } else if (year >= 2026) {
+          return new Date(year - 2, month, day);
+        } else {
+          return new Date(year - 1, month, day);
+        }
+      })();
+
+      const isTransferBeforeRetirement = transferDate.getTime() <= Date.now();
+      setIsTransferToNOIPossible(
+        isTransferBeforeRetirement ? "unavailable" : "available",
+      );
+      setTransferToNOIDate(
+        format(transferDate, "dd.MM.yyyy", {
+          locale: bg,
+        }),
       );
 
       setCalculatedRetirementDate(
