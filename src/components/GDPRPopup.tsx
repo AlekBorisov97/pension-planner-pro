@@ -12,6 +12,9 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
   const [open, setOpen] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasAccepted = useRef(false);
+  const originalSetItem = useRef(localStorage.setItem);
+  const originalRemoveItem = useRef(localStorage.removeItem);
+  const originalClear = useRef(localStorage.clear);
 
   useEffect(() => {
     // Check if the user has already seen the GDPR popup
@@ -23,7 +26,36 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
       setOpen(true);
       onAccepted(false);
       
-      // Start monitoring for inspector manipulation
+      // Override localStorage methods to detect manipulation
+      localStorage.setItem = function(key: string, value: string) {
+        if (key === "gdpr-accepted" && !hasAccepted.current) {
+          console.warn('GDPR localStorage manipulation detected - consent must be given properly');
+          return;
+        }
+        return originalSetItem.current.call(this, key, value);
+      };
+
+      localStorage.removeItem = function(key: string) {
+        if (key === "gdpr-accepted" && hasAccepted.current) {
+          console.warn('GDPR localStorage manipulation detected - restoring popup');
+          hasAccepted.current = false;
+          setOpen(true);
+          onAccepted(false);
+        }
+        return originalRemoveItem.current.call(this, key);
+      };
+
+      localStorage.clear = function() {
+        if (hasAccepted.current) {
+          console.warn('GDPR localStorage manipulation detected - restoring popup');
+          hasAccepted.current = false;
+          setOpen(true);
+          onAccepted(false);
+        }
+        return originalClear.current.call(this);
+      };
+      
+      // Start monitoring for inspector manipulation and localStorage changes
       intervalRef.current = setInterval(() => {
         // If user hasn't accepted but popup is not visible, they might have manipulated DOM
         if (!hasAccepted.current) {
@@ -43,6 +75,15 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
               console.warn('GDPR popup manipulation detected - restoring popup');
             }
           }
+
+          // Check if localStorage was manipulated directly
+          const currentGDPRValue = localStorage.getItem("gdpr-accepted");
+          if (currentGDPRValue === "true") {
+            console.warn('GDPR localStorage manipulation detected - removing unauthorized consent');
+            originalRemoveItem.current.call(localStorage, "gdpr-accepted");
+            setOpen(true);
+            onAccepted(false);
+          }
         }
       }, 1000);
     }
@@ -51,12 +92,16 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
+      // Restore original localStorage methods
+      localStorage.setItem = originalSetItem.current;
+      localStorage.removeItem = originalRemoveItem.current;
+      localStorage.clear = originalClear.current;
     };
   }, [onAccepted]);
 
   const handleAccept = () => {
     hasAccepted.current = true;
-    localStorage.setItem("gdpr-accepted", "true");
+    originalSetItem.current.call(localStorage, "gdpr-accepted", "true");
     setOpen(false);
     onAccepted(true);
     
@@ -65,6 +110,11 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+
+    // Restore original localStorage methods after acceptance
+    localStorage.setItem = originalSetItem.current;
+    localStorage.removeItem = originalRemoveItem.current;
+    localStorage.clear = originalClear.current;
   };
 
   // Prevent closing the dialog through escape or clicking outside
