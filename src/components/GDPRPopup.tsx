@@ -173,7 +173,7 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
         </div>
         <DialogFooter>
           <Button className="w-full" onClick={handleAccept}>
-            Разбирам
+            Съгласявам се
           </Button>
         </DialogFooter>
       </DialogContent>
