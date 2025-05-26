@@ -61,7 +61,7 @@ const PrivacyPolicy = () => {
         </div>
       </main>
 
-      <footer className="py-3 border-t border-primary/20 bg-secondary/50 text-center text-xs text-muted-foreground">
+      <footer className="mt-auto py-3 border-t border-primary/20 bg-secondary/50 text-center text-xs text-muted-foreground">
         <div className="container">
           <p className="text-primary/80">
             © {new Date().getFullYear()} Моята пенсия. Всички права запазени.

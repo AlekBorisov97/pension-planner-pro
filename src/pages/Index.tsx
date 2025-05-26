@@ -14,7 +14,7 @@ const Index = () => {
   return (
     <div className="min-h-screen dsk-gradient flex flex-col">
       {/* App content is blurred/disabled when GDPR not accepted */}
-      <div className={`${!gdprAccepted ? 'pointer-events-none blur-sm opacity-50' : ''} transition-all duration-300`}>
+      <div className={`${!gdprAccepted ? 'pointer-events-none blur-sm opacity-50' : ''} transition-all duration-300 flex flex-col min-h-screen`}>
         <header className="green-header pt-3 pb-2 px-4 rounded-b-lg shadow-md">
           <h1 className="text-2xl font-semibold text-center tracking-tight mb-1">
             Моята пенсия
@@ -29,7 +29,7 @@ const Index = () => {
           <Navigation />
         </main>
 
-        <footer className="py-3 border-t border-primary/20 bg-secondary/50 text-center text-xs text-muted-foreground">
+        <footer className="mt-auto py-3 border-t border-primary/20 bg-secondary/50 text-center text-xs text-muted-foreground">
           <div className="container">
             <div className="flex flex-col items-center gap-2">
               <p className="text-primary/80">
