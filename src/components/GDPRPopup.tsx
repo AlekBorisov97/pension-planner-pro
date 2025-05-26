@@ -1,29 +1,90 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 
-const GDPRPopup = () => {
+interface GDPRPopupProps {
+  onAccepted: (accepted: boolean) => void;
+}
+
+const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
   const [open, setOpen] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasAccepted = useRef(false);
 
   useEffect(() => {
     // Check if the user has already seen the GDPR popup
-    const hasSeenGDPR = localStorage.getItem("gdpr-seen");
-    if (!hasSeenGDPR) {
+    const hasSeenGDPR = localStorage.getItem("gdpr-accepted");
+    if (hasSeenGDPR === "true") {
+      hasAccepted.current = true;
+      onAccepted(true);
+    } else {
       setOpen(true);
+      onAccepted(false);
+      
+      // Start monitoring for inspector manipulation
+      intervalRef.current = setInterval(() => {
+        // If user hasn't accepted but popup is not visible, they might have manipulated DOM
+        if (!hasAccepted.current) {
+          const popupElement = document.querySelector('[data-gdpr-popup]');
+          if (popupElement) {
+            const computedStyle = window.getComputedStyle(popupElement);
+            const isHidden = computedStyle.display === 'none' || 
+                           computedStyle.visibility === 'hidden' || 
+                           computedStyle.opacity === '0' ||
+                           popupElement.getAttribute('style')?.includes('display: none') ||
+                           popupElement.getAttribute('style')?.includes('visibility: hidden');
+            
+            if (isHidden) {
+              // Reset the popup visibility
+              setOpen(true);
+              onAccepted(false);
+              console.warn('GDPR popup manipulation detected - restoring popup');
+            }
+          }
+        }
+      }, 1000);
     }
-  }, []);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [onAccepted]);
 
   const handleAccept = () => {
-    // Store in localStorage that the user has seen the GDPR popup
-    localStorage.setItem("gdpr-seen", "true");
+    hasAccepted.current = true;
+    localStorage.setItem("gdpr-accepted", "true");
     setOpen(false);
+    onAccepted(true);
+    
+    // Clear the monitoring interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Prevent closing the dialog through escape or clicking outside
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!hasAccepted.current) {
+      // Don't allow closing if not accepted
+      setOpen(true);
+    } else {
+      setOpen(newOpen);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="max-w-md" 
+        data-gdpr-popup="true"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Shield className="h-5 w-5 text-primary" />
