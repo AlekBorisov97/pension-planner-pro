@@ -107,3 +107,28 @@
 .green-header {
   @apply bg-gradient-to-b from-primary/90 to-primary text-white;
 }
+
+.cyrillic-list {
+  list-style: none;
+  counter-reset: cyrillic;
+  padding-left: 1.25rem; /* pl-5 equivalent */
+}
+
+.cyrillic-list li {
+  counter-increment: cyrillic;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.cyrillic-list li::before {
+  content: counter(cyrillic, lower-alpha);
+  font-family: inherit;
+  position: absolute;
+  left: 1rem;
+  transform: translateX(-100%);
+}
+
+/* Optional: Map Latin letters to Cyrillic manually */
+.cyrillic-list li:nth-child(1)::before { content: "а)"; }
+.cyrillic-list li:nth-child(2)::before { content: "б)"; }
+.cyrillic-list li:nth-child(3)::before { content: "в)"; }
