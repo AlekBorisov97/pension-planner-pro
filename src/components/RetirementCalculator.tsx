@@ -429,9 +429,6 @@ export default function RetirementCalculator() {
         previousFundsThreshold !== null &&
         previousFundsThreshold !== currentThreshold
       ) {
-        console.log(
-          `Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`,
-        );
         resetFormStateForThreshold(isMonthlySumLessThan15Percent);
       }
 
@@ -454,14 +451,12 @@ export default function RetirementCalculator() {
       setShowOptionDropdown(!isMonthlySumLessThan15Percent);
 
       if (!isMonthlySumLessThan15Percent) {
-        console.log("Setting step to 3 for large fund options");
         if (step < 3) setStep(3);
 
         // Reset the national pension step visibility for large funds
         // It will be shown again only if appropriate option conditions are met
         setShowNationalPensionStep(false);
       } else {
-        console.log("Setting step to 2 for small fund options");
         if (step > 2) setStep(2);
         setShowNationalPensionStep(false); // Don't show national pension step for small funds
       }
@@ -546,9 +541,6 @@ export default function RetirementCalculator() {
         previousFundsThreshold !== null &&
         previousFundsThreshold !== currentThreshold
       ) {
-        console.log(
-          `Threshold crossed from ${previousFundsThreshold} to ${currentThreshold}`,
-        );
         resetFormStateForThreshold(isSmallFund);
       }
 
@@ -584,7 +576,6 @@ export default function RetirementCalculator() {
 
     // Don't show national pension step for small funds
     if (additionalFunds <= 10000) {
-      console.log("Small funds, not showing national pension step");
       setShowNationalPensionStep(false);
       return;
     }
