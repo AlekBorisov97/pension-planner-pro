@@ -1263,6 +1263,11 @@ export default function RetirementCalculator() {
                                     Имате право на разсрочена пенсия
                                   </AlertDescription>
                                 </Alert>
+                                <div className="flex items-center gap-2 mb-2">
+                                          <Label htmlFor="monthlyPaymentForSmallFunds">
+                                            Период на разсрочване (в месеци){" "}
+                                          </Label>
+                                        </div>
                                 <Controller
                                   control={form.control}
                                   name="monthlyPaymentForSmallFunds"
@@ -1309,8 +1314,13 @@ export default function RetirementCalculator() {
                                   partialCalculationResult &&
                                   !isRetirementEligible && (
                                     <div className="flex flex-col pt-3">
+                                                          <Separator className="my-6" />
+
+                                      <h3 className="text-lg font-medium mb-4">
+                      Резултат от изчислението
+                    </h3>
                                       <div className="text-center">
-                                        <span className="text-sm uppercase tracking-wider font-medium text-primary/80">
+                                        <span className="text-2xl font-medium text-center text-primary">
                                           Първоначален размер:
                                         </span>
                                       </div>
@@ -1616,7 +1626,7 @@ export default function RetirementCalculator() {
                                                 )
                                               }
                                               value={field.value || ""}
-                                              placeholder="Въведете период в години"
+                                              placeholder="Въведете години"
                                               className="max-w-[200px]"
                                             />
                                           )}
@@ -1671,18 +1681,8 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentPeriod">
-                                            Период на разсрочване{" "}
+                                            Период на разсрочване (в месеци){" "}
                                           </Label>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p className="w-[200px] text-sm">
-                                                Години
-                                              </p>
-                                            </TooltipContent>
-                                          </Tooltip>
                                         </div>
                                         <Controller
                                           control={form.control}
@@ -1702,7 +1702,7 @@ export default function RetirementCalculator() {
                                                 )
                                               }
                                               value={field.value || ""}
-                                              placeholder="Въведете период"
+                                              placeholder="Въведете месеци"
                                               className="max-w-[200px]"
                                             />
                                           )}
@@ -1721,7 +1721,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentAmount">
-                                            Месечна сума на разсроченото плащане
+                                            Месечна сума на разсроченото плащане (лв.)
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>

@@ -69,12 +69,7 @@ export default function CalculationResult({ result }: CalculationResultProps) {
               : "Две пенсии повече от една ли са?"}
           </CardTitle>
           <CardDescription className="text-center text-sm">
-            {result.showSingleOption ? (
-              <>
-                За да направите сравнение с държавната пенсия моля въведете
-                данни за стаж и прогнозен размер на пенсия от ДОО.
-              </>
-            ) : (
+            {!result.showSingleOption && (
               "Две пенсии повече от една ли са?"
             )}
           </CardDescription>
@@ -200,6 +195,15 @@ export default function CalculationResult({ result }: CalculationResultProps) {
           )}
         </CardContent>
       </Card>
+
+       <div className="text-center text-sm text-red-600 mt-4">
+            {result.showSingleOption &&
+              <>
+                За да направите сравнение с държавната пенсия моля въведете
+                данни за стаж и прогнозен размер на пенсия от ДОО.
+              </>
+            }
+          </div>
     </motion.div>
   );
 }
