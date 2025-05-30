@@ -65,7 +65,7 @@ export default function CalculationResult({ result }: CalculationResultProps) {
         <CardHeader className="pb-4">
           <CardTitle className="text-2xl font-medium text-center text-primary">
             {result.showSingleOption
-              ? "Първоначален размер на втора пенсия от УПФ"
+              ? "Първоначален размер на втора пенсия"
               : "Две пенсии повече от една ли са?"}
           </CardTitle>
           <CardDescription className="text-center text-sm">
@@ -76,11 +76,6 @@ export default function CalculationResult({ result }: CalculationResultProps) {
         <CardContent className="pt-0">
           {result.showSingleOption ? (
             <div className="flex flex-col">
-              <div className="text-center pb-3">
-                <span className="text-sm uppercase tracking-wide font-medium text-primary/80">
-                  Втора пенсия от УПФ
-                </span>
-              </div>
               <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                   <div className="flex flex-wrap gap-4 justify-center text-center">

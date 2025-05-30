@@ -66,7 +66,7 @@ const DEFAULT_BIRTH_DATE = new Date("1960-01-01");
 const MIN_BIRTH_DATE = new Date("1960-01-01"); // No dates before 1960-01-01
 const TODAY = new Date();
 const MAX_RETIREMENT_DATE = addYears(TODAY, 40); // Up to 40 years in future
-const MIN_RETIREMENT_DATE = new Date("2016-01-01");
+const MIN_RETIREMENT_DATE = new Date();
 
 const formSchema = (
   minInstallmentAmount: number,
@@ -105,8 +105,8 @@ const formSchema = (
         invalid_type_error: "Моля, въведете години",
       })
       .int()
-      .min(2, "Периодът трябва да между 2 и 10 години")
-      .max(10, "Периодът трябва да между 2 и 10 години")
+      .min(2, "Периодът трябва да e между 2 и 10 години")
+      .max(10, "Периодът трябва да e между 2 и 10 години")
       .optional(),
     installmentPeriod: z
       .number({
@@ -635,7 +635,7 @@ export default function RetirementCalculator() {
           variant3CurrentMonthlyPensionWishMonths:
             data.monthlyPaymentForSmallFunds,
           showSingleOption: false,
-          isOption3Selected: false,
+          isOption3Selected: true,
         });
         setTimeout(() => {
           const resultElement = document.getElementById("calculation-result");
@@ -1321,16 +1321,10 @@ export default function RetirementCalculator() {
                                       </h3>
                                       <div className="text-center">
                                         <span className="text-2xl font-medium text-center text-primary">
-                                          Първоначален размер:
+                                          Първоначален размер на втора пенсия
                                         </span>
                                       </div>
-                                      <div className="text-center pb-3">
-                                        <span className="text-xs font-medium text-primary/80">
-                                          За да направите сравнение с държавната
-                                          пенсия моля въведете данни за стаж и
-                                          прогнозен размер на пенсия от ДОО.
-                                        </span>
-                                      </div>
+                      
                                       <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
                                         <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                                           <div className="text-3xl font-bold mb-2">
@@ -1340,6 +1334,14 @@ export default function RetirementCalculator() {
                                           </div>
                                         </CardContent>
                                       </Card>
+
+                                      <div className="text-center pb-3">
+                                        <span className="text-xs font-medium text-red-600">
+                                          За да направите сравнение с държавната
+                                          пенсия моля въведете данни за стаж и
+                                          прогнозен размер на пенсия от ДОО.
+                                        </span>
+                                      </div>
                                     </div>
                                   )}
 
@@ -1362,7 +1364,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2 max-w-md">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="nationalPensionFunds">
-                                            Пенсия от НОИ в пълен размер
+                                            Пенсия от НОИ в пълен размер (лв.)
                                           </Label>
                                         </div>
                                         <Controller
@@ -1403,7 +1405,7 @@ export default function RetirementCalculator() {
                                                   ? ""
                                                   : field.value
                                               }
-                                              placeholder="Въведете сума в лева"
+                                              placeholder="Въведете сума"
                                             />
                                           )}
                                         />
@@ -1420,7 +1422,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2 max-w-md">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="nationalPensionFundsCutOut">
-                                            Пенсия от НОИ в намален размер
+                                            Пенсия от НОИ в намален размер (лв.)
                                           </Label>
                                         </div>
                                         <Controller
@@ -1459,7 +1461,7 @@ export default function RetirementCalculator() {
                                                   ? ""
                                                   : field.value
                                               }
-                                              placeholder="Въведете сума в лева"
+                                              placeholder="Въведете сума"
                                             />
                                           )}
                                         />
@@ -1813,7 +1815,7 @@ export default function RetirementCalculator() {
                     <div className="space-y-2 max-w-md">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="nationalPensionFunds">
-                          Пенсия от НОИ в пълен размер
+                          Пенсия от НОИ в пълен размер (лв.)
                         </Label>
                       </div>
                       <Controller
@@ -1841,7 +1843,7 @@ export default function RetirementCalculator() {
                               }
                             }}
                             value={field.value === 0 ? "" : field.value}
-                            placeholder="Въведете сума в лева"
+                            placeholder="Въведете сума"
                           />
                         )}
                       />
@@ -1854,7 +1856,7 @@ export default function RetirementCalculator() {
                     <div className="space-y-2 max-w-md">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="nationalPensionFundsCutOut">
-                          Пенсия от НОИ в намален размер
+                          Пенсия от НОИ в намален размер (лв.)
                         </Label>
                       </div>
                       <Controller
@@ -1882,7 +1884,7 @@ export default function RetirementCalculator() {
                               }
                             }}
                             value={field.value === 0 ? "" : field.value}
-                            placeholder="Въведете сума в лева"
+                            placeholder="Въведете сума"
                           />
                         )}
                       />
@@ -1915,7 +1917,7 @@ export default function RetirementCalculator() {
                         disabled={form.formState.isSubmitting}
                         className="mt-2"
                       >
-                        {showSmallFundOptions || !isRetirementEligible
+                        {!isRetirementEligible
                           ? "Изчисли"
                           : "Сравни"}
                       </Button>

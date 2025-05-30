@@ -33,16 +33,16 @@ const Index = () => {
         <footer className="mt-auto py-3 border-t border-primary/20 bg-secondary/50 text-center text-xs text-muted-foreground">
           <div className="container">
             <div className="flex flex-col items-center gap-2">
+              <Link
+                to="/privacy-policy"
+                className="text-primary hover:underline font-semibold"
+              >
+                Политика за поверителност
+              </Link>
               <p className="text-primary/80">
                 © {new Date().getFullYear()} Моята пенсия. Всички права
                 запазени.
               </p>
-              <Link
-                to="/privacy-policy"
-                className="text-primary hover:underline"
-              >
-                Политика за поверителност
-              </Link>
             </div>
           </div>
         </footer>
