@@ -37,7 +37,7 @@ const Index = () => {
                 to="/privacy-policy"
                 className="text-primary hover:underline font-semibold"
               >
-                Политика за поверителност
+                Правила за защита на личните данни
               </Link>
               <p className="text-primary/80">
                 © {new Date().getFullYear()} Моята пенсия. Всички права

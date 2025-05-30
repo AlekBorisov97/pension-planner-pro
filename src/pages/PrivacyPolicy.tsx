@@ -7,7 +7,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen dsk-gradient flex flex-col">
       <header className="green-header pt-3 pb-2 px-4 rounded-b-lg shadow-md">
         <h1 className="text-2xl font-semibold text-center tracking-tight mb-1">
-          Политика за поверителност
+          Правила за защита на личните данни
         </h1>
       </header>
 

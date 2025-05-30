@@ -156,7 +156,7 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Shield className="h-5 w-5 text-primary" />
-            Политика за поверителност
+            Правила за защита на личните данни
           </DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto text-sm text-muted-foreground space-y-4">
