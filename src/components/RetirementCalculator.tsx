@@ -183,6 +183,7 @@ export default function RetirementCalculator() {
   const [isExperienceEnough, setIsExperienceEnough] = useState<boolean | null>(
     null,
   );
+  const [nn, setNN] = useState<number>(0);
   const [isRetirementAge, setIsRetirementAge] = useState<boolean | null>(null);
   const [calculatedRetirementDate, setCalculatedRetirementDate] = useState<
     string | null
@@ -604,6 +605,8 @@ export default function RetirementCalculator() {
   ]);
 
   const onSubmit = (data: FormValues) => {
+    const pp = form.watch("monthlyPaymentForSmallFunds");
+    setNN(pp);
     if (showSmallFundOptions) {
       if (showOneTimePaymentOption) return;
       const firstMonthlyPayment =
@@ -1331,6 +1334,14 @@ export default function RetirementCalculator() {
                                             {formatCurrency(
                                               partialCalculationResult,
                                             )}
+                                          </div>
+                                          <div
+                                            className={cn(
+                                              "text-sm font-normal text-red-600",
+                                              "leading-tight break-words",
+                                            )}
+                                          >
+                                            {`За период от ${nn} месеца`}
                                           </div>
                                         </CardContent>
                                       </Card>
