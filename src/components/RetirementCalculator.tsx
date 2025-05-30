@@ -1324,7 +1324,7 @@ export default function RetirementCalculator() {
                                           Първоначален размер на втора пенсия
                                         </span>
                                       </div>
-                      
+
                                       <Card className="flex-1 bg-white border shadow-sm hover:shadow-md transition-shadow">
                                         <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center h-full">
                                           <div className="text-3xl font-bold mb-2">
@@ -1917,9 +1917,7 @@ export default function RetirementCalculator() {
                         disabled={form.formState.isSubmitting}
                         className="mt-2"
                       >
-                        {!isRetirementEligible
-                          ? "Изчисли"
-                          : "Сравни"}
+                        {!isRetirementEligible ? "Изчисли" : "Сравни"}
                       </Button>
                     </div>
                   </motion.div>
