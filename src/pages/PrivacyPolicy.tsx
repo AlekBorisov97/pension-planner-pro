@@ -316,7 +316,7 @@ const PrivacyPolicy = () => {
 
               <p className="font-medium">Сигурност на данните</p>
               <p>
-                <span className="font-semibold">MoyataPensia.bg</span> прилага
+                <span>MoyataPensia.bg</span> прилага
                 подходящи технически и организационни мерки за защита на личните
                 данни срещу неразрешено или незаконно обработване и срещу
                 случайна загуба, унищожаване, повреда, промяна или разкриване
@@ -335,7 +335,7 @@ const PrivacyPolicy = () => {
               <p>
                 При съмнения за нарушени права, свързани с администрирането и
                 обработването на лични данни от{" "}
-                <span className="font-semibold">MoyataPensia.bg</span>, клиентът
+                <span>MoyataPensia.bg</span>, клиентът
                 има право да сезира Комисията по защита на личните данни.
               </p>
 
