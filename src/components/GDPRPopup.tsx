@@ -161,10 +161,9 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto text-sm text-muted-foreground space-y-4">
           <p>
-            <span className="font-semibold">MoyataPensia.bg</span> иска
-            съгласието Ви, за да използва личните Ви данни в обем, необходим за
-            предоставянето на услуги от сайта{" "}
-            <span className="font-semibold">https://moyatapensia.bg/</span>
+            MoyataPensia.bg иска съгласието Ви, за да използва личните Ви данни
+            в обем, необходим за предоставянето на услуги от сайта
+            https://moyatapensia.bg/
           </p>
 
           <p>
@@ -190,7 +189,7 @@ const GDPRPopup = ({ onAccepted }: GDPRPopupProps) => {
             защита на личните данни или да се свържете с нас на:
             <a
               href="mailto:info@moyatapensia.bg"
-              className="text-primary font-semibold underline ml-1"
+              className="text-primary underline ml-1"
             >
               moyatapensia@mail.bg
             </a>

@@ -344,7 +344,7 @@ const PrivacyPolicy = () => {
                 Моля, свържете се с нас на ел. адрес, посочен по-долу, ако имате
                 въпроси или искания, свързани със състоянието на съхранените ви
                 лични данни:{" "}
-                <span className="font-semibold">info@moyatapensia.bg</span>
+                <span className="font-semibold">moyatapensia@mail.bg</span>
               </p>
             </div>
           </div>
