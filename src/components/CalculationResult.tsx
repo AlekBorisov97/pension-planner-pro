@@ -64,7 +64,7 @@ export default function CalculationResult({ result }: CalculationResultProps) {
       <Card className="shadow-md border-0 green-card overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-2xl font-medium text-center text-primary">
-              {"Първоначален размер на втора пенсия"}
+            {"Първоначален размер на втора пенсия"}
           </CardTitle>
         </CardHeader>
 
