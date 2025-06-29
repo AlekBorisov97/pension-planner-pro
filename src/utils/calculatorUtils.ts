@@ -1,9 +1,8 @@
-import { mortalityRate } from "@/constants/mortalityRate";
+import { mortalityRate2025 } from "@/constants/mortalityRate2025";
 import {
   retirementAgesByYear,
   workExperienceRequirementsByYear,
 } from "@/constants/retirementAge";
-import { add } from "date-fns";
 
 export interface MortalityRow {
   age: number;
@@ -153,7 +152,7 @@ export const getMinimumWorkExperience = (
 };
 
 export const minimumOSVPension = (date: Date) => {
-  if (date >= new Date("2025-07-01")) return 636.0;
+  if (date >= new Date("2025-07-01")) return 630.5;
   if (date >= new Date("2024-07-01")) return 580.57;
   if (date >= new Date("2023-07-01")) return 523.04;
   if (date >= new Date("2022-07-01")) return 467.0;
@@ -174,7 +173,7 @@ export const calculateLXColumnB = (age: number) => {
 
   const result =
     calculateLXColumnB(age - 1) *
-    mortalityRate.filter((rate) => rate.age === age - 1)[0].px.total;
+    mortalityRate2025.filter((rate) => rate.age === age - 1)[0].px.total;
 
   return result;
 };
@@ -216,7 +215,7 @@ export const calculateLifeExpectancy = (age: number): number => {
 
   const previous = calculateLifeExpectancy(age - 1);
   const mortality =
-    mortalityRate.find((rate) => rate.age === age - 1)?.px.total ?? 1;
+    mortalityRate2025.find((rate) => rate.age === age - 1)?.px.total ?? 1;
 
   return previous * mortality;
 };
