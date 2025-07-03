@@ -662,7 +662,7 @@ export default function RetirementCalculator() {
       case "option1":
         result = calculateMonthlySumF6(
           data.additionalPensionFunds,
-          Math.floor(calculatedAge),
+          customAgeRound(calculatedAge),
           pensionFunders[data.pensionFunder],
         );
         break;
@@ -677,7 +677,7 @@ export default function RetirementCalculator() {
         }
         result = calculateMonthlyGuaranteedSumG6(
           data.additionalPensionFunds,
-          Math.floor(calculatedAge),
+          customAgeRound(calculatedAge),
           pensionFunders[data.pensionFunder],
           data.periodYears,
         );
@@ -693,7 +693,7 @@ export default function RetirementCalculator() {
         }
         result = calculateMonthlyScheduledSumH6(
           data.additionalPensionFunds,
-          Math.floor(calculatedAge),
+          customAgeRound(calculatedAge),
           pensionFunders[data.pensionFunder],
           data.installmentPeriod,
           data.installmentAmount,
@@ -1902,8 +1902,8 @@ export default function RetirementCalculator() {
                       {form.formState.errors.nationalPensionFundsCutOut && (
                         <p className="text-sm text-destructive">
                           {
-                            form.formState.errors.nationalPensionFundsCutOut
-                              .message
+                            form.formState.errors
+                              .nationalPensionFundsCutOut.message
                           }
                         </p>
                       )}
@@ -1959,4 +1959,8 @@ export default function RetirementCalculator() {
       </motion.div>
     </div>
   );
+}
+
+function customAgeRound(age: number) {
+  return age % 1 >= 0.5 ? Math.ceil(age) : Math.floor(age);
 }
