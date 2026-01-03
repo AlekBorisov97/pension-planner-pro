@@ -50,7 +50,7 @@ export const pensionFunders: Record<string, number> = {
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("bg-BG", {
     style: "currency",
-    currency: "BGN",
+    currency: "EUR",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
@@ -152,18 +152,18 @@ export const getMinimumWorkExperience = (
 };
 
 export const minimumOSVPension = (date: Date) => {
-  if (date >= new Date("2025-07-01")) return 630.5;
-  if (date >= new Date("2024-07-01")) return 580.57;
-  if (date >= new Date("2023-07-01")) return 523.04;
-  if (date >= new Date("2022-07-01")) return 467.0;
-  if (date >= new Date("2021-12-25")) return 370.0;
-  if (date >= new Date("2021-01-01")) return 300.0;
-  if (date >= new Date("2020-07-01")) return 250.0;
-  if (date >= new Date("2019-07-01")) return 219.43;
-  if (date >= new Date("2018-07-01")) return 207.6;
-  if (date >= new Date("2017-10-01")) return 200.0;
-  if (date >= new Date("2017-07-01")) return 180.0;
-  if (date >= new Date("2016-01-01")) return 157.44;
+  if (date >= new Date("2025-07-01")) return 322.37;
+  if (date >= new Date("2024-07-01")) return 296.84;
+  if (date >= new Date("2023-07-01")) return 267.43;
+  if (date >= new Date("2022-07-01")) return 238.77;
+  if (date >= new Date("2021-12-25")) return 189.18;
+  if (date >= new Date("2021-01-01")) return 153.39;
+  if (date >= new Date("2020-07-01")) return 127.82;
+  if (date >= new Date("2019-07-01")) return 112.19;
+  if (date >= new Date("2018-07-01")) return 106.14;
+  if (date >= new Date("2017-10-01")) return 102.26;
+  if (date >= new Date("2017-07-01")) return 92.03;
+  if (date >= new Date("2016-01-01")) return 80.50;
 
   return 0.0;
 };

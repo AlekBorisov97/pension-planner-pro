@@ -1128,7 +1128,7 @@ export default function RetirementCalculator() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="additionalPensionFunds">
-                            Сума по Вашата партида в УПФ (лв.)
+                            Сума по Вашата партида в УПФ (€)
                           </Label>
                         </div>
                         <Controller
@@ -1375,7 +1375,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2 max-w-md">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="nationalPensionFunds">
-                                            Пенсия от НОИ в пълен размер (лв.)
+                                            Пенсия от НОИ в пълен размер (€)
                                           </Label>
                                         </div>
                                         <Controller
@@ -1433,7 +1433,7 @@ export default function RetirementCalculator() {
                                       <div className="space-y-2 max-w-md">
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="nationalPensionFundsCutOut">
-                                            Пенсия от НОИ в намален размер (лв.)
+                                            Пенсия от НОИ в намален размер (€)
                                           </Label>
                                         </div>
                                         <Controller
@@ -1736,7 +1736,7 @@ export default function RetirementCalculator() {
                                         <div className="flex items-center gap-2">
                                           <Label htmlFor="installmentAmount">
                                             Месечна сума на разсроченото плащане
-                                            (лв.)
+                                            (€)
                                           </Label>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -1826,7 +1826,7 @@ export default function RetirementCalculator() {
                     <div className="space-y-2 max-w-md">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="nationalPensionFunds">
-                          Пенсия от НОИ в пълен размер (лв.)
+                          Пенсия от НОИ в пълен размер (€)
                         </Label>
                       </div>
                       <Controller
@@ -1867,7 +1867,7 @@ export default function RetirementCalculator() {
                     <div className="space-y-2 max-w-md">
                       <div className="flex items-center gap-2">
                         <Label htmlFor="nationalPensionFundsCutOut">
-                          Пенсия от НОИ в намален размер (лв.)
+                          Пенсия от НОИ в намален размер (€)
                         </Label>
                       </div>
                       <Controller
