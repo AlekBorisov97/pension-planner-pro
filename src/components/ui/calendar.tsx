@@ -11,8 +11,8 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   defaultMonth,
-  fromDate,
-  toDate,
+  startMonth,
+  endMonth,
   ...props
 }: CalendarProps) {
   return (
@@ -21,8 +21,8 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       defaultMonth={defaultMonth}
-      fromDate={fromDate}
-      toDate={toDate}
+      startMonth={startMonth}
+      endMonth={endMonth}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

@@ -836,9 +836,9 @@ export default function RetirementCalculator() {
                               selected={field.value}
                               onSelect={field.onChange}
                               defaultMonth={DEFAULT_BIRTH_DATE}
-                              fromDate={MIN_BIRTH_DATE} // No dates before 1960-01-01
-                              toDate={TODAY}
-                              initialFocus
+                              startMonth={MIN_BIRTH_DATE} // No dates before 1960-01-01
+                              endMonth={TODAY}
+                              autoFocus
                               className="rounded-md border p-3 pointer-events-auto"
                               locale={bg}
                             />
@@ -990,9 +990,9 @@ export default function RetirementCalculator() {
                               selected={field.value}
                               onSelect={field.onChange}
                               defaultMonth={TODAY}
-                              fromDate={MIN_RETIREMENT_DATE}
-                              toDate={MAX_RETIREMENT_DATE} // Up to 40 years in future
-                              initialFocus
+                              startMonth={MIN_RETIREMENT_DATE}
+                              endMonth={MAX_RETIREMENT_DATE} // Up to 40 years in future
+                              autoFocus
                               className="rounded-md border p-3 pointer-events-auto"
                               locale={bg}
                             />
