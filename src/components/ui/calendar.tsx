@@ -21,6 +21,7 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3 pointer-events-auto", className)}
       defaultMonth={defaultMonth}
+      hidden={{ before: startMonth }}
       startMonth={startMonth}
       endMonth={endMonth}
       classNames={{
