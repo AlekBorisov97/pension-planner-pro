@@ -310,7 +310,7 @@ export default function RetirementCalculator() {
       const retirement = new Date(retirementDate);
 
       const diffMs = retirement.getTime() - birthDate.getTime();
-
+      
       // add one day
       const ageAtRetirement =
         (diffMs + 86400000) / (1000 * 60 * 60 * 24 * 365.25);
@@ -369,7 +369,7 @@ export default function RetirementCalculator() {
         format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
       );
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
-      setIsRetirementAge(ageAtRetirement >= minRetirementAge);
+      setIsRetirementAge((Math.round(ageAtRetirement * 10) / 10) >= minRetirementAge);
       setIsRetirementEligible(
         ageAtRetirement >= minRetirementAge && totalWorkExperience > 0,
       );
