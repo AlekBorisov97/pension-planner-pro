@@ -321,8 +321,6 @@ export default function RetirementCalculator() {
         retirement.getFullYear(),
         gender,
       );
-      console.log('retirement.getFullYear(),', retirement.getFullYear(),);
-      
       const minRetirementAge = years + months / 12;
 
       const minWorkExperience = getMinimumWorkExperience(
@@ -370,7 +368,7 @@ export default function RetirementCalculator() {
         format(autoRetirementDate, "dd.MM.yyyy", { locale: bg }),
       );
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
-      setIsRetirementAge((Math.round(ageAtRetirement * 10) / 10) >= minRetirementAge || autoRetirementDate <= retirement ); // double check if we need the first condition
+      setIsRetirementAge( autoRetirementDate <= retirement );
       setIsRetirementEligible(
         (ageAtRetirement >= minRetirementAge || autoRetirementDate <= retirement) && totalWorkExperience > 0,
       );
