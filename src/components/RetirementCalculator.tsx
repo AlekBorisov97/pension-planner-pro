@@ -370,14 +370,14 @@ export default function RetirementCalculator() {
       setIsExperienceEnough(totalWorkExperience >= minWorkExperience);
       setIsRetirementAge( autoRetirementDate <= retirement );
       setIsRetirementEligible(
-        (ageAtRetirement >= minRetirementAge || autoRetirementDate <= retirement) && totalWorkExperience > 0,
+        ((ageAtRetirement >= minRetirementAge) || (autoRetirementDate <= retirement)) && totalWorkExperience > 0,
       );
       setMinWorkExperience(minWorkExperience);
       setCurrentWorkExperience(totalWorkExperience);
 
-      if (step === 1 && (ageAtRetirement >= minRetirementAge || autoRetirementDate <= retirement)) {
+      if (step === 1 && ((ageAtRetirement >= minRetirementAge) || (autoRetirementDate <= retirement))) {
         setStep(2);
-      } else if (step !== 1 && (ageAtRetirement >= minRetirementAge || autoRetirementDate > retirement)) {
+      } else if (step !== 1 && ((ageAtRetirement >= minRetirementAge) || (autoRetirementDate > retirement))) {
         form.setValue("additionalPensionFunds", 0);
         form.setValue("additionalPensionFunds", 0);
         form.setValue("nationalPensionFunds", 0);
